@@ -94,7 +94,7 @@ module.exports = async (req, res) => {
               text-decoration: none;
               color: #333;
               font-weight: 600;
-              transition: all 0.15s ease;
+              transition: none;
               background: white;
               cursor: pointer;
               -webkit-tap-highlight-color: transparent;
@@ -103,13 +103,16 @@ module.exports = async (req, res) => {
               -moz-user-select: none;
               -ms-user-select: none;
               touch-action: manipulation;
+              pointer-events: auto;
             }
             .provider-btn:active {
               transform: scale(0.95);
-              transition: transform 0.1s ease;
             }
             .provider-btn:focus {
               outline: none;
+            }
+            .provider-btn:hover {
+              opacity: 0.9;
             }
             .spotify { 
               border-color: #1db954; 
@@ -119,11 +122,11 @@ module.exports = async (req, res) => {
               border-color: #1db954;
             }
             .apple_music { 
-              border-color: #fa243c; 
+              border-color: #ff2d92; 
             }
             .apple_music:hover { 
-              background: #fff0f0; 
-              border-color: #fa243c;
+              background: #fff0f8; 
+              border-color: #ff2d92;
             }
             .youtube_music { 
               border-color: #ff0000; 
@@ -149,11 +152,58 @@ module.exports = async (req, res) => {
             
             <div class="providers">
               ${track.providers.map(provider => `
-                <a href="${provider.deepLink}" class="provider-btn ${provider.name}">
+                <a href="${provider.deepLink}" class="provider-btn ${provider.name}" onclick="handleProviderClick(event, '${provider.name}', '${provider.deepLink}')">
                   Play on ${provider.displayName}
                 </a>
               `).join('')}
             </div>
+            
+            <script>
+              function handleProviderClick(event, provider, url) {
+                event.preventDefault();
+                
+                if (provider === 'spotify') {
+                  // Try Spotify app first, then web
+                  const appUrl = url.replace('https://', 'spotify://');
+                  const iframe = document.createElement('iframe');
+                  iframe.style.display = 'none';
+                  iframe.src = appUrl;
+                  document.body.appendChild(iframe);
+                  
+                  setTimeout(() => {
+                    document.body.removeChild(iframe);
+                    window.open(url, '_blank');
+                  }, 1000);
+                } else if (provider === 'apple_music') {
+                  // Try Apple Music app first, then web
+                  const appUrl = url.replace('https://music.apple.com', 'music://music.apple.com');
+                  const iframe = document.createElement('iframe');
+                  iframe.style.display = 'none';
+                  iframe.src = appUrl;
+                  document.body.appendChild(iframe);
+                  
+                  setTimeout(() => {
+                    document.body.removeChild(iframe);
+                    window.open(url, '_blank');
+                  }, 1000);
+                } else if (provider === 'youtube_music') {
+                  // Try YouTube Music app first, then web
+                  const appUrl = url.replace('https://music.youtube.com', 'youtubemusic://music.youtube.com');
+                  const iframe = document.createElement('iframe');
+                  iframe.style.display = 'none';
+                  iframe.src = appUrl;
+                  document.body.appendChild(iframe);
+                  
+                  setTimeout(() => {
+                    document.body.removeChild(iframe);
+                    window.open(url, '_blank');
+                  }, 1000);
+                } else {
+                  // Fallback for other providers
+                  window.open(url, '_blank');
+                }
+              }
+            </script>
             
             <div class="footer">
               Powered by TrackShare

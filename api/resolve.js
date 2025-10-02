@@ -186,13 +186,13 @@ async function resolveTrackMetadata(trackInfo) {
           {
             name: 'apple_music',
             displayName: 'Apple Music',
-            deepLink: `music://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
+            deepLink: `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
             isAvailable: true
           },
           {
             name: 'youtube_music',
             displayName: 'YouTube Music',
-            deepLink: `youtubemusic://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
+            deepLink: `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
             isAvailable: true
           }
         ];
