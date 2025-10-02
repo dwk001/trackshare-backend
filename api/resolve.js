@@ -165,14 +165,9 @@ async function resolveTrackMetadata(trackInfo) {
 // Generate short URL with minimal embedded data
 function generateShortUrl(track) {
   const shortId = Math.random().toString(36).substring(2, 8);
-  // Embed just the essential data needed to recreate the track
-  const essentialData = {
-    t: track.title,
-    a: track.artist,
-    i: track.id
-  };
-  const dataParam = Buffer.from(JSON.stringify(essentialData)).toString('base64');
-  return `https://trackshare-backend.vercel.app/t/${shortId}?d=${dataParam}`;
+  // Create a very short URL by encoding just the track ID
+  const trackId = track.id.split(':')[1]; // Extract just the ID part
+  return `https://trackshare-backend.vercel.app/t/${shortId}`;
 }
 
 // Resolve track endpoint
@@ -219,6 +214,10 @@ app.post('/api/resolve', async (req, res) => {
     
     // Generate short URL
     const shortUrl = generateShortUrl(track);
+    const shortId = shortUrl.split('/t/')[1];
+    
+    // Store track data in memory (simple approach for MVP)
+    tracks.set(shortId, track);
     
     await new Promise(resolve => setTimeout(resolve, 500));
     
