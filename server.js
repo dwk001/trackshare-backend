@@ -151,6 +151,12 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+// Test endpoint
+app.post('/test', (req, res) => {
+  console.log('Test endpoint called with body:', req.body);
+  res.json({ message: 'Test successful', body: req.body });
+});
+
 // Resolve track endpoint
 app.post('/api/resolve', async (req, res) => {
   try {
