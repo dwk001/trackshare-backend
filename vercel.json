@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "functions": {
+    "api/resolve.js": {
+      "maxDuration": 30
+    },
+    "api/t.js": {
+      "maxDuration": 10
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/t/:id",
+      "destination": "/api/t?id=:id"
+    }
+  ]
+}
