@@ -94,20 +94,36 @@ module.exports = async (req, res) => {
               text-decoration: none;
               color: #333;
               font-weight: 600;
-              transition: all 0.3s ease;
+              transition: all 0.2s ease;
               background: white;
+              cursor: pointer;
+              -webkit-tap-highlight-color: transparent;
+              user-select: none;
             }
-            .provider-btn:hover {
-              border-color: #667eea;
-              background: #f8f9ff;
-              transform: translateY(-2px);
+            .provider-btn:active {
+              transform: scale(0.98);
             }
-            .spotify { border-color: #1db954; }
-            .spotify:hover { background: #f0fff4; }
-            .apple { border-color: #fa243c; }
-            .apple:hover { background: #fff0f0; }
-            .youtube { border-color: #ff0000; }
-            .youtube:hover { background: #fff0f0; }
+            .spotify { 
+              border-color: #1db954; 
+            }
+            .spotify:hover { 
+              background: #f0fff4; 
+              border-color: #1db954;
+            }
+            .apple { 
+              border-color: #fa243c; 
+            }
+            .apple:hover { 
+              background: #fff0f0; 
+              border-color: #fa243c;
+            }
+            .youtube { 
+              border-color: #ff0000; 
+            }
+            .youtube:hover { 
+              background: #fff0f0; 
+              border-color: #ff0000;
+            }
             .footer {
               margin-top: 30px;
               font-size: 14px;
