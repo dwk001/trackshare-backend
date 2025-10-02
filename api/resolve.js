@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const https = require('https');
+const { kv } = require('@vercel/kv');
 
 const app = express();
 
@@ -160,18 +161,10 @@ async function resolveTrackMetadata(trackInfo) {
   }
 }
 
-// Generate short URL with embedded data
+// Generate short URL
 function generateShortUrl(track) {
   const shortId = Math.random().toString(36).substring(2, 8);
-  // Encode track data in the URL for now (simple base64 encoding)
-  const trackData = Buffer.from(JSON.stringify({
-    title: track.title,
-    artist: track.artist,
-    artwork: track.artwork,
-    providers: track.providers
-  })).toString('base64');
-  
-  return `https://trackshare-backend.vercel.app/t/${shortId}?data=${trackData}`;
+  return `https://trackshare-backend.vercel.app/t/${shortId}`;
 }
 
 // Resolve track endpoint
@@ -218,6 +211,14 @@ app.post('/api/resolve', async (req, res) => {
     
     // Generate short URL
     const shortUrl = generateShortUrl(track);
+    const shortId = shortUrl.split('/t/')[1];
+    
+    // Store track data in KV storage
+    try {
+      await kv.set(`track:${shortId}`, JSON.stringify(track), { ex: 86400 }); // 24 hour expiry
+    } catch (kvError) {
+      console.log('KV storage failed, using fallback');
+    }
     
     await new Promise(resolve => setTimeout(resolve, 500));
     
