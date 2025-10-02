@@ -26,8 +26,9 @@ module.exports = async (req, res) => {
   // Try to get track data from Vercel KV
   try {
     const trackData = await kv.get(`t:${id}`);
+    console.log(`Track data type:`, typeof trackData);
     if (trackData) {
-      const track = JSON.parse(trackData);
+      const track = typeof trackData === 'string' ? JSON.parse(trackData) : trackData;
       
       res.send(`
         <!DOCTYPE html>

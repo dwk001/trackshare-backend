@@ -6,3 +6,6 @@
 /IMPLEMENTATION_SUMMARY.md
 /README.md
 /settings.gradle
+
+# Ignore backend/ duplicate to avoid confusion - Vercel uses root /api/
+/backend/

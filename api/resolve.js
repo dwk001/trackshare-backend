@@ -285,7 +285,7 @@ app.post('/api/resolve', async (req, res) => {
         createdAt: new Date().toISOString()
       };
       
-      await kv.set(`t:${shortId}`, JSON.stringify(trackData), { ex: 2592000 }); // 30 days TTL
+      await kv.set(`t:${shortId}`, trackData, { ex: 2592000 }); // 30 days TTL - KV auto-serializes
       console.log(`Stored track data for ${shortId}`);
     } catch (kvError) {
       console.error('KV storage failed:', kvError);
