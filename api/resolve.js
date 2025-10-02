@@ -175,24 +175,18 @@ async function resolveTrackMetadata(trackInfo) {
       }
     }
     
-        // Generate provider links for all platforms with a robust native-first strategy
+        // Generate provider links for all platforms - use search URLs for better app opening
         const providers = [
           {
             name: 'spotify',
             displayName: 'Spotify',
-            deepLinkHint: trackInfo.type === 'spotify' 
-              ? `spotify://track/${trackInfo.id}` 
-              : `spotify://search/${encodeURIComponent(title + ' ' + artist)}`,
-            webUrl: trackInfo.type === 'spotify'
-              ? `https://open.spotify.com/track/${trackInfo.id}`
-              : `https://open.spotify.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
+            deepLinkHint: `spotify:search:${encodeURIComponent(title + ' ' + artist)}`,
+            webUrl: `https://open.spotify.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
             isAvailable: true
           },
           {
             name: 'apple_music',
             displayName: 'Apple Music',
-            // Universal links are the most reliable hint for Apple Music on both platforms.
-            // On Android, the frontend will wrap this in an intent.
             deepLinkHint: `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
             webUrl: `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
             isAvailable: true
@@ -200,13 +194,8 @@ async function resolveTrackMetadata(trackInfo) {
           {
             name: 'youtube_music',
             displayName: 'YouTube Music',
-            // Use direct link if source, otherwise search. Universal links are reliable here too.
-            deepLinkHint: trackInfo.type === 'youtube'
-              ? `https://music.youtube.com/watch?v=${trackInfo.id}`
-              : `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
-            webUrl: trackInfo.type === 'youtube'
-              ? `https://music.youtube.com/watch?v=${trackInfo.id}`
-              : `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
+            deepLinkHint: `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
+            webUrl: `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
             isAvailable: true
           }
         ];
