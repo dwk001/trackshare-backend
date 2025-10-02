@@ -224,7 +224,7 @@ async function resolveTrackMetadata(trackInfo) {
 function generateShortUrl(track) {
   // Generate a random short ID
   const shortId = Math.random().toString(36).substring(2, 8);
-  return `https://trackshare-backend.vercel.app/t/${shortId}`;
+  return `https://trackshare.online/t/${shortId}`;
 }
 
 // Resolve track endpoint
