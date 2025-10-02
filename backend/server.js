@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const https = require('https');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,54 +15,118 @@ app.use(express.json());
 const tracks = new Map();
 const shortUrls = new Map();
 
-// Mock track data for testing
-const mockTracks = {
-  'spotify:track:4iV5W9uYEdYUVa79Axb7Rh': {
-    id: 'track_001',
-    title: 'Blinding Lights',
-    artist: 'The Weeknd',
-    artwork: 'https://i.scdn.co/image/ab67616d0000b2738863bc11d2aa12b54f5aeb36',
-    providers: [
-      {
-        name: 'spotify',
-        displayName: 'Spotify',
-        deepLink: 'spotify:track:4iV5W9uYEdYUVa79Axb7Rh',
-        isAvailable: true
-      },
-      {
-        name: 'apple_music',
-        displayName: 'Apple Music',
-        deepLink: 'https://music.apple.com/us/album/blinding-lights/1499379768?i=1499379770',
-        isAvailable: true
-      },
-      {
-        name: 'youtube_music',
-        displayName: 'YouTube Music',
-        deepLink: 'https://music.youtube.com/watch?v=fHI8X4OXluQ',
-        isAvailable: true
-      }
-    ]
-  }
-};
+// Helper function to make HTTP requests
+function makeRequest(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, (res) => {
+      let data = '';
+      res.on('data', (chunk) => data += chunk);
+      res.on('end', () => {
+        try {
+          resolve(JSON.parse(data));
+        } catch (e) {
+          reject(e);
+        }
+      });
+    }).on('error', reject);
+  });
+}
 
 // Helper function to extract track ID from URL
 function extractTrackId(url) {
   const spotifyMatch = url.match(/spotify\.com\/track\/([a-zA-Z0-9]+)/);
   if (spotifyMatch) {
-    return `spotify:track:${spotifyMatch[1]}`;
+    return { type: 'spotify', id: spotifyMatch[1] };
   }
   
   const appleMatch = url.match(/music\.apple\.com\/.*\/album\/.*\/(\d+)/);
   if (appleMatch) {
-    return `apple:track:${appleMatch[1]}`;
+    return { type: 'apple', id: appleMatch[1] };
   }
   
   const youtubeMatch = url.match(/music\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/);
   if (youtubeMatch) {
-    return `youtube:track:${youtubeMatch[1]}`;
+    return { type: 'youtube', id: youtubeMatch[1] };
   }
   
   return null;
+}
+
+// Enhanced track resolution with real metadata
+async function resolveTrackMetadata(trackInfo) {
+  try {
+    let title = 'Unknown Track';
+    let artist = 'Unknown Artist';
+    let artwork = null;
+    
+    if (trackInfo.type === 'spotify') {
+      // Use Spotify oEmbed API for metadata
+      const oembedUrl = `https://open.spotify.com/oembed?url=https://open.spotify.com/track/${trackInfo.id}`;
+      try {
+        const oembedData = await makeRequest(oembedUrl);
+        title = oembedData.title || title;
+        artist = oembedData.author_name || artist;
+        artwork = oembedData.thumbnail_url || null;
+      } catch (e) {
+        console.log('Spotify oEmbed failed, using fallback');
+      }
+    } else if (trackInfo.type === 'youtube') {
+      // Use YouTube oEmbed API
+      const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${trackInfo.id}&format=json`;
+      try {
+        const oembedData = await makeRequest(oembedUrl);
+        title = oembedData.title || title;
+        artist = oembedData.author_name || artist;
+        artwork = oembedData.thumbnail_url || null;
+      } catch (e) {
+        console.log('YouTube oEmbed failed, using fallback');
+      }
+    }
+    
+    // Generate provider links for all platforms
+    const providers = [
+      {
+        name: 'spotify',
+        displayName: 'Spotify',
+        deepLink: `https://open.spotify.com/track/${trackInfo.id}`,
+        isAvailable: true
+      },
+      {
+        name: 'apple_music',
+        displayName: 'Apple Music',
+        deepLink: `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
+        isAvailable: true
+      },
+      {
+        name: 'youtube_music',
+        displayName: 'YouTube Music',
+        deepLink: `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
+        isAvailable: true
+      }
+    ];
+    
+    return {
+      title,
+      artist,
+      artwork,
+      providers
+    };
+  } catch (error) {
+    console.error('Error resolving metadata:', error);
+    return {
+      title: 'Unknown Track',
+      artist: 'Unknown Artist',
+      artwork: null,
+      providers: [
+        {
+          name: 'spotify',
+          displayName: 'Spotify',
+          deepLink: `https://open.spotify.com/track/${trackInfo.id}`,
+          isAvailable: true
+        }
+      ]
+    };
+  }
 }
 
 // Generate short URL
@@ -86,8 +151,14 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+// Test endpoint
+app.post('/test', (req, res) => {
+  console.log('Test endpoint called with body:', req.body);
+  res.json({ message: 'Test successful', body: req.body });
+});
+
 // Resolve track endpoint
-app.post('/resolve', async (req, res) => {
+app.post('/api/resolve', async (req, res) => {
   try {
     const { url } = req.body;
     
@@ -100,43 +171,44 @@ app.post('/resolve', async (req, res) => {
     
     console.log('Resolving track:', url);
     
-    const trackId = extractTrackId(url);
+    const trackInfo = extractTrackId(url);
     
-    if (!trackId) {
+    if (!trackInfo) {
       return res.status(400).json({
         success: false,
         error: 'Unsupported URL format. Please share a Spotify, Apple Music, or YouTube Music link.'
       });
     }
     
-    let trackData = mockTracks[trackId];
+    // Check if we already have this track
+    const trackKey = `${trackInfo.type}:${trackInfo.id}`;
+    let track = tracks.get(trackKey);
     
-    if (!trackData) {
-      trackData = {
-        id: `track_${Date.now()}`,
-        title: 'Unknown Track',
-        artist: 'Unknown Artist',
-        artwork: null,
-        providers: [
-          {
-            name: 'spotify',
-            displayName: 'Spotify',
-            deepLink: url,
-            isAvailable: true
-          }
-        ]
+    if (!track) {
+      // Resolve real metadata
+      const metadata = await resolveTrackMetadata(trackInfo);
+      
+      track = {
+        id: trackKey,
+        title: metadata.title,
+        artist: metadata.artist,
+        artwork: metadata.artwork,
+        providers: metadata.providers
       };
+      
+      tracks.set(trackKey, track);
     }
     
-    const shortUrl = generateShortUrl(trackData.id);
-    tracks.set(trackData.id, { ...trackData, shortUrl });
+    // Generate short URL
+    const shortUrl = generateShortUrl(track.id);
+    shortUrls.set(shortUrl, track.id);
     
     await new Promise(resolve => setTimeout(resolve, 500));
     
     res.json({
       success: true,
       track: {
-        ...trackData,
+        ...track,
         shortUrl,
         sourceUrl: url
       },

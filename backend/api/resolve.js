@@ -291,6 +291,17 @@ app.post('/api/resolve', async (req, res) => {
     } catch (kvError) {
       console.error('KV storage failed:', kvError);
       console.error('KV error details:', kvError.message);
+      // Return error information in response for debugging
+      return res.status(500).json({
+        success: false,
+        error: 'KV storage failed',
+        kvError: kvError.message,
+        track: {
+          ...track,
+          shortUrl,
+          sourceUrl: url
+        }
+      });
     }
     
     await new Promise(resolve => setTimeout(resolve, 500));
