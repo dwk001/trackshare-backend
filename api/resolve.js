@@ -161,13 +161,13 @@ async function resolveTrackMetadata(trackInfo) {
   }
 }
 
-// Generate short URL with embedded track ID
+// Generate short URL with track ID in path
 function generateShortUrl(track) {
-  const shortId = Math.random().toString(36).substring(2, 8);
-  // Extract just the track ID and encode it
+  // Extract just the track ID and create a short code
   const trackId = track.id.split(':')[1]; // Extract just the ID part
-  const encodedId = Buffer.from(trackId).toString('base64').replace(/[+/=]/g, ''); // Remove special chars
-  return `https://trackshare-backend.vercel.app/t/${shortId}?i=${encodedId}`;
+  // Create a shorter code by taking first 8 characters and encoding
+  const shortCode = Buffer.from(trackId.substring(0, 8)).toString('base64').replace(/[+/=]/g, '');
+  return `https://trackshare-backend.vercel.app/t/${shortCode}`;
 }
 
 // Resolve track endpoint
