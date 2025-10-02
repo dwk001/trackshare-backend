@@ -166,32 +166,32 @@ module.exports = async (req, res) => {
                 
                 // Try to open the app first, then fallback to web
                 if (provider === 'spotify') {
-                  // Try Spotify app first
-                  const spotifyUrl = url.replace('https://open.spotify.com', 'spotify://open.spotify.com');
+                  // Try Spotify app first - use proper URL scheme
+                  const spotifyUrl = url.replace('https://open.spotify.com/track/', 'spotify://track/');
                   window.location.href = spotifyUrl;
                   
                   // Fallback to web after a short delay
                   setTimeout(() => {
                     window.open(url, '_blank');
-                  }, 500);
+                  }, 800);
                 } else if (provider === 'apple_music') {
-                  // Try Apple Music app first
-                  const appleUrl = url.replace('https://music.apple.com', 'music://music.apple.com');
+                  // Try Apple Music app first - use proper URL scheme
+                  const appleUrl = url.replace('https://music.apple.com/search?term=', 'music://music.apple.com/search?term=');
                   window.location.href = appleUrl;
                   
                   // Fallback to web after a short delay
                   setTimeout(() => {
                     window.open(url, '_blank');
-                  }, 500);
+                  }, 800);
                 } else if (provider === 'youtube_music') {
-                  // Try YouTube Music app first
-                  const youtubeUrl = url.replace('https://music.youtube.com', 'youtubemusic://music.youtube.com');
+                  // Try YouTube Music app first - use proper URL scheme
+                  const youtubeUrl = url.replace('https://music.youtube.com/search?q=', 'youtubemusic://music.youtube.com/search?q=');
                   window.location.href = youtubeUrl;
                   
                   // Fallback to web after a short delay
                   setTimeout(() => {
                     window.open(url, '_blank');
-                  }, 500);
+                  }, 800);
                 } else {
                   // Direct web fallback
                   window.open(url, '_blank');
@@ -201,7 +201,7 @@ module.exports = async (req, res) => {
                 setTimeout(() => {
                   event.target.disabled = false;
                   event.target.style.opacity = '1';
-                }, 1000);
+                }, 1500);
               }
             </script>
             
