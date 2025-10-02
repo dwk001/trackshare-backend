@@ -200,21 +200,21 @@ module.exports = async (req, res) => {
                   console.log("Button clicked:", providerName, deepLink, webUrl);
                   
                   var isAndroid = /Android/i.test(navigator.userAgent);
-                  console.log("Is Android:", isAndroid);
+                  var isChrome = /Chrome/i.test(navigator.userAgent);
+                  console.log("Is Android:", isAndroid, "Is Chrome:", isChrome);
                   
-                  if (isAndroid) {
+                  if (isAndroid && isChrome) {
+                    // Chrome on Android - use intent URLs
                     var intentUrl;
+                    var cleanUrl = webUrl.replace(/^https?:\\/\\//, "");
                     
                     if (providerName === "spotify") {
-                      var cleanUrl = webUrl.replace(/^https?:\\/\\//g, "");
                       intentUrl = "intent://" + cleanUrl + "#Intent;scheme=https;package=com.spotify.music;S.browser_fallback_url=" + encodeURIComponent(webUrl) + ";end";
                       console.log("Spotify Intent URL:", intentUrl);
                     } else if (providerName === "apple_music") {
-                      var cleanUrl = webUrl.replace(/^https?:\\/\\//g, "");
                       intentUrl = "intent://" + cleanUrl + "#Intent;scheme=https;package=com.apple.android.music;S.browser_fallback_url=" + encodeURIComponent(webUrl) + ";end";
                       console.log("Apple Music Intent URL:", intentUrl);
                     } else if (providerName === "youtube_music") {
-                      var cleanUrl = webUrl.replace(/^https?:\\/\\//g, "");
                       intentUrl = "intent://" + cleanUrl + "#Intent;scheme=https;package=com.google.android.apps.youtube.music;S.browser_fallback_url=" + encodeURIComponent(webUrl) + ";end";
                       console.log("YouTube Music Intent URL:", intentUrl);
                     }
@@ -222,20 +222,11 @@ module.exports = async (req, res) => {
                     if (intentUrl) {
                       console.log("Opening intent URL...");
                       window.location.href = intentUrl;
-                    } else {
-                      console.log("No intent URL created, opening web URL");
-                      window.location.href = webUrl;
                     }
                   } else {
-                    console.log("Not Android, opening deepLink:", deepLink);
-                    window.location.href = deepLink;
-                    
-                    setTimeout(function() {
-                      if (document.hasFocus()) {
-                        console.log("Fallback to webUrl");
-                        window.location.href = webUrl;
-                      }
-                    }, 800);
+                    // Firefox on Android or iOS - just open the web URL and let the OS handle it
+                    console.log("Opening web URL directly:", webUrl);
+                    window.location.href = webUrl;
                   }
                 });
               });
