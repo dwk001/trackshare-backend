@@ -175,15 +175,15 @@ async function resolveTrackMetadata(trackInfo) {
       }
     }
     
-        // Generate provider links for all platforms with native app priority
+        // Generate provider links for all platforms with a robust native-first strategy
         const providers = [
           {
             name: 'spotify',
             displayName: 'Spotify',
-            deepLink: trackInfo.type === 'spotify' 
-              ? `spotify://track/${trackInfo.id}`  // Direct track
-              : `spotify://search/${encodeURIComponent(title + ' ' + artist)}`, // App search
-            webFallback: trackInfo.type === 'spotify'
+            deepLinkHint: trackInfo.type === 'spotify' 
+              ? `spotify:track:${trackInfo.id}` 
+              : `spotify:search:${encodeURIComponent(title + ' ' + artist)}`,
+            webUrl: trackInfo.type === 'spotify'
               ? `https://open.spotify.com/track/${trackInfo.id}`
               : `https://open.spotify.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
             isAvailable: true
@@ -191,17 +191,20 @@ async function resolveTrackMetadata(trackInfo) {
           {
             name: 'apple_music',
             displayName: 'Apple Music',
-            deepLink: `music://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
-            webFallback: `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
+            // Universal links are the most reliable hint for Apple Music on both platforms.
+            // On Android, the frontend will wrap this in an intent.
+            deepLinkHint: `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
+            webUrl: `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
             isAvailable: true
           },
           {
             name: 'youtube_music',
             displayName: 'YouTube Music',
-            deepLink: trackInfo.type === 'youtube'
-              ? `youtubemusic://music.youtube.com/watch?v=${trackInfo.id}` // Direct video
-              : `youtubemusic://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`, // App search
-            webFallback: trackInfo.type === 'youtube'
+            // Use direct link if source, otherwise search. Universal links are reliable here too.
+            deepLinkHint: trackInfo.type === 'youtube'
+              ? `https://music.youtube.com/watch?v=${trackInfo.id}`
+              : `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
+            webUrl: trackInfo.type === 'youtube'
               ? `https://music.youtube.com/watch?v=${trackInfo.id}`
               : `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
             isAvailable: true
