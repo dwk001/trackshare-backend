@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const https = require('https');
+// Use the correct KV variable names from Upstash
 const { kv } = require('@vercel/kv');
 
 const app = express();
@@ -288,6 +289,7 @@ app.post('/api/resolve', async (req, res) => {
       console.log(`Stored track data for ${shortId}`);
     } catch (kvError) {
       console.error('KV storage failed:', kvError);
+      console.error('KV error details:', kvError.message);
     }
     
     await new Promise(resolve => setTimeout(resolve, 500));
