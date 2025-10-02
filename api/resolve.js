@@ -161,12 +161,13 @@ async function resolveTrackMetadata(trackInfo) {
   }
 }
 
-// Generate short URL with minimal embedded data
+// Generate short URL with embedded track ID
 function generateShortUrl(track) {
   const shortId = Math.random().toString(36).substring(2, 8);
-  // Create a very short URL by encoding just the track ID
+  // Extract just the track ID and encode it
   const trackId = track.id.split(':')[1]; // Extract just the ID part
-  return `https://trackshare-backend.vercel.app/t/${shortId}`;
+  const encodedId = Buffer.from(trackId).toString('base64').replace(/[+/=]/g, ''); // Remove special chars
+  return `https://trackshare-backend.vercel.app/t/${shortId}?i=${encodedId}`;
 }
 
 // Resolve track endpoint
@@ -213,17 +214,6 @@ app.post('/api/resolve', async (req, res) => {
     
     // Generate short URL
     const shortUrl = generateShortUrl(track);
-    const shortId = shortUrl.split('/t/')[1];
-    
-    // Store track data in KV storage
-    try {
-      await kv.set(`track:${shortId}`, JSON.stringify(track), { ex: 86400 }); // 24 hour expiry
-      console.log(`Stored track data for ${shortId}`);
-    } catch (kvError) {
-      console.error('KV storage failed:', kvError);
-      // Fallback: store in memory (will be lost on function restart)
-      tracks.set(shortId, track);
-    }
     
     await new Promise(resolve => setTimeout(resolve, 500));
     
