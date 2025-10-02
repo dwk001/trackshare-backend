@@ -175,27 +175,27 @@ async function resolveTrackMetadata(trackInfo) {
       }
     }
     
-    // Generate provider links for all platforms
-    const providers = [
-      {
-        name: 'spotify',
-        displayName: 'Spotify',
-        deepLink: `https://open.spotify.com/track/${trackInfo.id}`,
-        isAvailable: true
-      },
-      {
-        name: 'apple_music',
-        displayName: 'Apple Music',
-        deepLink: `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
-        isAvailable: true
-      },
-      {
-        name: 'youtube_music',
-        displayName: 'YouTube Music',
-        deepLink: `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
-        isAvailable: true
-      }
-    ];
+        // Generate provider links for all platforms
+        const providers = [
+          {
+            name: 'spotify',
+            displayName: 'Spotify',
+            deepLink: `https://open.spotify.com/track/${trackInfo.id}`,
+            isAvailable: true
+          },
+          {
+            name: 'apple_music',
+            displayName: 'Apple Music',
+            deepLink: `music://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
+            isAvailable: true
+          },
+          {
+            name: 'youtube_music',
+            displayName: 'YouTube Music',
+            deepLink: `youtubemusic://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
+            isAvailable: true
+          }
+        ];
     
     return {
       title,

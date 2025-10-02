@@ -94,14 +94,22 @@ module.exports = async (req, res) => {
               text-decoration: none;
               color: #333;
               font-weight: 600;
-              transition: all 0.2s ease;
+              transition: all 0.15s ease;
               background: white;
               cursor: pointer;
               -webkit-tap-highlight-color: transparent;
               user-select: none;
+              -webkit-user-select: none;
+              -moz-user-select: none;
+              -ms-user-select: none;
+              touch-action: manipulation;
             }
             .provider-btn:active {
-              transform: scale(0.98);
+              transform: scale(0.95);
+              transition: transform 0.1s ease;
+            }
+            .provider-btn:focus {
+              outline: none;
             }
             .spotify { 
               border-color: #1db954; 
@@ -110,17 +118,17 @@ module.exports = async (req, res) => {
               background: #f0fff4; 
               border-color: #1db954;
             }
-            .apple { 
+            .apple_music { 
               border-color: #fa243c; 
             }
-            .apple:hover { 
+            .apple_music:hover { 
               background: #fff0f0; 
               border-color: #fa243c;
             }
-            .youtube { 
+            .youtube_music { 
               border-color: #ff0000; 
             }
-            .youtube:hover { 
+            .youtube_music:hover { 
               background: #fff0f0; 
               border-color: #ff0000;
             }
