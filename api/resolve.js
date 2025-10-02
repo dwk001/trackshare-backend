@@ -52,6 +52,56 @@ function extractTrackId(url) {
   return null;
 }
 
+// Spotify Client Credentials authentication
+async function getSpotifyAccessToken() {
+  const clientId = process.env.SPOTIFY_CLIENT_ID;
+  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+  
+  if (!clientId || !clientSecret) {
+    console.log('Spotify credentials not configured');
+    return null;
+  }
+  
+  try {
+    const response = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`
+      },
+      body: 'grant_type=client_credentials'
+    });
+    
+    const data = await response.json();
+    return data.access_token;
+  } catch (error) {
+    console.error('Error getting Spotify token:', error);
+    return null;
+  }
+}
+
+// iTunes Search API fallback
+async function searchItunes(title, artist) {
+  try {
+    const searchTerm = encodeURIComponent(`${title} ${artist}`);
+    const response = await fetch(`https://itunes.apple.com/search?term=${searchTerm}&entity=song&limit=1`);
+    const data = await response.json();
+    
+    if (data.results && data.results.length > 0) {
+      const result = data.results[0];
+      return {
+        title: result.trackName || title,
+        artist: result.artistName || artist,
+        artwork: result.artworkUrl100 ? result.artworkUrl100.replace('100x100', '600x600') : null
+      };
+    }
+  } catch (error) {
+    console.error('iTunes search failed:', error);
+  }
+  
+  return { title, artist, artwork: null };
+}
+
 // Enhanced track resolution with real metadata
 async function resolveTrackMetadata(trackInfo) {
   try {
@@ -59,48 +109,48 @@ async function resolveTrackMetadata(trackInfo) {
     let artist = 'Unknown Artist';
     let artwork = null;
     
-    // Hardcoded mapping for testing (this should be replaced with proper API calls)
-    const trackMappings = {
-      '4gfrYDtaRmp6HPvN80V2ob': {
-        title: 'I Got Better',
-        artist: 'Morgan Wallen',
-        artwork: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e0235ea219ce47813b5e2dc3745'
-      }
-    };
-    
-    // Check if we have a hardcoded mapping
-    if (trackMappings[trackInfo.id]) {
-      const mapping = trackMappings[trackInfo.id];
-      title = mapping.title;
-      artist = mapping.artist;
-      artwork = mapping.artwork;
-    }
-    
     if (trackInfo.type === 'spotify') {
-      // Use Spotify oEmbed API for metadata
-      const oembedUrl = `https://open.spotify.com/oembed?url=https://open.spotify.com/track/${trackInfo.id}`;
-      try {
-        const oembedData = await makeRequest(oembedUrl);
-        title = oembedData.title || title;
-        artwork = oembedData.thumbnail_url || null;
-        
-        // Try to get artist info from Spotify Web API (public endpoint)
+      // Try Spotify Web API with Client Credentials first
+      const accessToken = await getSpotifyAccessToken();
+      if (accessToken) {
         try {
-          const spotifyApiUrl = `https://api.spotify.com/v1/tracks/${trackInfo.id}`;
-          // Note: This will likely fail without authentication, but let's try
-          const spotifyData = await makeRequest(spotifyApiUrl);
-          if (spotifyData.artists && spotifyData.artists.length > 0) {
-            artist = spotifyData.artists[0].name;
+          const response = await fetch(`https://api.spotify.com/v1/tracks/${trackInfo.id}`, {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            }
+          });
+          
+          if (response.ok) {
+            const spotifyData = await response.json();
+            title = spotifyData.name || title;
+            artist = spotifyData.artists && spotifyData.artists.length > 0 ? spotifyData.artists[0].name : artist;
+            artwork = spotifyData.album && spotifyData.album.images && spotifyData.album.images.length > 0 
+              ? spotifyData.album.images[0].url : null;
           }
         } catch (apiError) {
-          console.log('Spotify Web API failed, using fallback');
-          // Fallback: try to extract from title or use generic
-          if (title && title !== 'Unknown Track') {
-            artist = 'Artist'; // Generic fallback
-          }
+          console.log('Spotify Web API failed:', apiError);
         }
-      } catch (e) {
-        console.log('Spotify oEmbed failed, using fallback');
+      }
+      
+      // Fallback to oEmbed if Web API failed
+      if (title === 'Unknown Track' || artist === 'Unknown Artist') {
+        const oembedUrl = `https://open.spotify.com/oembed?url=https://open.spotify.com/track/${trackInfo.id}`;
+        try {
+          const oembedData = await makeRequest(oembedUrl);
+          if (title === 'Unknown Track') title = oembedData.title || title;
+          if (!artwork) artwork = oembedData.thumbnail_url || null;
+        } catch (e) {
+          console.log('Spotify oEmbed failed');
+        }
+      }
+      
+      // Final fallback to iTunes Search
+      if (artist === 'Unknown Artist' && title !== 'Unknown Track') {
+        const itunesData = await searchItunes(title, '');
+        if (itunesData.artist !== '') {
+          artist = itunesData.artist;
+          if (!artwork) artwork = itunesData.artwork;
+        }
       }
     } else if (trackInfo.type === 'youtube') {
       // Use YouTube oEmbed API
@@ -111,7 +161,16 @@ async function resolveTrackMetadata(trackInfo) {
         artist = oembedData.author_name || artist;
         artwork = oembedData.thumbnail_url || null;
       } catch (e) {
-        console.log('YouTube oEmbed failed, using fallback');
+        console.log('YouTube oEmbed failed');
+      }
+      
+      // Fallback to iTunes Search for better metadata
+      if (artist === 'Unknown Artist' && title !== 'Unknown Track') {
+        const itunesData = await searchItunes(title, '');
+        if (itunesData.artist !== '') {
+          artist = itunesData.artist;
+          if (!artwork) artwork = itunesData.artwork;
+        }
       }
     }
     
@@ -161,13 +220,11 @@ async function resolveTrackMetadata(trackInfo) {
   }
 }
 
-// Generate short URL with track ID in path
+// Generate short URL with random ID
 function generateShortUrl(track) {
-  // Extract just the track ID and create a short code
-  const trackId = track.id.split(':')[1]; // Extract just the ID part
-  // Create a shorter code by taking first 8 characters and encoding
-  const shortCode = Buffer.from(trackId.substring(0, 8)).toString('base64').replace(/[+/=]/g, '');
-  return `https://trackshare-backend.vercel.app/t/${shortCode}`;
+  // Generate a random short ID
+  const shortId = Math.random().toString(36).substring(2, 8);
+  return `https://trackshare-backend.vercel.app/t/${shortId}`;
 }
 
 // Resolve track endpoint
@@ -214,6 +271,24 @@ app.post('/api/resolve', async (req, res) => {
     
     // Generate short URL
     const shortUrl = generateShortUrl(track);
+    const shortId = shortUrl.split('/t/')[1];
+    
+    // Store track data in Vercel KV
+    try {
+      const trackData = {
+        title: track.title,
+        artist: track.artist,
+        artwork: track.artwork,
+        providers: track.providers,
+        sourceUrl: url,
+        createdAt: new Date().toISOString()
+      };
+      
+      await kv.set(`t:${shortId}`, JSON.stringify(trackData), { ex: 2592000 }); // 30 days TTL
+      console.log(`Stored track data for ${shortId}`);
+    } catch (kvError) {
+      console.error('KV storage failed:', kvError);
+    }
     
     await new Promise(resolve => setTimeout(resolve, 500));
     
