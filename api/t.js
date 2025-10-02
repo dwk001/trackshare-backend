@@ -181,33 +181,33 @@ module.exports = async (req, res) => {
               const isAndroid = /Android/i.test(navigator.userAgent);
               
               if (isAndroid) {
-                // Build Android intent URLs for native app opening
+                // Build Android intent URLs for native app opening with browser fallback
                 let intentUrl;
                 
                 if (providerName === 'spotify') {
-                  // For Spotify, use the custom scheme directly on Android
-                  intentUrl = deepLink;
+                  // For Spotify on Android, use intent URL with Spotify package
+                  const spotifyUrl = webUrl.replace(/^https?:\\/\\//, '');
+                  intentUrl = 'intent://' + spotifyUrl + '#Intent;scheme=https;package=com.spotify.music;S.browser_fallback_url=' + encodeURIComponent(webUrl) + ';end';
                 } else if (providerName === 'apple_music') {
                   // For Apple Music on Android, use intent URL
-                  intentUrl = 'intent://' + webUrl.replace(/^https?:\\/\\//, '') + '#Intent;scheme=https;package=com.apple.android.music;end';
+                  const appleMusicUrl = webUrl.replace(/^https?:\\/\\//, '');
+                  intentUrl = 'intent://' + appleMusicUrl + '#Intent;scheme=https;package=com.apple.android.music;S.browser_fallback_url=' + encodeURIComponent(webUrl) + ';end';
                 } else if (providerName === 'youtube_music') {
                   // For YouTube Music on Android, use intent URL
-                  intentUrl = 'intent://' + webUrl.replace(/^https?:\\/\\//, '') + '#Intent;scheme=https;package=com.google.android.apps.youtube.music;end';
+                  const youtubeMusicUrl = webUrl.replace(/^https?:\\/\\//, '');
+                  intentUrl = 'intent://' + youtubeMusicUrl + '#Intent;scheme=https;package=com.google.android.apps.youtube.music;S.browser_fallback_url=' + encodeURIComponent(webUrl) + ';end';
                 }
                 
-                // Try to open the intent URL
+                // Open the intent URL - Android will handle app/browser fallback automatically
                 window.location.href = intentUrl;
-                
-                // Fallback to web URL after a short delay if app doesn't open
-                setTimeout(function() {
-                  window.location.href = webUrl;
-                }, 1500);
               } else {
                 // For iOS and other platforms, try deepLink first then fallback to web
                 window.location.href = deepLink;
                 
                 setTimeout(function() {
-                  window.location.href = webUrl;
+                  if (document.hasFocus()) {
+                    window.location.href = webUrl;
+                  }
                 }, 800);
               }
             }
