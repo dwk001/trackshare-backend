@@ -28,6 +28,7 @@ module.exports = async (req, res) => {
     console.log(`Looking for track with key: t:${id}`);
     const trackData = await kv.get(`t:${id}`);
     console.log(`Track data found:`, trackData ? 'yes' : 'no');
+    console.log(`Track data type:`, typeof trackData);
     
     // Try alternative key formats
     if (!trackData) {
