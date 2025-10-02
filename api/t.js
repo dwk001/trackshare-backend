@@ -91,7 +91,6 @@ module.exports = async (req, res) => {
               padding: 15px 20px;
               border: 2px solid #e0e0e0;
               border-radius: 12px;
-              text-decoration: none;
               color: #333;
               font-weight: 600;
               background: white;
@@ -103,6 +102,8 @@ module.exports = async (req, res) => {
               -ms-user-select: none;
               touch-action: manipulation;
               pointer-events: auto;
+              font-size: 16px;
+              font-family: inherit;
             }
             .provider-btn:active {
               transform: scale(0.95);
@@ -151,11 +152,58 @@ module.exports = async (req, res) => {
             
             <div class="providers">
               ${track.providers.map(provider => `
-                <a href="${provider.deepLink}" class="provider-btn ${provider.name}" target="_blank">
+                <button class="provider-btn ${provider.name}" onclick="openProvider('${provider.name}', '${provider.deepLink}')">
                   Play on ${provider.displayName}
-                </a>
+                </button>
               `).join('')}
             </div>
+            
+            <script>
+              function openProvider(provider, url) {
+                // Prevent double-click by disabling button temporarily
+                event.target.disabled = true;
+                event.target.style.opacity = '0.7';
+                
+                // Try to open the app first, then fallback to web
+                if (provider === 'spotify') {
+                  // Try Spotify app first
+                  const spotifyUrl = url.replace('https://open.spotify.com', 'spotify://open.spotify.com');
+                  window.location.href = spotifyUrl;
+                  
+                  // Fallback to web after a short delay
+                  setTimeout(() => {
+                    window.open(url, '_blank');
+                  }, 500);
+                } else if (provider === 'apple_music') {
+                  // Try Apple Music app first
+                  const appleUrl = url.replace('https://music.apple.com', 'music://music.apple.com');
+                  window.location.href = appleUrl;
+                  
+                  // Fallback to web after a short delay
+                  setTimeout(() => {
+                    window.open(url, '_blank');
+                  }, 500);
+                } else if (provider === 'youtube_music') {
+                  // Try YouTube Music app first
+                  const youtubeUrl = url.replace('https://music.youtube.com', 'youtubemusic://music.youtube.com');
+                  window.location.href = youtubeUrl;
+                  
+                  // Fallback to web after a short delay
+                  setTimeout(() => {
+                    window.open(url, '_blank');
+                  }, 500);
+                } else {
+                  // Direct web fallback
+                  window.open(url, '_blank');
+                }
+                
+                // Re-enable button after a delay
+                setTimeout(() => {
+                  event.target.disabled = false;
+                  event.target.style.opacity = '1';
+                }, 1000);
+              }
+            </script>
             
             <div class="footer">
               Powered by TrackShare
