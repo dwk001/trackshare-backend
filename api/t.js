@@ -156,9 +156,11 @@ module.exports = async (req, res) => {
             <div class="artist">${track.artist}</div>
             
             <div class="providers">
-              ${track.providers.map(provider => `
+              ${track.providers.map((provider, index) => `
                 <a href="#" 
-                   onclick="openProvider('${provider.name}', '${provider.deepLinkHint.replace(/'/g, "\\'")}', '${provider.webUrl.replace(/'/g, "\\'")}'); return false;" 
+                   data-provider="${provider.name}" 
+                   data-deeplink="${provider.deepLinkHint}" 
+                   data-weburl="${provider.webUrl}"
                    class="provider-btn ${provider.name}">
                   ${
                     provider.name === 'spotify' ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.42 1.56-.299.421-1.02.599-1.559.3z"/></svg>` :
@@ -176,41 +178,70 @@ module.exports = async (req, res) => {
           </div>
           
           <script>
-            function openProvider(providerName, deepLink, webUrl) {
-              // Detect Android
-              const isAndroid = /Android/i.test(navigator.userAgent);
+            document.addEventListener('DOMContentLoaded', function() {
+              console.log('Page loaded, setting up click handlers');
               
-              if (isAndroid) {
-                // Build Android intent URLs for native app opening with browser fallback
-                let intentUrl;
-                
-                if (providerName === 'spotify') {
-                  // For Spotify on Android, use intent URL with Spotify package
-                  const spotifyUrl = webUrl.replace(/^https?:\\/\\//, '');
-                  intentUrl = 'intent://' + spotifyUrl + '#Intent;scheme=https;package=com.spotify.music;S.browser_fallback_url=' + encodeURIComponent(webUrl) + ';end';
-                } else if (providerName === 'apple_music') {
-                  // For Apple Music on Android, use intent URL
-                  const appleMusicUrl = webUrl.replace(/^https?:\\/\\//, '');
-                  intentUrl = 'intent://' + appleMusicUrl + '#Intent;scheme=https;package=com.apple.android.music;S.browser_fallback_url=' + encodeURIComponent(webUrl) + ';end';
-                } else if (providerName === 'youtube_music') {
-                  // For YouTube Music on Android, use intent URL
-                  const youtubeMusicUrl = webUrl.replace(/^https?:\\/\\//, '');
-                  intentUrl = 'intent://' + youtubeMusicUrl + '#Intent;scheme=https;package=com.google.android.apps.youtube.music;S.browser_fallback_url=' + encodeURIComponent(webUrl) + ';end';
-                }
-                
-                // Open the intent URL - Android will handle app/browser fallback automatically
-                window.location.href = intentUrl;
-              } else {
-                // For iOS and other platforms, try deepLink first then fallback to web
-                window.location.href = deepLink;
-                
-                setTimeout(function() {
-                  if (document.hasFocus()) {
-                    window.location.href = webUrl;
+              const buttons = document.querySelectorAll('.provider-btn');
+              console.log('Found buttons:', buttons.length);
+              
+              buttons.forEach(function(button) {
+                button.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  
+                  const providerName = this.getAttribute('data-provider');
+                  const deepLink = this.getAttribute('data-deeplink');
+                  const webUrl = this.getAttribute('data-weburl');
+                  
+                  console.log('Button clicked:', providerName, deepLink, webUrl);
+                  
+                  // Detect Android
+                  const isAndroid = /Android/i.test(navigator.userAgent);
+                  console.log('Is Android:', isAndroid);
+                  
+                  if (isAndroid) {
+                    // Build Android intent URLs for native app opening
+                    let intentUrl;
+                    
+                    if (providerName === 'spotify') {
+                      // For Spotify on Android, build intent URL
+                      const cleanUrl = webUrl.replace(/^https?:\/\//, '');
+                      intentUrl = 'intent://' + cleanUrl + '#Intent;scheme=https;package=com.spotify.music;S.browser_fallback_url=' + encodeURIComponent(webUrl) + ';end';
+                      console.log('Spotify Intent URL:', intentUrl);
+                    } else if (providerName === 'apple_music') {
+                      // For Apple Music on Android, use intent URL
+                      const cleanUrl = webUrl.replace(/^https?:\/\//, '');
+                      intentUrl = 'intent://' + cleanUrl + '#Intent;scheme=https;package=com.apple.android.music;S.browser_fallback_url=' + encodeURIComponent(webUrl) + ';end';
+                      console.log('Apple Music Intent URL:', intentUrl);
+                    } else if (providerName === 'youtube_music') {
+                      // For YouTube Music on Android, use intent URL
+                      const cleanUrl = webUrl.replace(/^https?:\/\//, '');
+                      intentUrl = 'intent://' + cleanUrl + '#Intent;scheme=https;package=com.google.android.apps.youtube.music;S.browser_fallback_url=' + encodeURIComponent(webUrl) + ';end';
+                      console.log('YouTube Music Intent URL:', intentUrl);
+                    }
+                    
+                    // Open the intent URL - Android will handle app/browser fallback automatically
+                    if (intentUrl) {
+                      console.log('Opening intent URL...');
+                      window.location.href = intentUrl;
+                    } else {
+                      console.log('No intent URL created, opening web URL');
+                      window.location.href = webUrl;
+                    }
+                  } else {
+                    // For iOS and other platforms, try deepLink first
+                    console.log('Not Android, opening deepLink:', deepLink);
+                    window.location.href = deepLink;
+                    
+                    setTimeout(function() {
+                      if (document.hasFocus()) {
+                        console.log('Fallback to webUrl');
+                        window.location.href = webUrl;
+                      }
+                    }, 800);
                   }
-                }, 800);
-              }
-            }
+                });
+              });
+            });
           </script>
         </body>
         </html>
