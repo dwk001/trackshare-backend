@@ -180,7 +180,9 @@ async function resolveTrackMetadata(trackInfo) {
           {
             name: 'spotify',
             displayName: 'Spotify',
-            deepLink: `https://open.spotify.com/track/${trackInfo.id}`,
+            deepLink: trackInfo.type === 'spotify' 
+              ? `https://open.spotify.com/track/${trackInfo.id}`
+              : `https://open.spotify.com/search/${encodeURIComponent(title + ' ' + artist)}`,
             isAvailable: true
           },
           {
@@ -192,7 +194,9 @@ async function resolveTrackMetadata(trackInfo) {
           {
             name: 'youtube_music',
             displayName: 'YouTube Music',
-            deepLink: `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
+            deepLink: trackInfo.type === 'youtube'
+              ? `https://music.youtube.com/watch?v=${trackInfo.id}`
+              : `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
             isAvailable: true
           }
         ];
