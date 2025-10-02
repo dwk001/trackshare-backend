@@ -175,12 +175,15 @@ async function resolveTrackMetadata(trackInfo) {
       }
     }
     
-        // Generate provider links for all platforms
+        // Generate provider links for all platforms with native app priority
         const providers = [
           {
             name: 'spotify',
             displayName: 'Spotify',
             deepLink: trackInfo.type === 'spotify' 
+              ? `spotify://track/${trackInfo.id}`  // Direct track
+              : `spotify://search/${encodeURIComponent(title + ' ' + artist)}`, // App search
+            webFallback: trackInfo.type === 'spotify'
               ? `https://open.spotify.com/track/${trackInfo.id}`
               : `https://open.spotify.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
             isAvailable: true
@@ -188,13 +191,17 @@ async function resolveTrackMetadata(trackInfo) {
           {
             name: 'apple_music',
             displayName: 'Apple Music',
-            deepLink: `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
+            deepLink: `music://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
+            webFallback: `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
             isAvailable: true
           },
           {
             name: 'youtube_music',
             displayName: 'YouTube Music',
             deepLink: trackInfo.type === 'youtube'
+              ? `youtubemusic://music.youtube.com/watch?v=${trackInfo.id}` // Direct video
+              : `youtubemusic://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`, // App search
+            webFallback: trackInfo.type === 'youtube'
               ? `https://music.youtube.com/watch?v=${trackInfo.id}`
               : `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
             isAvailable: true
