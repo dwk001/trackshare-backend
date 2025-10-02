@@ -1,11 +1,13 @@
-const tracks = new Map();
+const { kv } = require('@vercel/kv');
 
 module.exports = async (req, res) => {
   const { id } = req.query;
   
-  // Try to get track data from memory
-  const track = tracks.get(id);
-  if (track) {
+  // Try to get track data from KV storage
+  try {
+    const trackData = await kv.get(`track:${id}`);
+    if (trackData) {
+      const track = JSON.parse(trackData);
     res.send(`
       <!DOCTYPE html>
       <html>
@@ -114,10 +116,13 @@ module.exports = async (req, res) => {
       </body>
       </html>
     `);
-    return;
+      return;
+    }
+  } catch (kvError) {
+    console.error('KV storage error:', kvError);
   }
   
-  // Fallback if no track found
+  // Fallback if no track found or KV fails
   return res.status(404).send(`
     <!DOCTYPE html>
     <html>

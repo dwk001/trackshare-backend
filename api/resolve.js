@@ -2,8 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const https = require('https');
-const fs = require('fs');
-const path = require('path');
+const { kv } = require('@vercel/kv');
 
 const app = express();
 
@@ -216,8 +215,15 @@ app.post('/api/resolve', async (req, res) => {
     const shortUrl = generateShortUrl(track);
     const shortId = shortUrl.split('/t/')[1];
     
-    // Store track data in memory (simple approach for MVP)
-    tracks.set(shortId, track);
+    // Store track data in KV storage
+    try {
+      await kv.set(`track:${shortId}`, JSON.stringify(track), { ex: 86400 }); // 24 hour expiry
+      console.log(`Stored track data for ${shortId}`);
+    } catch (kvError) {
+      console.error('KV storage failed:', kvError);
+      // Fallback: store in memory (will be lost on function restart)
+      tracks.set(shortId, track);
+    }
     
     await new Promise(resolve => setTimeout(resolve, 500));
     

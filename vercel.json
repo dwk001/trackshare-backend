@@ -3,6 +3,9 @@
   "functions": {
     "api/resolve.js": {
       "maxDuration": 30
+    },
+    "api/t.js": {
+      "maxDuration": 10
     }
   }
 }
