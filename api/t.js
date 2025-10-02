@@ -94,7 +94,6 @@ module.exports = async (req, res) => {
               text-decoration: none;
               color: #333;
               font-weight: 600;
-              transition: none;
               background: white;
               cursor: pointer;
               -webkit-tap-highlight-color: transparent;
@@ -152,58 +151,11 @@ module.exports = async (req, res) => {
             
             <div class="providers">
               ${track.providers.map(provider => `
-                <a href="${provider.deepLink}" class="provider-btn ${provider.name}" onclick="handleProviderClick(event, '${provider.name}', '${provider.deepLink}')">
+                <a href="${provider.deepLink}" class="provider-btn ${provider.name}" target="_blank">
                   Play on ${provider.displayName}
                 </a>
               `).join('')}
             </div>
-            
-            <script>
-              function handleProviderClick(event, provider, url) {
-                event.preventDefault();
-                
-                if (provider === 'spotify') {
-                  // Try Spotify app first, then web
-                  const appUrl = url.replace('https://', 'spotify://');
-                  const iframe = document.createElement('iframe');
-                  iframe.style.display = 'none';
-                  iframe.src = appUrl;
-                  document.body.appendChild(iframe);
-                  
-                  setTimeout(() => {
-                    document.body.removeChild(iframe);
-                    window.open(url, '_blank');
-                  }, 1000);
-                } else if (provider === 'apple_music') {
-                  // Try Apple Music app first, then web
-                  const appUrl = url.replace('https://music.apple.com', 'music://music.apple.com');
-                  const iframe = document.createElement('iframe');
-                  iframe.style.display = 'none';
-                  iframe.src = appUrl;
-                  document.body.appendChild(iframe);
-                  
-                  setTimeout(() => {
-                    document.body.removeChild(iframe);
-                    window.open(url, '_blank');
-                  }, 1000);
-                } else if (provider === 'youtube_music') {
-                  // Try YouTube Music app first, then web
-                  const appUrl = url.replace('https://music.youtube.com', 'youtubemusic://music.youtube.com');
-                  const iframe = document.createElement('iframe');
-                  iframe.style.display = 'none';
-                  iframe.src = appUrl;
-                  document.body.appendChild(iframe);
-                  
-                  setTimeout(() => {
-                    document.body.removeChild(iframe);
-                    window.open(url, '_blank');
-                  }, 1000);
-                } else {
-                  // Fallback for other providers
-                  window.open(url, '_blank');
-                }
-              }
-            </script>
             
             <div class="footer">
               Powered by TrackShare
