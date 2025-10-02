@@ -175,23 +175,11 @@ module.exports = async (req, res) => {
                     window.open(url, '_blank');
                   }, 800);
                 } else if (provider === 'apple_music') {
-                  // Try Apple Music app first - use proper URL scheme
-                  const appleUrl = url.replace('https://music.apple.com/search?term=', 'music://music.apple.com/search?term=');
-                  window.location.href = appleUrl;
-                  
-                  // Fallback to web after a short delay
-                  setTimeout(() => {
-                    window.open(url, '_blank');
-                  }, 800);
+                  // Apple Music - use web URL directly (was working before)
+                  window.open(url, '_blank');
                 } else if (provider === 'youtube_music') {
-                  // Try YouTube Music app first - use proper URL scheme
-                  const youtubeUrl = url.replace('https://music.youtube.com/search?q=', 'youtubemusic://music.youtube.com/search?q=');
-                  window.location.href = youtubeUrl;
-                  
-                  // Fallback to web after a short delay
-                  setTimeout(() => {
-                    window.open(url, '_blank');
-                  }, 800);
+                  // YouTube Music - use web URL directly (was working before)
+                  window.open(url, '_blank');
                 } else {
                   // Direct web fallback
                   window.open(url, '_blank');
