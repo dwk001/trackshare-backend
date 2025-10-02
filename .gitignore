@@ -1,0 +1,8 @@
+/.gradle
+/app
+/build.gradle
+/DEPLOYMENT_GUIDE.md
+/gradle.properties
+/IMPLEMENTATION_SUMMARY.md
+/README.md
+/settings.gradle
