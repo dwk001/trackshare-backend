@@ -200,9 +200,16 @@ module.exports = async (req, res) => {
                 }, 800);
               }
               
-              function openMusicApp(webUrl) {
-                console.log("Opening music app:", webUrl);
-                window.location.href = webUrl;
+              function openMusicApp(nativeUrl, webUrl) {
+                console.log("Opening music app:", nativeUrl);
+                // Try native app first
+                window.location.href = nativeUrl;
+                
+                // Fallback to web after delay
+                setTimeout(function() {
+                  console.log("Fallback to web:", webUrl);
+                  window.open(webUrl, '_blank');
+                }, 800);
               }
             </script>
         </body>
