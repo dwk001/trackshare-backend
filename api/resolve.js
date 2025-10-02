@@ -182,7 +182,7 @@ async function resolveTrackMetadata(trackInfo) {
             displayName: 'Spotify',
             deepLink: trackInfo.type === 'spotify' 
               ? `https://open.spotify.com/track/${trackInfo.id}`
-              : `https://open.spotify.com/search/${encodeURIComponent(title + ' ' + artist)}`,
+              : `https://open.spotify.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
             isAvailable: true
           },
           {
