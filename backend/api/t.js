@@ -1,5 +1,6 @@
 const { kv } = require('@vercel/kv');
 
+// FIXED: Vercel KV returns parsed objects, no need for JSON.parse()
 module.exports = async (req, res) => {
   const { id } = req.query;
   
