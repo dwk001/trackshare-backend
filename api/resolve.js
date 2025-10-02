@@ -160,12 +160,18 @@ async function resolveTrackMetadata(trackInfo) {
   }
 }
 
-// Generate short URL
-function generateShortUrl(trackId) {
+// Generate short URL with embedded data
+function generateShortUrl(track) {
   const shortId = Math.random().toString(36).substring(2, 8);
-  const shortUrl = `https://trackshare-backend.vercel.app/t/${shortId}`;
-  shortUrls.set(shortId, trackId);
-  return shortUrl;
+  // Encode track data in the URL for now (simple base64 encoding)
+  const trackData = Buffer.from(JSON.stringify({
+    title: track.title,
+    artist: track.artist,
+    artwork: track.artwork,
+    providers: track.providers
+  })).toString('base64');
+  
+  return `https://trackshare-backend.vercel.app/t/${shortId}?data=${trackData}`;
 }
 
 // Resolve track endpoint
@@ -211,13 +217,7 @@ app.post('/api/resolve', async (req, res) => {
     }
     
     // Generate short URL
-    const shortUrl = generateShortUrl(track.id);
-    shortUrls.set(shortUrl, track.id);
-    
-    // Store track data for the redirect function
-    // We'll use a simple approach: store in the shortUrls map with a special key
-    const shortId = shortUrl.split('/t/')[1];
-    tracks.set(shortId, track); // Store track data with short ID as key
+    const shortUrl = generateShortUrl(track);
     
     await new Promise(resolve => setTimeout(resolve, 500));
     
