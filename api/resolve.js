@@ -104,6 +104,23 @@ async function searchItunes(title, artist) {
   return { title, artist, artwork: null, trackId: null };
 }
 
+// Clean search query for better results
+function cleanSearchQuery(title, artist) {
+  // Remove common suffixes that hurt search results
+  let cleanTitle = title.replace(/\s*-\s*Topic$/, '').trim();
+  cleanTitle = cleanTitle.replace(/\s*\(Official.*?\)$/i, '').trim();
+  cleanTitle = cleanTitle.replace(/\s*\[.*?\]$/i, '').trim();
+  
+  // Clean artist name
+  let cleanArtist = artist.replace(/\s*-\s*Topic$/, '').trim();
+  
+  return {
+    title: cleanTitle,
+    artist: cleanArtist,
+    combined: `${cleanTitle} ${cleanArtist}`.trim()
+  };
+}
+
 // Search for direct track URLs on music platforms
 async function findDirectTrackUrls(title, artist) {
   const results = {
@@ -112,23 +129,28 @@ async function findDirectTrackUrls(title, artist) {
     youtubeMusic: null
   };
   
+  const clean = cleanSearchQuery(title, artist);
+  console.log('Searching for:', clean);
+  
   try {
     // Search Spotify using their Web API
     const spotifyToken = await getSpotifyAccessToken();
     if (spotifyToken) {
       try {
-        const spotifyResponse = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(title + ' ' + artist)}&type=track&limit=1`, {
+        const spotifyResponse = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(clean.combined)}&type=track&limit=3`, {
           headers: { 'Authorization': `Bearer ${spotifyToken}` }
         });
         if (spotifyResponse.ok) {
           const spotifyData = await spotifyResponse.json();
           if (spotifyData.tracks.items.length > 0) {
+            // Find the best match
             const track = spotifyData.tracks.items[0];
             results.spotify = {
               trackId: track.id,
               directUrl: `https://open.spotify.com/track/${track.id}`,
               deepLink: `spotify:track:${track.id}`
             };
+            console.log('Found Spotify track:', track.name, 'by', track.artists[0].name);
           }
         }
       } catch (e) {
@@ -138,13 +160,14 @@ async function findDirectTrackUrls(title, artist) {
     
     // Search Apple Music using iTunes API
     try {
-      const itunesData = await searchItunes(title, artist);
+      const itunesData = await searchItunes(clean.title, clean.artist);
       if (itunesData.trackId) {
         results.appleMusic = {
           trackId: itunesData.trackId,
           directUrl: `https://music.apple.com/us/album/${itunesData.trackId}`,
           deepLink: `https://music.apple.com/us/album/${itunesData.trackId}`
         };
+        console.log('Found Apple Music track:', itunesData.title, 'by', itunesData.artist);
       }
     } catch (e) {
       console.log('Apple Music direct search failed:', e);
@@ -152,7 +175,7 @@ async function findDirectTrackUrls(title, artist) {
     
     // Search YouTube Music using YouTube Data API
     try {
-      const youtubeResponse = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(title + ' ' + artist + ' music')}&type=video&key=${process.env.YOUTUBE_API_KEY}&maxResults=1`);
+      const youtubeResponse = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(clean.combined + ' music')}&type=video&key=${process.env.YOUTUBE_API_KEY}&maxResults=3`);
       if (youtubeResponse.ok) {
         const youtubeData = await youtubeResponse.json();
         if (youtubeData.items.length > 0) {
@@ -162,6 +185,7 @@ async function findDirectTrackUrls(title, artist) {
             directUrl: `https://music.youtube.com/watch?v=${video.id.videoId}`,
             deepLink: `https://music.youtube.com/watch?v=${video.id.videoId}`
           };
+          console.log('Found YouTube Music video:', video.snippet.title);
         }
       }
     } catch (e) {
