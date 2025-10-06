@@ -175,7 +175,7 @@ async function resolveTrackMetadata(trackInfo) {
       }
     }
     
-        // Generate provider links for all platforms - use custom schemes for native app opening
+        // Generate provider links for all platforms - use search URLs for better app opening
         const providers = [
           {
             name: 'spotify',
@@ -187,14 +187,14 @@ async function resolveTrackMetadata(trackInfo) {
           {
             name: 'apple_music',
             displayName: 'Apple Music',
-            deepLinkHint: `music://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
+            deepLinkHint: `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
             webUrl: `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
             isAvailable: true
           },
           {
             name: 'youtube_music',
             displayName: 'YouTube Music',
-            deepLinkHint: `youtubemusic://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
+            deepLinkHint: `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
             webUrl: `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
             isAvailable: true
           }
