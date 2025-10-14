@@ -94,7 +94,9 @@ async function searchItunes(title, artist) {
         title: result.trackName || title,
         artist: result.artistName || artist,
         artwork: result.artworkUrl100 ? result.artworkUrl100.replace('100x100', '600x600') : null,
-        trackId: result.trackId
+        trackId: result.trackId,
+        collectionId: result.collectionId || null,
+        trackViewUrl: result.trackViewUrl || null
       };
     }
   } catch (error) {
@@ -162,9 +164,27 @@ async function findDirectTrackUrls(title, artist) {
     try {
       const itunesData = await searchItunes(clean.title, clean.artist);
       if (itunesData.trackId) {
+        let nativePath = `/search?term=${encodeURIComponent(clean.combined)}`;
+        let webUrl = `https://music.apple.com/search?term=${encodeURIComponent(clean.combined)}`;
+
+        if (itunesData.trackViewUrl) {
+          try {
+            const parsed = new URL(itunesData.trackViewUrl);
+            const pathWithQuery = `${parsed.pathname}${parsed.search}`;
+            if (pathWithQuery && pathWithQuery !== '/') {
+              nativePath = pathWithQuery;
+              webUrl = `https://music.apple.com${pathWithQuery}`;
+            }
+          } catch (err) {
+            console.log('Failed to parse Apple Music trackViewUrl:', err);
+          }
+        }
+
         results.appleMusic = {
           trackId: itunesData.trackId,
-          webUrl: `https://music.apple.com/us/album/${itunesData.trackId}`
+          collectionId: itunesData.collectionId,
+          nativeUrl: `music://music.apple.com${nativePath}`,
+          webUrl
         };
         console.log('Found Apple Music track:', itunesData.title, 'by', itunesData.artist);
       }
@@ -289,8 +309,10 @@ async function resolveTrackMetadata(trackInfo) {
       {
         name: 'apple_music',
         displayName: 'Apple Music',
-        nativeUrl: `music://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
-        webUrl: directUrls.appleMusic
+        nativeUrl: directUrls.appleMusic
+          ? directUrls.appleMusic.nativeUrl
+          : `music://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
+        webUrl: directUrls.appleMusic && directUrls.appleMusic.webUrl
           ? directUrls.appleMusic.webUrl
           : `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
         isAvailable: true,
