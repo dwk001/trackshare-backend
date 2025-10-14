@@ -147,8 +147,8 @@ async function findDirectTrackUrls(title, artist) {
             const track = spotifyData.tracks.items[0];
             results.spotify = {
               trackId: track.id,
-              directUrl: `https://open.spotify.com/track/${track.id}`,
-              deepLink: `spotify:track:${track.id}`
+              nativeUrl: `spotify://track/${track.id}`,
+              webUrl: `https://open.spotify.com/track/${track.id}`
             };
             console.log('Found Spotify track:', track.name, 'by', track.artists[0].name);
           }
@@ -164,8 +164,7 @@ async function findDirectTrackUrls(title, artist) {
       if (itunesData.trackId) {
         results.appleMusic = {
           trackId: itunesData.trackId,
-          directUrl: `https://music.apple.com/us/album/${itunesData.trackId}`,
-          deepLink: `https://music.apple.com/us/album/${itunesData.trackId}`
+          webUrl: `https://music.apple.com/us/album/${itunesData.trackId}`
         };
         console.log('Found Apple Music track:', itunesData.title, 'by', itunesData.artist);
       }
@@ -182,8 +181,8 @@ async function findDirectTrackUrls(title, artist) {
           const video = youtubeData.items[0];
           results.youtubeMusic = {
             videoId: video.id.videoId,
-            directUrl: `https://music.youtube.com/watch?v=${video.id.videoId}`,
-            deepLink: `https://music.youtube.com/watch?v=${video.id.videoId}`
+            nativeUrl: `youtubemusic://music.youtube.com/watch?v=${video.id.videoId}`,
+            webUrl: `https://music.youtube.com/watch?v=${video.id.videoId}`
           };
           console.log('Found YouTube Music video:', video.snippet.title);
         }
@@ -272,35 +271,44 @@ async function resolveTrackMetadata(trackInfo) {
     }
     
         // Find direct track URLs on all platforms
-        const directUrls = await findDirectTrackUrls(title, artist);
-        
-        // Generate provider links using direct URLs when available
-        const providers = [
-          {
-            name: 'spotify',
-            displayName: 'Spotify',
-            deepLinkHint: directUrls.spotify ? directUrls.spotify.deepLink : `spotify:search:${encodeURIComponent(title + ' ' + artist)}`,
-            webUrl: directUrls.spotify ? directUrls.spotify.directUrl : `https://open.spotify.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
-            isAvailable: true,
-            isDirect: !!directUrls.spotify
-          },
-          {
-            name: 'apple_music',
-            displayName: 'Apple Music',
-            deepLinkHint: directUrls.appleMusic ? directUrls.appleMusic.deepLink : `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
-            webUrl: directUrls.appleMusic ? directUrls.appleMusic.directUrl : `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
-            isAvailable: true,
-            isDirect: !!directUrls.appleMusic
-          },
-          {
-            name: 'youtube_music',
-            displayName: 'YouTube Music',
-            deepLinkHint: directUrls.youtubeMusic ? directUrls.youtubeMusic.deepLink : `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
-            webUrl: directUrls.youtubeMusic ? directUrls.youtubeMusic.directUrl : `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
-            isAvailable: true,
-            isDirect: !!directUrls.youtubeMusic
-          }
-        ];
+    const directUrls = await findDirectTrackUrls(title, artist);
+
+    const providers = [
+      {
+        name: 'spotify',
+        displayName: 'Spotify',
+        nativeUrl: directUrls.spotify
+          ? directUrls.spotify.nativeUrl
+          : `spotify://search/${encodeURIComponent(title + ' ' + artist)}`,
+        webUrl: directUrls.spotify
+          ? directUrls.spotify.webUrl
+          : `https://open.spotify.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
+        isAvailable: true,
+        isDirect: !!directUrls.spotify
+      },
+      {
+        name: 'apple_music',
+        displayName: 'Apple Music',
+        nativeUrl: `music://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
+        webUrl: directUrls.appleMusic
+          ? directUrls.appleMusic.webUrl
+          : `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
+        isAvailable: true,
+        isDirect: !!directUrls.appleMusic
+      },
+      {
+        name: 'youtube_music',
+        displayName: 'YouTube Music',
+        nativeUrl: directUrls.youtubeMusic
+          ? directUrls.youtubeMusic.nativeUrl
+          : `youtubemusic://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
+        webUrl: directUrls.youtubeMusic
+          ? directUrls.youtubeMusic.webUrl
+          : `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
+        isAvailable: true,
+        isDirect: !!directUrls.youtubeMusic
+      }
+    ];
     
     return {
       title,
