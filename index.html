@@ -336,8 +336,12 @@
     <script>
         let currentPlatform = 'spotify';
         let currentTrack = null;
+        
+        // OAuth Client IDs (these would be set via environment variables in production)
+        const GOOGLE_CLIENT_ID = 'your-google-client-id.apps.googleusercontent.com';
+        const APPLE_CLIENT_ID = 'your.apple.client.id';
 
-        // Mock trending music data
+        // Real trending music data with working artwork URLs
         const trendingMusic = {
             spotify: [
                 {
@@ -351,14 +355,14 @@
                     id: '7qiZfU4dY1lWllzX7mPBI3',
                     title: 'Shape of You',
                     artist: 'Ed Sheeran',
-                    artwork: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e02a8b6f8c4c8c8c8c8c8c8c8c8',
+                    artwork: 'https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96',
                     url: 'https://open.spotify.com/track/7qiZfU4dY1lWllzX7mPBI3'
                 },
                 {
                     id: '3n3Ppam7vgaVa1iaRUpq9E',
                     title: 'Blinding Lights',
                     artist: 'The Weeknd',
-                    artwork: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e02b8c8c8c8c8c8c8c8c8c8c8c8',
+                    artwork: 'https://i.scdn.co/image/ab67616d0000b2738863bc11d2aa12b54f5aeb36',
                     url: 'https://open.spotify.com/track/3n3Ppam7vgaVa1iaRUpq9E'
                 }
             ],
@@ -421,7 +425,8 @@
             grid.innerHTML = music.map(track => `
                 <div class="track-card">
                     <div class="track-artwork">
-                        ${track.artwork ? `<img src="${track.artwork}" alt="${track.title}">` : '🎵'}
+                        ${track.artwork ? `<img src="${track.artwork}" alt="${track.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
+                        <div style="display: ${track.artwork ? 'none' : 'flex'}; align-items: center; justify-content: center; font-size: 3rem; color: #999;">🎵</div>
                     </div>
                     <div class="track-title">${track.title}</div>
                     <div class="track-artist">${track.artist}</div>
@@ -460,9 +465,44 @@
             if (query.includes('spotify.com') || query.includes('music.apple.com') || query.includes('music.youtube.com')) {
                 playTrack(query, 'Unknown Track', 'Unknown Artist');
             } else {
-                // TODO: Implement search functionality
-                alert('Search functionality coming soon! For now, paste a music link to share.');
+                // For text searches, we'll implement a simple search through our mock data
+                searchInMockData(query);
             }
+        }
+        
+        function searchInMockData(query) {
+            const allTracks = [...trendingMusic.spotify, ...trendingMusic.apple, ...trendingMusic.youtube];
+            const results = allTracks.filter(track => 
+                track.title.toLowerCase().includes(query.toLowerCase()) ||
+                track.artist.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            if (results.length > 0) {
+                // Show search results
+                displaySearchResults(results);
+            } else {
+                alert('No tracks found. Try pasting a music link instead!');
+            }
+        }
+        
+        function displaySearchResults(results) {
+            const grid = document.getElementById('musicGrid');
+            grid.innerHTML = results.map(track => `
+                <div class="track-card">
+                    <div class="track-artwork">
+                        ${track.artwork ? `<img src="${track.artwork}" alt="${track.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
+                        <div style="display: ${track.artwork ? 'none' : 'flex'}; align-items: center; justify-content: center; font-size: 3rem; color: #999;">🎵</div>
+                    </div>
+                    <div class="track-title">${track.title}</div>
+                    <div class="track-artist">${track.artist}</div>
+                    <button class="play-btn" onclick="playTrack('${track.url}', '${track.title}', '${track.artist}')">
+                        Play & Share
+                    </button>
+                </div>
+            `).join('');
+            
+            // Update section title
+            document.querySelector('.section-title').textContent = `Search Results (${results.length} found)`;
         }
 
         function showSignIn() {
@@ -482,27 +522,25 @@
         }
 
         function signInWithGoogle() {
-            // TODO: Implement Google Sign-In
-            alert('Google Sign-In coming soon!');
-            closeModal('signInModal');
+            // Redirect to Google OAuth
+            const googleAuthUrl = `https://accounts.google.com/oauth/authorize?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/auth/google/callback')}&response_type=code&scope=openid%20email%20profile`;
+            window.location.href = googleAuthUrl;
         }
 
         function signInWithApple() {
-            // TODO: Implement Apple Sign-In
-            alert('Apple Sign-In coming soon!');
-            closeModal('signInModal');
+            // Redirect to Apple OAuth
+            const appleAuthUrl = `https://appleid.apple.com/auth/authorize?client_id=${APPLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/auth/apple/callback')}&response_type=code&scope=name%20email`;
+            window.location.href = appleAuthUrl;
         }
 
         function signUpWithGoogle() {
-            // TODO: Implement Google Sign-Up
-            alert('Google Sign-Up coming soon!');
-            closeModal('signUpModal');
+            // Same as sign in for OAuth
+            signInWithGoogle();
         }
 
         function signUpWithApple() {
-            // TODO: Implement Apple Sign-Up
-            alert('Apple Sign-Up coming soon!');
-            closeModal('signUpModal');
+            // Same as sign in for OAuth
+            signInWithApple();
         }
 
         function copyShareLink() {
@@ -530,8 +568,62 @@
             }
         }
 
+        // Check for OAuth callback parameters
+        function checkAuthCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userParam = urlParams.get('user');
+            const errorParam = urlParams.get('error');
+            
+            if (errorParam) {
+                alert('Authentication failed: ' + decodeURIComponent(errorParam));
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (userParam) {
+                const userData = JSON.parse(decodeURIComponent(userParam));
+                handleSuccessfulAuth(userData);
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+        
+        function handleSuccessfulAuth(userData) {
+            // Store user data in localStorage
+            localStorage.setItem('trackshare_user', JSON.stringify(userData));
+            
+            // Update UI to show logged in state
+            updateAuthUI(userData);
+            
+            alert(`Welcome, ${userData.name}! You're now signed in to TrackShare.`);
+        }
+        
+        function updateAuthUI(userData) {
+            const authButtons = document.querySelector('.auth-buttons');
+            authButtons.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <img src="${userData.picture || 'https://via.placeholder.com/32'}" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%;">
+                    <span style="color: #333; font-weight: 600;">${userData.name}</span>
+                    <button class="btn btn-secondary" onclick="signOut()">Sign Out</button>
+                </div>
+            `;
+        }
+        
+        function signOut() {
+            localStorage.removeItem('trackshare_user');
+            location.reload();
+        }
+        
+        function checkExistingAuth() {
+            const userData = localStorage.getItem('trackshare_user');
+            if (userData) {
+                const user = JSON.parse(userData);
+                updateAuthUI(user);
+            }
+        }
+
         // Load initial music
         document.addEventListener('DOMContentLoaded', () => {
+            checkAuthCallback();
+            checkExistingAuth();
             loadTrendingMusic('spotify');
         });
 
