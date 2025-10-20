@@ -1,11 +1,231 @@
+const authRouter = express.Router();
+
+authRouter.post('/exchange', ensureSupabaseClient, async (req, res) => {
+  try {
+    const { provider, accessToken } = req.body || {};
+
+    if (!provider || !accessToken) {
+      return res.status(400).json({ error: 'provider and accessToken are required' });
+    }
+
+    const supabaseUser = await fetchSupabaseUser(accessToken);
+    const profileRow = await upsertProfileFromSupabaseUser(supabaseUser);
+
+    const sessionToken = mintTrackShareJwt({
+      sub: supabaseUser.id,
+      provider,
+      email: supabaseUser.email
+    });
+
+    return res.json({
+      token: sessionToken,
+      user: mapProfileRow(profileRow)
+    });
+  } catch (error) {
+    console.error('Session exchange failed:', error);
+    const statusCode = error.statusCode || 500;
+    return res.status(statusCode).json({ error: error.message || 'Failed to exchange session' });
+  }
+});
+
+authRouter.get('/me', authenticateTrackshare, ensureSupabaseClient, async (req, res) => {
+  try {
+    const userId = req.trackshareAuth?.sub;
+    if (!userId) {
+      return res.status(401).json({ error: 'Session token missing subject' });
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to fetch profile: ${error.message}`);
+    }
+
+    return res.json({ user: mapProfileRow(data) });
+  } catch (error) {
+    console.error('Failed to fetch profile:', error);
+    return res.status(500).json({ error: error.message || 'Failed to fetch profile' });
+  }
+});
+
+authRouter.get('/users/:id', authenticateTrackshare, ensureSupabaseClient, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to fetch profile: ${error.message}`);
+    }
+
+    return res.json({ user: mapProfileRow(data) });
+  } catch (error) {
+    console.error('Failed to fetch user profile:', error);
+    return res.status(500).json({ error: error.message || 'Failed to fetch user profile' });
+  }
+});
+
+app.use('/api/auth', authRouter);
+
+// Provider linking routes
+const providersRouter = require('./api/providers');
+app.use('/api/providers', providersRouter);
+
+// Activity and feed routes
+const activityRouter = require('./api/activity');
+app.use('/api/activity', activityRouter);
+
+// Privacy and compliance routes
+const privacyRouter = require('./api/privacy');
+app.use('/api/privacy', privacyRouter);
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const https = require('https');
+const jwt = require('jsonwebtoken');
+const { createClient } = require('@supabase/supabase-js');
 
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabase = supabaseUrl && supabaseServiceRoleKey
+  ? createClient(supabaseUrl, supabaseServiceRoleKey)
+  : null;
+
+if (!supabase) {
+  console.warn('Supabase client not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.');
+}
+
+const TRACKSHARE_JWT_SECRET = process.env.TRACKSHARE_JWT_SECRET;
+const TRACKSHARE_JWT_TTL_SECONDS = Number(process.env.TRACKSHARE_JWT_TTL_SECONDS || 43200);
+
+async function ensureSupabaseClient(req, res, next) {
+  if (!supabase) {
+    return res.status(500).json({ error: 'Supabase not configured' });
+  }
+  next();
+}
+
+function mintTrackShareJwt(payload) {
+  if (!TRACKSHARE_JWT_SECRET) {
+    throw new Error('TRACKSHARE_JWT_SECRET not configured');
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const jwtPayload = {
+    iss: 'trackshare_backend',
+    iat: now,
+    exp: now + TRACKSHARE_JWT_TTL_SECONDS,
+    ...payload
+  };
+
+  return jwt.sign(jwtPayload, TRACKSHARE_JWT_SECRET, { algorithm: 'HS256' });
+}
+
+async function fetchSupabaseUser(accessToken) {
+  if (!supabase) {
+    throw new Error('Supabase client not configured');
+  }
+
+  const { data, error } = await supabase.auth.getUser(accessToken);
+
+  if (error || !data || !data.user) {
+    const err = new Error(error?.message || 'Invalid Supabase access token');
+    err.statusCode = 401;
+    throw err;
+  }
+
+  return data.user;
+}
+
+async function upsertProfileFromSupabaseUser(user) {
+  if (!supabase) {
+    throw new Error('Supabase client not configured');
+  }
+
+  const displayName = user.user_metadata?.full_name
+    || user.user_metadata?.name
+    || (user.email ? user.email.split('@')[0] : null);
+
+  const payload = {
+    id: user.id,
+    email: user.email,
+    display_name: displayName,
+    avatar_url: user.user_metadata?.avatar_url || null,
+    updated_at: new Date().toISOString(),
+    last_sign_in_at: user.last_sign_in_at || new Date().toISOString()
+  };
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .upsert(payload, { onConflict: 'id', ignoreDuplicates: false })
+    .select()
+    .single();
+
+  if (error) {
+    const err = new Error(`Failed to upsert profile: ${error.message}`);
+    err.statusCode = 500;
+    throw err;
+  }
+
+  return data;
+}
+
+function mapProfileRow(row) {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: row.id,
+    email: row.email,
+    displayName: row.display_name,
+    avatarUrl: row.avatar_url,
+    connectedProviders: row.connected_providers || {},
+    privacy: row.privacy || 'friends',
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    lastSignInAt: row.last_sign_in_at || row.updated_at,
+    settings: row.settings || {}
+  };
+}
+
+function authenticateTrackshare(req, res, next) {
+  if (!TRACKSHARE_JWT_SECRET) {
+    return res.status(500).json({ error: 'TRACKSHARE_JWT_SECRET not configured' });
+  }
+
+  const authHeader = req.headers.authorization || req.headers.Authorization;
+  if (!authHeader || typeof authHeader !== 'string') {
+    return res.status(401).json({ error: 'Authorization header missing' });
+  }
+
+  const [, token] = authHeader.split(' ');
+
+  if (!token) {
+    return res.status(401).json({ error: 'Invalid Authorization header format' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, TRACKSHARE_JWT_SECRET, { algorithms: ['HS256'] });
+    req.trackshareAuth = decoded;
+    next();
+  } catch (error) {
+    console.error('TrackShare JWT verification failed:', error.message);
+    return res.status(401).json({ error: 'Invalid or expired session token' });
+  }
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
