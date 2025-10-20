@@ -3,142 +3,544 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrackShare - Share Music Across Platforms</title>
-    <meta property="og:title" content="TrackShare - Share Music Across Platforms">
-    <meta property="og:description" content="Share your favorite music and let friends play it on their preferred platform">
-    <meta property="og:image" content="https://trackshare.online/og-image.png">
+    <title>TrackShare - Discover & Share Music</title>
+    <meta property="og:title" content="TrackShare - Discover & Share Music">
+    <meta property="og:description" content="Discover trending music and share it across all platforms">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+        }
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-secondary {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: white;
+        }
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            position: relative;
+        }
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .search-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+        .discovery-section {
+            background: white;
+            padding: 3rem 2rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+        .platform-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .tab {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+        .music-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .track-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+        .track-card:hover {
+            transform: translateY(-4px);
+        }
+        .track-artwork {
+            width: 100%;
+            height: 200px;
+            border-radius: 8px;
+            background: #f0f0f0;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 500px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-        .logo {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-        h1 { 
-            font-size: 32px; 
-            margin-bottom: 16px; 
-            color: #333; 
-            font-weight: 700;
-        }
-        .subtitle { 
-            font-size: 18px; 
-            color: #666; 
-            margin-bottom: 30px; 
-            line-height: 1.5;
-        }
-        .features {
-            text-align: left;
-            margin: 30px 0;
-        }
-        .feature {
-            display: flex;
-            align-items: center;
-            margin-bottom: 16px;
-            font-size: 16px;
-            color: #555;
-        }
-        .feature-icon {
-            margin-right: 12px;
-            font-size: 20px;
-        }
-        .cta {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 16px 32px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 18px;
-            display: inline-block;
-            margin-top: 20px;
-            transition: transform 0.2s ease;
-        }
-        .cta:hover {
-            transform: translateY(-2px);
-        }
-        .footer {
-            margin-top: 40px;
-            font-size: 14px;
+            font-size: 3rem;
             color: #999;
         }
-        .api-info {
-            background: #f8f9fa;
+        .track-artwork img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
             border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
-            text-align: left;
         }
-        .api-info h3 {
-            margin-bottom: 12px;
+        .track-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
             color: #333;
         }
-        .api-info code {
-            background: #e9ecef;
-            padding: 2px 6px;
+        .track-artist {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+        .play-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: #e74c3c;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+        }
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        .modal h2 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        .modal p {
+            margin-bottom: 1.5rem;
+            color: #666;
+        }
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .share-link {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        .copy-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
             border-radius: 4px;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 14px;
+            cursor: pointer;
+            margin-top: 0.5rem;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">🎵</div>
-        <h1>TrackShare</h1>
-        <p class="subtitle">Share your favorite music and let friends play it on their preferred platform</p>
-        
-        <div class="features">
-            <div class="feature">
-                <span class="feature-icon">🎧</span>
-                <span>Native app deep linking for Spotify, Apple Music, and YouTube Music</span>
-            </div>
-            <div class="feature">
-                <span class="feature-icon">🔗</span>
-                <span>Generate short links that work across all platforms</span>
-            </div>
-            <div class="feature">
-                <span class="feature-icon">📱</span>
-                <span>Web fallback for seamless experience</span>
-            </div>
-            <div class="feature">
-                <span class="feature-icon">🔒</span>
-                <span>Privacy-first design with user control</span>
-            </div>
+    <header class="header">
+        <div class="logo">🎵 TrackShare</div>
+        <div class="auth-buttons">
+            <button class="btn btn-secondary" onclick="showSignIn()">Sign In</button>
+            <button class="btn btn-primary" onclick="showSignUp()">Sign Up</button>
         </div>
-        
-        <div class="api-info">
-            <h3>API Usage</h3>
-            <p>Resolve music links:</p>
-            <code>GET /api/resolve?url=SPOTIFY_URL</code>
-            <p style="margin-top: 8px;">Get track page:</p>
-            <code>GET /t/SHORT_ID</code>
-        </div>
-        
-        <a href="https://github.com/dwk001/trackshare-backend" class="cta">
-            View on GitHub
-        </a>
-        
-        <div class="footer">
-            <p>TrackShare API is now live! 🚀</p>
-            <p>Try it: <code>https://trackshare.online/api/resolve?url=https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh</code></p>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>Discover Amazing Music</h1>
+            <p>Find trending tracks and share them across all platforms</p>
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search for songs, artists, or paste a music link..." id="searchInput">
+                <button class="search-btn" onclick="searchMusic()">Search</button>
+            </div>
+        </section>
+
+        <section class="discovery-section">
+            <div class="container">
+                <h2 class="section-title">Trending Now</h2>
+                <div class="platform-tabs">
+                    <div class="tab active" data-platform="spotify" onclick="switchPlatform('spotify')">Spotify</div>
+                    <div class="tab" data-platform="apple" onclick="switchPlatform('apple')">Apple Music</div>
+                    <div class="tab" data-platform="youtube" onclick="switchPlatform('youtube')">YouTube Music</div>
+                </div>
+                <div id="musicGrid" class="music-grid">
+                    <div class="loading">Loading trending music...</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Sign In Modal -->
+    <div id="signInModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('signInModal')">&times;</button>
+            <h2>Sign In</h2>
+            <p>Sign in to save your favorite tracks and connect with friends</p>
+            <button class="btn btn-primary" onclick="signInWithGoogle()" style="width: 100%; margin-bottom: 1rem;">
+                Continue with Google
+            </button>
+            <button class="btn btn-secondary" onclick="signInWithApple()" style="width: 100%;">
+                Continue with Apple
+            </button>
         </div>
     </div>
+
+    <!-- Sign Up Modal -->
+    <div id="signUpModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('signUpModal')">&times;</button>
+            <h2>Sign Up</h2>
+            <p>Join TrackShare to discover and share amazing music</p>
+            <button class="btn btn-primary" onclick="signUpWithGoogle()" style="width: 100%; margin-bottom: 1rem;">
+                Continue with Google
+            </button>
+            <button class="btn btn-secondary" onclick="signUpWithApple()" style="width: 100%;">
+                Continue with Apple
+            </button>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('shareModal')">&times;</button>
+            <h2>Share This Track</h2>
+            <p>Copy this link to share with friends:</p>
+            <div class="share-link" id="shareLink"></div>
+            <button class="copy-btn" onclick="copyShareLink()">Copy Link</button>
+            <div style="margin-top: 1rem;">
+                <button class="btn btn-primary" onclick="openInSpotify()" style="margin-right: 0.5rem;">Open in Spotify</button>
+                <button class="btn btn-secondary" onclick="openInAppleMusic()" style="margin-right: 0.5rem;">Open in Apple Music</button>
+                <button class="btn btn-secondary" onclick="openInYouTubeMusic()">Open in YouTube Music</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPlatform = 'spotify';
+        let currentTrack = null;
+
+        // Mock trending music data
+        const trendingMusic = {
+            spotify: [
+                {
+                    id: '4iV5W9uYEdYUVa79Axb7Rh',
+                    title: 'Prelude for Piano No. 11 in F-Sharp Minor',
+                    artist: 'Unknown Artist',
+                    artwork: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e024f61e186facbb486f79e9fd9',
+                    url: 'https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh'
+                },
+                {
+                    id: '7qiZfU4dY1lWllzX7mPBI3',
+                    title: 'Shape of You',
+                    artist: 'Ed Sheeran',
+                    artwork: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e02a8b6f8c4c8c8c8c8c8c8c8c8',
+                    url: 'https://open.spotify.com/track/7qiZfU4dY1lWllzX7mPBI3'
+                },
+                {
+                    id: '3n3Ppam7vgaVa1iaRUpq9E',
+                    title: 'Blinding Lights',
+                    artist: 'The Weeknd',
+                    artwork: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e02b8c8c8c8c8c8c8c8c8c8c8c8',
+                    url: 'https://open.spotify.com/track/3n3Ppam7vgaVa1iaRUpq9E'
+                }
+            ],
+            apple: [
+                {
+                    id: '1234567890',
+                    title: 'Anti-Hero',
+                    artist: 'Taylor Swift',
+                    artwork: 'https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/12/34/56/12345678-1234-1234-1234-123456789012/cover.jpg',
+                    url: 'https://music.apple.com/us/album/anti-hero/1234567890'
+                },
+                {
+                    id: '0987654321',
+                    title: 'As It Was',
+                    artist: 'Harry Styles',
+                    artwork: 'https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/98/76/54/98765432-9876-5432-1098-765432109876/cover.jpg',
+                    url: 'https://music.apple.com/us/album/as-it-was/0987654321'
+                }
+            ],
+            youtube: [
+                {
+                    id: 'dQw4w9WgXcQ',
+                    title: 'Never Gonna Give You Up',
+                    artist: 'Rick Astley',
+                    artwork: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+                    url: 'https://music.youtube.com/watch?v=dQw4w9WgXcQ'
+                },
+                {
+                    id: '9bZkp7q19f0',
+                    title: 'Gangnam Style',
+                    artist: 'PSY',
+                    artwork: 'https://i.ytimg.com/vi/9bZkp7q19f0/maxresdefault.jpg',
+                    url: 'https://music.youtube.com/watch?v=9bZkp7q19f0'
+                }
+            ]
+        };
+
+        function switchPlatform(platform) {
+            currentPlatform = platform;
+            
+            // Update tab styles
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-platform="${platform}"]`).classList.add('active');
+            
+            // Load music for the platform
+            loadTrendingMusic(platform);
+        }
+
+        function loadTrendingMusic(platform) {
+            const grid = document.getElementById('musicGrid');
+            const music = trendingMusic[platform] || [];
+            
+            if (music.length === 0) {
+                grid.innerHTML = '<div class="error">No trending music available for this platform</div>';
+                return;
+            }
+            
+            grid.innerHTML = music.map(track => `
+                <div class="track-card">
+                    <div class="track-artwork">
+                        ${track.artwork ? `<img src="${track.artwork}" alt="${track.title}">` : '🎵'}
+                    </div>
+                    <div class="track-title">${track.title}</div>
+                    <div class="track-artist">${track.artist}</div>
+                    <button class="play-btn" onclick="playTrack('${track.url}', '${track.title}', '${track.artist}')">
+                        Play & Share
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function playTrack(url, title, artist) {
+            currentTrack = { url, title, artist };
+            
+            // Generate share link using our API
+            fetch(`/api/resolve?url=${encodeURIComponent(url)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('shareLink').textContent = data.track.shortUrl;
+                        showModal('shareModal');
+                    } else {
+                        alert('Error generating share link: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error generating share link');
+                });
+        }
+
+        function searchMusic() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+            
+            // Check if it's a URL
+            if (query.includes('spotify.com') || query.includes('music.apple.com') || query.includes('music.youtube.com')) {
+                playTrack(query, 'Unknown Track', 'Unknown Artist');
+            } else {
+                // TODO: Implement search functionality
+                alert('Search functionality coming soon! For now, paste a music link to share.');
+            }
+        }
+
+        function showSignIn() {
+            showModal('signInModal');
+        }
+
+        function showSignUp() {
+            showModal('signUpModal');
+        }
+
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function signInWithGoogle() {
+            // TODO: Implement Google Sign-In
+            alert('Google Sign-In coming soon!');
+            closeModal('signInModal');
+        }
+
+        function signInWithApple() {
+            // TODO: Implement Apple Sign-In
+            alert('Apple Sign-In coming soon!');
+            closeModal('signInModal');
+        }
+
+        function signUpWithGoogle() {
+            // TODO: Implement Google Sign-Up
+            alert('Google Sign-Up coming soon!');
+            closeModal('signUpModal');
+        }
+
+        function signUpWithApple() {
+            // TODO: Implement Apple Sign-Up
+            alert('Apple Sign-Up coming soon!');
+            closeModal('signUpModal');
+        }
+
+        function copyShareLink() {
+            const shareLink = document.getElementById('shareLink').textContent;
+            navigator.clipboard.writeText(shareLink).then(() => {
+                alert('Link copied to clipboard!');
+            });
+        }
+
+        function openInSpotify() {
+            if (currentTrack) {
+                window.open(`spotify://track/${currentTrack.url.match(/track\/([a-zA-Z0-9]+)/)?.[1] || ''}`, '_blank');
+            }
+        }
+
+        function openInAppleMusic() {
+            if (currentTrack) {
+                window.open(`music://music.apple.com/search?term=${encodeURIComponent(currentTrack.title + ' ' + currentTrack.artist)}`, '_blank');
+            }
+        }
+
+        function openInYouTubeMusic() {
+            if (currentTrack) {
+                window.open(`youtubemusic://watch?v=${currentTrack.url.match(/v=([a-zA-Z0-9_-]+)/)?.[1] || ''}`, '_blank');
+            }
+        }
+
+        // Load initial music
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTrendingMusic('spotify');
+        });
+
+        // Handle Enter key in search
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchMusic();
+            }
+        });
+    </script>
 </body>
 </html>
