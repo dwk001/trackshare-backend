@@ -8,9 +8,6 @@
     "api/t.js": {
       "maxDuration": 10
     },
-    "api/auth.js": {
-      "maxDuration": 30
-    },
     "api/providers.js": {
       "maxDuration": 30
     },
