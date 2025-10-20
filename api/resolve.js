@@ -93,129 +93,14 @@ async function searchItunes(title, artist) {
       return {
         title: result.trackName || title,
         artist: result.artistName || artist,
-        artwork: result.artworkUrl100 ? result.artworkUrl100.replace('100x100', '600x600') : null,
-        trackId: result.trackId,
-        collectionId: result.collectionId || null,
-        trackViewUrl: result.trackViewUrl || null
+        artwork: result.artworkUrl100 ? result.artworkUrl100.replace('100x100', '600x600') : null
       };
     }
   } catch (error) {
     console.error('iTunes search failed:', error);
   }
   
-  return { title, artist, artwork: null, trackId: null };
-}
-
-// Clean search query for better results
-function cleanSearchQuery(title, artist) {
-  // Remove common suffixes that hurt search results
-  let cleanTitle = title.replace(/\s*-\s*Topic$/, '').trim();
-  cleanTitle = cleanTitle.replace(/\s*\(Official.*?\)$/i, '').trim();
-  cleanTitle = cleanTitle.replace(/\s*\[.*?\]$/i, '').trim();
-  
-  // Clean artist name
-  let cleanArtist = artist.replace(/\s*-\s*Topic$/, '').trim();
-  
-  return {
-    title: cleanTitle,
-    artist: cleanArtist,
-    combined: `${cleanTitle} ${cleanArtist}`.trim()
-  };
-}
-
-// Search for direct track URLs on music platforms
-async function findDirectTrackUrls(title, artist) {
-  const results = {
-    spotify: null,
-    appleMusic: null,
-    youtubeMusic: null
-  };
-  
-  const clean = cleanSearchQuery(title, artist);
-  console.log('Searching for:', clean);
-  
-  try {
-    // Search Spotify using their Web API
-    const spotifyToken = await getSpotifyAccessToken();
-    if (spotifyToken) {
-      try {
-        const spotifyResponse = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(clean.combined)}&type=track&limit=3`, {
-          headers: { 'Authorization': `Bearer ${spotifyToken}` }
-        });
-        if (spotifyResponse.ok) {
-          const spotifyData = await spotifyResponse.json();
-          if (spotifyData.tracks.items.length > 0) {
-            // Find the best match
-            const track = spotifyData.tracks.items[0];
-            results.spotify = {
-              trackId: track.id,
-              nativeUrl: `spotify://track/${track.id}`,
-              webUrl: `https://open.spotify.com/track/${track.id}`
-            };
-            console.log('Found Spotify track:', track.name, 'by', track.artists[0].name);
-          }
-        }
-      } catch (e) {
-        console.log('Spotify direct search failed:', e);
-      }
-    }
-    
-    // Search Apple Music using iTunes API
-    try {
-      const itunesData = await searchItunes(clean.title, clean.artist);
-      if (itunesData.trackId) {
-        let nativePath = `/search?term=${encodeURIComponent(clean.combined)}`;
-        let webUrl = `https://music.apple.com/search?term=${encodeURIComponent(clean.combined)}`;
-
-        if (itunesData.trackViewUrl) {
-          try {
-            const parsed = new URL(itunesData.trackViewUrl);
-            const pathWithQuery = `${parsed.pathname}${parsed.search}`;
-            if (pathWithQuery && pathWithQuery !== '/') {
-              nativePath = pathWithQuery;
-              webUrl = `https://music.apple.com${pathWithQuery}`;
-            }
-          } catch (err) {
-            console.log('Failed to parse Apple Music trackViewUrl:', err);
-          }
-        }
-
-        results.appleMusic = {
-          trackId: itunesData.trackId,
-          collectionId: itunesData.collectionId,
-          nativeUrl: `music://music.apple.com${nativePath}`,
-          webUrl
-        };
-        console.log('Found Apple Music track:', itunesData.title, 'by', itunesData.artist);
-      }
-    } catch (e) {
-      console.log('Apple Music direct search failed:', e);
-    }
-    
-    // Search YouTube Music using YouTube Data API
-    try {
-      const youtubeResponse = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(clean.combined + ' music')}&type=video&key=${process.env.YOUTUBE_API_KEY}&maxResults=3`);
-      if (youtubeResponse.ok) {
-        const youtubeData = await youtubeResponse.json();
-        if (youtubeData.items.length > 0) {
-          const video = youtubeData.items[0];
-          results.youtubeMusic = {
-            videoId: video.id.videoId,
-            nativeUrl: `youtubemusic://music.youtube.com/watch?v=${video.id.videoId}`,
-            webUrl: `https://music.youtube.com/watch?v=${video.id.videoId}`
-          };
-          console.log('Found YouTube Music video:', video.snippet.title);
-        }
-      }
-    } catch (e) {
-      console.log('YouTube Music direct search failed:', e);
-    }
-    
-  } catch (error) {
-    console.error('Error finding direct track URLs:', error);
-  }
-  
-  return results;
+  return { title, artist, artwork: null };
 }
 
 // Enhanced track resolution with real metadata
@@ -290,45 +175,25 @@ async function resolveTrackMetadata(trackInfo) {
       }
     }
     
-        // Find direct track URLs on all platforms
-    const directUrls = await findDirectTrackUrls(title, artist);
-
+    // Generate provider links for all platforms
     const providers = [
       {
         name: 'spotify',
         displayName: 'Spotify',
-        nativeUrl: directUrls.spotify
-          ? directUrls.spotify.nativeUrl
-          : `spotify://search/${encodeURIComponent(title + ' ' + artist)}`,
-        webUrl: directUrls.spotify
-          ? directUrls.spotify.webUrl
-          : `https://open.spotify.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
-        isAvailable: true,
-        isDirect: !!directUrls.spotify
+        deepLink: `https://open.spotify.com/track/${trackInfo.id}`,
+        isAvailable: true
       },
       {
         name: 'apple_music',
         displayName: 'Apple Music',
-        nativeUrl: directUrls.appleMusic
-          ? directUrls.appleMusic.nativeUrl
-          : `music://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
-        webUrl: directUrls.appleMusic && directUrls.appleMusic.webUrl
-          ? directUrls.appleMusic.webUrl
-          : `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
-        isAvailable: true,
-        isDirect: !!directUrls.appleMusic
+        deepLink: `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
+        isAvailable: true
       },
       {
         name: 'youtube_music',
         displayName: 'YouTube Music',
-        nativeUrl: directUrls.youtubeMusic
-          ? directUrls.youtubeMusic.nativeUrl
-          : `youtubemusic://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
-        webUrl: directUrls.youtubeMusic
-          ? directUrls.youtubeMusic.webUrl
-          : `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
-        isAvailable: true,
-        isDirect: !!directUrls.youtubeMusic
+        deepLink: `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
+        isAvailable: true
       }
     ];
     
@@ -420,11 +285,23 @@ app.post('/api/resolve', async (req, res) => {
         createdAt: new Date().toISOString()
       };
       
-      await kv.set(`t:${shortId}`, trackData, { ex: 2592000 }); // 30 days TTL - KV auto-serializes
-      console.log(`Stored track data for ${shortId}`);
+      await kv.set(`t:${shortId}`, JSON.stringify(trackData), { ex: 2592000 }); // 30 days TTL
+      console.log(`Stored track data for key: t:${shortId}`);
+      console.log(`Track data:`, JSON.stringify(trackData, null, 2));
     } catch (kvError) {
       console.error('KV storage failed:', kvError);
       console.error('KV error details:', kvError.message);
+      // Return error information in response for debugging
+      return res.status(500).json({
+        success: false,
+        error: 'KV storage failed',
+        kvError: kvError.message,
+        track: {
+          ...track,
+          shortUrl,
+          sourceUrl: url
+        }
+      });
     }
     
     await new Promise(resolve => setTimeout(resolve, 500));

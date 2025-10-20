@@ -1,5 +1,6 @@
 const { kv } = require('@vercel/kv');
 
+// FIXED: Vercel KV returns parsed objects, no need for JSON.parse()
 module.exports = async (req, res) => {
   const { id } = req.query;
   
@@ -25,26 +26,142 @@ module.exports = async (req, res) => {
   
   // Try to get track data from Vercel KV
   try {
+    console.log(`Looking for track with key: t:${id}`);
     const trackData = await kv.get(`t:${id}`);
-    console.log(`Track data for ${id}:`, trackData);
+    console.log(`Track data found:`, trackData ? 'yes' : 'no');
     console.log(`Track data type:`, typeof trackData);
-    if (trackData) {
-      const track = typeof trackData === 'string' ? JSON.parse(trackData) : trackData;
-      console.log(`Track object:`, track);
-      console.log(`Providers:`, track.providers);
+    
+    // Try alternative key formats
+    if (!trackData) {
+      console.log(`Trying alternative key format: ${id}`);
+      const altTrackData = await kv.get(id);
+      console.log(`Alternative key found:`, altTrackData ? 'yes' : 'no');
+      if (altTrackData) {
+        const track = altTrackData; // KV already returns parsed objects
+        // Return the track with alternative key format
+        return res.send(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>${track.title} - ${track.artist} | TrackShare</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta property="og:title" content="${track.title} - ${track.artist}">
+            <meta property="og:description" content="Listen to ${track.title} by ${track.artist} on your preferred music platform">
+            <meta property="og:image" content="${track.artwork || ''}">
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+              }
+              .container {
+                background: white;
+                border-radius: 20px;
+                padding: 40px;
+                max-width: 400px;
+                width: 100%;
+                text-align: center;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+              }
+              .artwork {
+                width: 200px;
+                height: 200px;
+                border-radius: 15px;
+                margin: 0 auto 20px;
+                background: #f0f0f0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 48px;
+                color: #999;
+              }
+              .artwork img {
+                width: 100%;
+                height: 100%;
+                border-radius: 15px;
+                object-fit: cover;
+              }
+              h1 { font-size: 24px; margin-bottom: 8px; color: #333; }
+              .artist { font-size: 18px; color: #666; margin-bottom: 30px; }
+              .providers {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+              }
+              .provider-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 15px 20px;
+                border: 2px solid #e0e0e0;
+                border-radius: 12px;
+                text-decoration: none;
+                color: #333;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                background: white;
+              }
+              .provider-btn:hover {
+                border-color: #667eea;
+                background: #f8f9ff;
+                transform: translateY(-2px);
+              }
+              .spotify { border-color: #1db954; }
+              .spotify:hover { background: #f0fff4; }
+              .apple { border-color: #fa243c; }
+              .apple:hover { background: #fff0f0; }
+              .youtube { border-color: #ff0000; }
+              .youtube:hover { background: #fff0f0; }
+              .footer {
+                margin-top: 30px;
+                font-size: 14px;
+                color: #999;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="artwork">
+                ${track.artwork ? `<img src="${track.artwork}" alt="Track artwork">` : '🎵'}
+              </div>
+              <h1>${track.title}</h1>
+              <div class="artist">${track.artist}</div>
 
-      const htmlTitle = (track.title || 'Unknown Track').replace(/"/g, '&quot;');
-      const htmlArtist = (track.artist || 'Unknown Artist').replace(/"/g, '&quot;');
-      const htmlArtwork = track.artwork || '';
+              <div class="providers">
+                ${track.providers.map(provider => `
+                  <a href="${provider.deepLink}" class="provider-btn ${provider.name}">
+                    Play on ${provider.displayName}
+                  </a>
+                `).join('')}
+              </div>
+
+              <div class="footer">
+                Powered by TrackShare
+              </div>
+            </div>
+          </body>
+          </html>
+        `);
+      }
+    }
+    
+    if (trackData) {
+      const track = trackData; // KV already returns parsed objects
       
-      res.send(`<!DOCTYPE html>
+      res.send(`
+        <!DOCTYPE html>
         <html>
         <head>
-          <title>${htmlTitle} - ${htmlArtist} | TrackShare</title>
+          <title>${track.title} - ${track.artist} | TrackShare</title>
           <meta name="viewport" content="width=device-width, initial-scale=1">
-          <meta property="og:title" content="${htmlTitle} - ${htmlArtist}">
-          <meta property="og:description" content="Listen to ${htmlTitle} by ${htmlArtist} on your preferred music platform">
-          <meta property="og:image" content="${htmlArtwork}">
+          <meta property="og:title" content="${track.title} - ${track.artist}">
+          <meta property="og:description" content="Listen to ${track.title} by ${track.artist} on your preferred music platform">
+          <meta property="og:image" content="${track.artwork || ''}">
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { 
@@ -94,62 +211,26 @@ module.exports = async (req, res) => {
               display: flex;
               align-items: center;
               justify-content: center;
-              gap: 8px;
               padding: 15px 20px;
               border: 2px solid #e0e0e0;
               border-radius: 12px;
+              text-decoration: none;
               color: #333;
               font-weight: 600;
+              transition: all 0.3s ease;
               background: white;
-              cursor: pointer;
-              -webkit-tap-highlight-color: transparent;
-              user-select: none;
-              -webkit-user-select: none;
-              -moz-user-select: none;
-              -ms-user-select: none;
-              touch-action: manipulation;
-              pointer-events: auto;
-              font-size: 16px;
-              font-family: inherit;
-              text-decoration: none;
-            }
-            .provider-btn:active {
-              transform: scale(0.95);
-            }
-            .provider-btn:focus {
-              outline: none;
             }
             .provider-btn:hover {
-              opacity: 0.9;
+              border-color: #667eea;
+              background: #f8f9ff;
+              transform: translateY(-2px);
             }
-            .spotify { 
-              border-color: #1db954; 
-            }
-            .spotify:hover { 
-              background: #f0fff4; 
-              border-color: #1db954;
-            }
-            .apple_music { 
-              border-color: #ff2d92; 
-            }
-            .apple_music:hover { 
-              background: #fff0f8; 
-              border-color: #ff2d92;
-            }
-            .youtube_music { 
-              border-color: #ff0000; 
-            }
-            .youtube_music:hover { 
-              background: #fff0f0; 
-              border-color: #ff0000;
-            }
-            .provider-btn.direct {
-              border-width: 3px;
-              font-weight: 700;
-            }
-            .provider-btn.search {
-              opacity: 0.8;
-            }
+            .spotify { border-color: #1db954; }
+            .spotify:hover { background: #f0fff4; }
+            .apple { border-color: #fa243c; }
+            .apple:hover { background: #fff0f0; }
+            .youtube { border-color: #ff0000; }
+            .youtube:hover { background: #fff0f0; }
             .footer {
               margin-top: 30px;
               font-size: 14px;
@@ -160,64 +241,23 @@ module.exports = async (req, res) => {
         <body>
           <div class="container">
             <div class="artwork">
-              ${htmlArtwork ? `<img src="${htmlArtwork}" alt="Track artwork">` : '🎵'}
+              ${track.artwork ? `<img src="${track.artwork}" alt="Track artwork">` : '🎵'}
             </div>
-            <h1>${htmlTitle}</h1>
-            <div class="artist">${htmlArtist}</div>
+            <h1>${track.title}</h1>
+            <div class="artist">${track.artist}</div>
             
             <div class="providers">
-              ${track.providers.map(provider => {
-                const escapedNativeUrl = (provider.nativeUrl || '').replace(/'/g, "\\'");
-                const escapedWebUrl = (provider.webUrl || '').replace(/'/g, "\\'");
-                const isDirect = provider.isDirect || false;
-                
-                return `
-                  <button class="provider-btn ${provider.name} ${isDirect ? 'direct' : 'search'}" onclick="openProvider(event, '${escapedNativeUrl}', '${escapedWebUrl}')">
-                    ${
-                      provider.name === 'spotify' ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.42 1.56-.299.421-1.02.599-1.559.3z"/></svg>` :
-                      provider.name === 'apple_music' ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="#000000"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>` :
-                      provider.name === 'youtube_music' ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="#FF0000"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>` : ''
-                    }
-                    Play on ${provider.displayName}
-                  </button>
-                `;
-              }).join('')}
+              ${track.providers.map(provider => `
+                <a href="${provider.deepLink}" class="provider-btn ${provider.name}">
+                  Play on ${provider.displayName}
+                </a>
+              `).join('')}
             </div>
             
             <div class="footer">
               Powered by TrackShare
             </div>
           </div>
-          
-            <script>
-              function openProvider(event, nativeUrl, webUrl) {
-                const button = event.currentTarget;
-                if (!button) {
-                  window.location.href = nativeUrl || webUrl;
-                  return;
-                }
-
-                button.disabled = true;
-                const previousOpacity = button.style.opacity;
-                button.style.opacity = '0.7';
-
-                const targetUrl = nativeUrl || webUrl;
-                if (targetUrl) {
-                  window.location.href = targetUrl;
-                }
-
-                if (webUrl && nativeUrl && nativeUrl !== webUrl) {
-                  setTimeout(function() {
-                    window.open(webUrl, '_blank');
-                  }, 800);
-                }
-
-                setTimeout(function() {
-                  button.disabled = false;
-                  button.style.opacity = previousOpacity || '1';
-                }, 1500);
-              }
-            </script>
         </body>
         </html>
       `);
