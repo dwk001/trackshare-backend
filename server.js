@@ -1,7 +1,231 @@
+const authRouter = express.Router();
+
+authRouter.post('/exchange', ensureSupabaseClient, async (req, res) => {
+  try {
+    const { provider, accessToken } = req.body || {};
+
+    if (!provider || !accessToken) {
+      return res.status(400).json({ error: 'provider and accessToken are required' });
+    }
+
+    const supabaseUser = await fetchSupabaseUser(accessToken);
+    const profileRow = await upsertProfileFromSupabaseUser(supabaseUser);
+
+    const sessionToken = mintTrackShareJwt({
+      sub: supabaseUser.id,
+      provider,
+      email: supabaseUser.email
+    });
+
+    return res.json({
+      token: sessionToken,
+      user: mapProfileRow(profileRow)
+    });
+  } catch (error) {
+    console.error('Session exchange failed:', error);
+    const statusCode = error.statusCode || 500;
+    return res.status(statusCode).json({ error: error.message || 'Failed to exchange session' });
+  }
+});
+
+authRouter.get('/me', authenticateTrackshare, ensureSupabaseClient, async (req, res) => {
+  try {
+    const userId = req.trackshareAuth?.sub;
+    if (!userId) {
+      return res.status(401).json({ error: 'Session token missing subject' });
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to fetch profile: ${error.message}`);
+    }
+
+    return res.json({ user: mapProfileRow(data) });
+  } catch (error) {
+    console.error('Failed to fetch profile:', error);
+    return res.status(500).json({ error: error.message || 'Failed to fetch profile' });
+  }
+});
+
+authRouter.get('/users/:id', authenticateTrackshare, ensureSupabaseClient, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to fetch profile: ${error.message}`);
+    }
+
+    return res.json({ user: mapProfileRow(data) });
+  } catch (error) {
+    console.error('Failed to fetch user profile:', error);
+    return res.status(500).json({ error: error.message || 'Failed to fetch user profile' });
+  }
+});
+
+app.use('/api/auth', authRouter);
+
+// Provider linking routes
+const providersRouter = require('./api/providers');
+app.use('/api/providers', providersRouter);
+
+// Activity and feed routes
+const activityRouter = require('./api/activity');
+app.use('/api/activity', activityRouter);
+
+// Privacy and compliance routes
+const privacyRouter = require('./api/privacy');
+app.use('/api/privacy', privacyRouter);
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const https = require('https');
+const jwt = require('jsonwebtoken');
+const { createClient } = require('@supabase/supabase-js');
+
+const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
+const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabase = supabaseUrl && supabaseServiceRoleKey
+  ? createClient(supabaseUrl, supabaseServiceRoleKey)
+  : null;
+
+if (!supabase) {
+  console.warn('Supabase client not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.');
+}
+
+const TRACKSHARE_JWT_SECRET = process.env.TRACKSHARE_JWT_SECRET;
+const TRACKSHARE_JWT_TTL_SECONDS = Number(process.env.TRACKSHARE_JWT_TTL_SECONDS || 43200);
+
+async function ensureSupabaseClient(req, res, next) {
+  if (!supabase) {
+    return res.status(500).json({ error: 'Supabase not configured' });
+  }
+  next();
+}
+
+function mintTrackShareJwt(payload) {
+  if (!TRACKSHARE_JWT_SECRET) {
+    throw new Error('TRACKSHARE_JWT_SECRET not configured');
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const jwtPayload = {
+    iss: 'trackshare_backend',
+    iat: now,
+    exp: now + TRACKSHARE_JWT_TTL_SECONDS,
+    ...payload
+  };
+
+  return jwt.sign(jwtPayload, TRACKSHARE_JWT_SECRET, { algorithm: 'HS256' });
+}
+
+async function fetchSupabaseUser(accessToken) {
+  if (!supabase) {
+    throw new Error('Supabase client not configured');
+  }
+
+  const { data, error } = await supabase.auth.getUser(accessToken);
+
+  if (error || !data || !data.user) {
+    const err = new Error(error?.message || 'Invalid Supabase access token');
+    err.statusCode = 401;
+    throw err;
+  }
+
+  return data.user;
+}
+
+async function upsertProfileFromSupabaseUser(user) {
+  if (!supabase) {
+    throw new Error('Supabase client not configured');
+  }
+
+  const displayName = user.user_metadata?.full_name
+    || user.user_metadata?.name
+    || (user.email ? user.email.split('@')[0] : null);
+
+  const payload = {
+    id: user.id,
+    email: user.email,
+    display_name: displayName,
+    avatar_url: user.user_metadata?.avatar_url || null,
+    updated_at: new Date().toISOString(),
+    last_sign_in_at: user.last_sign_in_at || new Date().toISOString()
+  };
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .upsert(payload, { onConflict: 'id', ignoreDuplicates: false })
+    .select()
+    .single();
+
+  if (error) {
+    const err = new Error(`Failed to upsert profile: ${error.message}`);
+    err.statusCode = 500;
+    throw err;
+  }
+
+  return data;
+}
+
+function mapProfileRow(row) {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: row.id,
+    email: row.email,
+    displayName: row.display_name,
+    avatarUrl: row.avatar_url,
+    connectedProviders: row.connected_providers || {},
+    privacy: row.privacy || 'friends',
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    lastSignInAt: row.last_sign_in_at || row.updated_at,
+    settings: row.settings || {}
+  };
+}
+
+function authenticateTrackshare(req, res, next) {
+  if (!TRACKSHARE_JWT_SECRET) {
+    return res.status(500).json({ error: 'TRACKSHARE_JWT_SECRET not configured' });
+  }
+
+  const authHeader = req.headers.authorization || req.headers.Authorization;
+  if (!authHeader || typeof authHeader !== 'string') {
+    return res.status(401).json({ error: 'Authorization header missing' });
+  }
+
+  const [, token] = authHeader.split(' ');
+
+  if (!token) {
+    return res.status(401).json({ error: 'Invalid Authorization header format' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, TRACKSHARE_JWT_SECRET, { algorithms: ['HS256'] });
+    req.trackshareAuth = decoded;
+    next();
+  } catch (error) {
+    console.error('TrackShare JWT verification failed:', error.message);
+    return res.status(401).json({ error: 'Invalid or expired session token' });
+  }
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,20 +240,268 @@ const tracks = new Map();
 const shortUrls = new Map();
 
 // Helper function to make HTTP requests
-function makeRequest(url) {
+function makeRequest(url, options = {}) {
   return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
-      let data = '';
-      res.on('data', (chunk) => data += chunk);
-      res.on('end', () => {
-        try {
-          resolve(JSON.parse(data));
-        } catch (e) {
-          reject(e);
-        }
+    try {
+      const parsedUrl = new URL(url);
+      const requestOptions = {
+        method: options.method || 'GET',
+        headers: options.headers ? { ...options.headers } : {}
+      };
+
+      const req = https.request(parsedUrl, requestOptions, (res) => {
+        let data = '';
+
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+
+        res.on('end', () => {
+          if (!data) {
+            return resolve(null);
+          }
+
+          let parsed;
+          try {
+            parsed = JSON.parse(data);
+          } catch (error) {
+            error.message = `Failed to parse response from ${url}: ${error.message}`;
+            return reject(error);
+          }
+
+          if (res.statusCode < 200 || res.statusCode >= 300) {
+            const err = new Error(`Request to ${url} failed with status ${res.statusCode}`);
+            err.statusCode = res.statusCode;
+            err.body = parsed;
+            return reject(err);
+          }
+
+          resolve(parsed);
+        });
       });
-    }).on('error', reject);
+
+      req.on('error', reject);
+
+      if (options.body) {
+        if (!Object.keys(requestOptions.headers).some((header) => header.toLowerCase() === 'content-length')) {
+          req.setHeader('Content-Length', Buffer.byteLength(options.body));
+        }
+        req.write(options.body);
+      }
+
+      req.end();
+    } catch (error) {
+      reject(error);
+    }
   });
+}
+
+function escapeHtml(value) {
+  if (value == null) {
+    return '';
+  }
+
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+const spotifyTokenCache = {
+  token: null,
+  expiresAt: 0
+};
+
+async function getSpotifyAccessToken() {
+  if (!SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET) {
+    return null;
+  }
+
+  const now = Date.now();
+  if (spotifyTokenCache.token && now < spotifyTokenCache.expiresAt) {
+    return spotifyTokenCache.token;
+  }
+
+  const credentials = Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64');
+
+  try {
+    const response = await makeRequest('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${credentials}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: 'grant_type=client_credentials'
+    });
+
+    if (response && response.access_token) {
+      spotifyTokenCache.token = response.access_token;
+      spotifyTokenCache.expiresAt = now + Math.max(0, (response.expires_in - 60) * 1000);
+      return spotifyTokenCache.token;
+    }
+  } catch (error) {
+    console.error('Failed to obtain Spotify access token:', error.message);
+  }
+
+  return null;
+}
+
+async function searchSpotifyTrack(title, artist) {
+  const queryParts = [];
+  if (title) {
+    queryParts.push(title);
+  }
+  if (artist) {
+    queryParts.push(artist);
+  }
+
+  const query = queryParts.join(' ').trim();
+  if (!query) {
+    return null;
+  }
+
+  const token = await getSpotifyAccessToken();
+  if (!token) {
+    return null;
+  }
+
+  const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=1`;
+
+  try {
+    const data = await makeRequest(url, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (data && data.tracks && Array.isArray(data.tracks.items) && data.tracks.items.length > 0) {
+      const track = data.tracks.items[0];
+      return {
+        id: track.id,
+        title: track.name,
+        artist: track.artists ? track.artists.map((item) => item.name).join(', ') : null,
+        artwork: track.album && Array.isArray(track.album.images) && track.album.images.length > 0
+          ? track.album.images[0].url
+          : null
+      };
+    }
+  } catch (error) {
+    if (error.statusCode === 401) {
+      spotifyTokenCache.token = null;
+      spotifyTokenCache.expiresAt = 0;
+    }
+    console.error('Spotify search failed:', error.message);
+  }
+
+  return null;
+}
+
+async function lookupAppleTrack(id) {
+  if (!id) {
+    return null;
+  }
+
+  try {
+    const url = `https://itunes.apple.com/lookup?id=${encodeURIComponent(id)}`;
+    const response = await makeRequest(url);
+
+    if (response && Array.isArray(response.results) && response.results.length > 0) {
+      const track = response.results[0];
+      return {
+        title: track.trackName,
+        artist: track.artistName,
+        artwork: track.artworkUrl100 ? track.artworkUrl100.replace('100x100bb', '400x400bb') : null,
+        url: track.trackViewUrl
+      };
+    }
+  } catch (error) {
+    console.error('Apple Music lookup failed:', error.message);
+  }
+
+  return null;
+}
+
+async function searchAppleMusic(title, artist) {
+  const queryParts = [];
+  if (title) {
+    queryParts.push(title);
+  }
+  if (artist) {
+    queryParts.push(artist);
+  }
+
+  const query = queryParts.join(' ').trim();
+  if (!query) {
+    return null;
+  }
+
+  try {
+    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=1`;
+    const response = await makeRequest(url);
+
+    if (response && Array.isArray(response.results) && response.results.length > 0) {
+      const track = response.results[0];
+      return {
+        title: track.trackName,
+        artist: track.artistName,
+        artwork: track.artworkUrl100 ? track.artworkUrl100.replace('100x100bb', '400x400bb') : null,
+        url: track.trackViewUrl
+      };
+    }
+  } catch (error) {
+    console.error('Apple Music search failed:', error.message);
+  }
+
+  return null;
+}
+
+async function searchYouTubeMusic(title, artist) {
+  if (!YOUTUBE_API_KEY) {
+    return null;
+  }
+
+  const queryParts = [];
+  if (title) {
+    queryParts.push(title);
+  }
+  if (artist) {
+    queryParts.push(artist);
+  }
+
+  const query = queryParts.join(' ').trim();
+  if (!query) {
+    return null;
+  }
+
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoCategoryId=10&maxResults=1&q=${encodeURIComponent(query)}&key=${YOUTUBE_API_KEY}`;
+
+  try {
+    const response = await makeRequest(url);
+
+    if (response && Array.isArray(response.items) && response.items.length > 0) {
+      const item = response.items[0];
+      const videoId = item.id && item.id.videoId;
+
+      if (!videoId) {
+        return null;
+      }
+
+      const snippet = item.snippet || {};
+
+      return {
+        id: videoId,
+        title: snippet.title,
+        artwork: (snippet.thumbnails && (snippet.thumbnails.high?.url || snippet.thumbnails.medium?.url || snippet.thumbnails.default?.url)) || null,
+        url: `https://music.youtube.com/watch?v=${videoId}&feature=share`
+      };
+    }
+  } catch (error) {
+    console.error('YouTube Music search failed:', error.message);
+  }
+
+  return null;
 }
 
 // Helper function to extract track ID from URL
@@ -38,17 +510,17 @@ function extractTrackId(url) {
   if (spotifyMatch) {
     return { type: 'spotify', id: spotifyMatch[1] };
   }
-  
+
   const appleMatch = url.match(/music\.apple\.com\/.*\/album\/.*\/(\d+)/);
   if (appleMatch) {
     return { type: 'apple', id: appleMatch[1] };
   }
-  
+
   const youtubeMatch = url.match(/music\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/);
   if (youtubeMatch) {
     return { type: 'youtube', id: youtubeMatch[1] };
   }
-  
+
   return null;
 }
 
@@ -58,53 +530,137 @@ async function resolveTrackMetadata(trackInfo) {
     let title = 'Unknown Track';
     let artist = 'Unknown Artist';
     let artwork = null;
-    
+    const providerLinks = {};
+
     if (trackInfo.type === 'spotify') {
-      // Use Spotify oEmbed API for metadata
       const oembedUrl = `https://open.spotify.com/oembed?url=https://open.spotify.com/track/${trackInfo.id}`;
       try {
         const oembedData = await makeRequest(oembedUrl);
-        title = oembedData.title || title;
-        artist = oembedData.author_name || artist;
-        artwork = oembedData.thumbnail_url || null;
-      } catch (e) {
-        console.log('Spotify oEmbed failed, using fallback');
+        if (oembedData) {
+          title = oembedData.title || title;
+          artist = oembedData.author_name || artist;
+          artwork = oembedData.thumbnail_url || artwork;
+        }
+      } catch (error) {
+        console.log('Spotify oEmbed failed, using fallback metadata');
       }
+      providerLinks.spotify = `https://open.spotify.com/track/${trackInfo.id}`;
     } else if (trackInfo.type === 'youtube') {
-      // Use YouTube oEmbed API
       const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${trackInfo.id}&format=json`;
       try {
         const oembedData = await makeRequest(oembedUrl);
-        title = oembedData.title || title;
-        artist = oembedData.author_name || artist;
-        artwork = oembedData.thumbnail_url || null;
-      } catch (e) {
-        console.log('YouTube oEmbed failed, using fallback');
+        if (oembedData) {
+          title = oembedData.title || title;
+          artist = oembedData.author_name || artist;
+          artwork = oembedData.thumbnail_url || artwork;
+        }
+      } catch (error) {
+        console.log('YouTube oEmbed failed, using fallback metadata');
+      }
+      providerLinks.youtube_music = `https://music.youtube.com/watch?v=${trackInfo.id}&feature=share`;
+    } else if (trackInfo.type === 'apple') {
+      const appleTrack = await lookupAppleTrack(trackInfo.id);
+      if (appleTrack) {
+        title = appleTrack.title || title;
+        artist = appleTrack.artist || artist;
+        artwork = appleTrack.artwork || artwork;
+        providerLinks.apple_music = appleTrack.url;
       }
     }
-    
-    // Generate provider links for all platforms
-    const providers = [
-      {
-        name: 'spotify',
-        displayName: 'Spotify',
-        deepLink: `https://open.spotify.com/track/${trackInfo.id}`,
-        isAvailable: true
-      },
-      {
-        name: 'apple_music',
-        displayName: 'Apple Music',
-        deepLink: `https://music.apple.com/search?term=${encodeURIComponent(title + ' ' + artist)}`,
-        isAvailable: true
-      },
-      {
-        name: 'youtube_music',
-        displayName: 'YouTube Music',
-        deepLink: `https://music.youtube.com/search?q=${encodeURIComponent(title + ' ' + artist)}`,
-        isAvailable: true
+
+    const queryParts = [];
+    if (title && title !== 'Unknown Track') {
+      queryParts.push(title);
+    }
+    if (artist && artist !== 'Unknown Artist') {
+      queryParts.push(artist);
+    }
+
+    const query = queryParts.join(' ').trim();
+
+    if (!providerLinks.spotify && query) {
+      const spotifyMatch = await searchSpotifyTrack(title !== 'Unknown Track' ? title : null, artist !== 'Unknown Artist' ? artist : null);
+      if (spotifyMatch) {
+        providerLinks.spotify = `https://open.spotify.com/track/${spotifyMatch.id}`;
+        if ((!artwork || artwork === null) && spotifyMatch.artwork) {
+          artwork = spotifyMatch.artwork;
+        }
+        if (title === 'Unknown Track' && spotifyMatch.title) {
+          title = spotifyMatch.title;
+        }
+        if (artist === 'Unknown Artist' && spotifyMatch.artist) {
+          artist = spotifyMatch.artist;
+        }
       }
-    ];
-    
+    }
+
+    if (!providerLinks.apple_music && query) {
+      const appleMatch = await searchAppleMusic(title !== 'Unknown Track' ? title : null, artist !== 'Unknown Artist' ? artist : null);
+      if (appleMatch) {
+        providerLinks.apple_music = appleMatch.url;
+        if ((!artwork || artwork === null) && appleMatch.artwork) {
+          artwork = appleMatch.artwork;
+        }
+        if (title === 'Unknown Track' && appleMatch.title) {
+          title = appleMatch.title;
+        }
+        if (artist === 'Unknown Artist' && appleMatch.artist) {
+          artist = appleMatch.artist;
+        }
+      }
+    }
+
+    if (!providerLinks.youtube_music && query) {
+      const youtubeMatch = await searchYouTubeMusic(title !== 'Unknown Track' ? title : null, artist !== 'Unknown Artist' ? artist : null);
+      if (youtubeMatch) {
+        providerLinks.youtube_music = youtubeMatch.url;
+        if ((!artwork || artwork === null) && youtubeMatch.artwork) {
+          artwork = youtubeMatch.artwork;
+        }
+      }
+    }
+
+    const encodedQuery = query ? encodeURIComponent(query) : null;
+    const providers = [];
+
+    const addProvider = (name, displayName, directLink, isAvailable, fallback) => {
+      if (!directLink && !fallback) {
+        return;
+      }
+
+      providers.push({
+        name,
+        displayName,
+        deepLink: directLink || fallback,
+        isAvailable,
+        fallbackLink: fallback || null
+      });
+    };
+
+    addProvider(
+      'spotify',
+      'Spotify',
+      providerLinks.spotify || null,
+      Boolean(providerLinks.spotify),
+      encodedQuery ? `https://open.spotify.com/search/${encodedQuery}` : null
+    );
+
+    addProvider(
+      'apple_music',
+      'Apple Music',
+      providerLinks.apple_music || null,
+      Boolean(providerLinks.apple_music),
+      encodedQuery ? `https://music.apple.com/search?term=${encodedQuery}` : null
+    );
+
+    addProvider(
+      'youtube_music',
+      'YouTube Music',
+      providerLinks.youtube_music || null,
+      Boolean(providerLinks.youtube_music),
+      encodedQuery ? `https://music.youtube.com/search?q=${encodedQuery}` : null
+    );
+
     return {
       title,
       artist,
@@ -113,18 +669,36 @@ async function resolveTrackMetadata(trackInfo) {
     };
   } catch (error) {
     console.error('Error resolving metadata:', error);
+
+    const fallbackProviders = [];
+    if (trackInfo.type === 'spotify') {
+      fallbackProviders.push({
+        name: 'spotify',
+        displayName: 'Spotify',
+        deepLink: `https://open.spotify.com/track/${trackInfo.id}`,
+        isAvailable: true
+      });
+    } else if (trackInfo.type === 'apple') {
+      fallbackProviders.push({
+        name: 'apple_music',
+        displayName: 'Apple Music',
+        deepLink: `https://music.apple.com/`,
+        isAvailable: false
+      });
+    } else if (trackInfo.type === 'youtube') {
+      fallbackProviders.push({
+        name: 'youtube_music',
+        displayName: 'YouTube Music',
+        deepLink: `https://music.youtube.com/`,
+        isAvailable: false
+      });
+    }
+
     return {
       title: 'Unknown Track',
       artist: 'Unknown Artist',
       artwork: null,
-      providers: [
-        {
-          name: 'spotify',
-          displayName: 'Spotify',
-          deepLink: `https://open.spotify.com/track/${trackInfo.id}`,
-          isAvailable: true
-        }
-      ]
+      providers: fallbackProviders
     };
   }
 }
@@ -139,10 +713,10 @@ function generateShortUrl(trackId) {
 
 // Root route
 app.get('/', (req, res) => {
-  res.json({ 
-    message: 'TrackShare API is running!', 
+  res.json({
+    message: 'TrackShare API is running!',
     endpoints: ['/health', '/resolve', '/t/:id'],
-    timestamp: new Date().toISOString() 
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -161,33 +735,31 @@ app.post('/test', (req, res) => {
 app.post('/api/resolve', async (req, res) => {
   try {
     const { url } = req.body;
-    
+
     if (!url) {
       return res.status(400).json({
         success: false,
         error: 'URL is required'
       });
     }
-    
+
     console.log('Resolving track:', url);
-    
+
     const trackInfo = extractTrackId(url);
-    
+
     if (!trackInfo) {
       return res.status(400).json({
         success: false,
         error: 'Unsupported URL format. Please share a Spotify, Apple Music, or YouTube Music link.'
       });
     }
-    
-    // Check if we already have this track
+
     const trackKey = `${trackInfo.type}:${trackInfo.id}`;
     let track = tracks.get(trackKey);
-    
+
     if (!track) {
-      // Resolve real metadata
       const metadata = await resolveTrackMetadata(trackInfo);
-      
+
       track = {
         id: trackKey,
         title: metadata.title,
@@ -195,16 +767,15 @@ app.post('/api/resolve', async (req, res) => {
         artwork: metadata.artwork,
         providers: metadata.providers
       };
-      
+
       tracks.set(trackKey, track);
     }
-    
-    // Generate short URL
+
     const shortUrl = generateShortUrl(track.id);
     shortUrls.set(shortUrl, track.id);
-    
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     res.json({
       success: true,
       track: {
@@ -214,7 +785,6 @@ app.post('/api/resolve', async (req, res) => {
       },
       latency: 500
     });
-    
   } catch (error) {
     console.error('Error resolving track:', error);
     res.status(500).json({
@@ -228,7 +798,7 @@ app.post('/api/resolve', async (req, res) => {
 app.get('/t/:id', (req, res) => {
   const { id } = req.params;
   const trackId = shortUrls.get(id);
-  
+
   if (!trackId) {
     return res.status(404).send(`
       <!DOCTYPE html>
@@ -248,7 +818,7 @@ app.get('/t/:id', (req, res) => {
       </html>
     `);
   }
-  
+
   const track = tracks.get(trackId);
   if (!track) {
     return res.status(404).send(`
@@ -269,19 +839,42 @@ app.get('/t/:id', (req, res) => {
       </html>
     `);
   }
-  
+
+  const safeTitle = escapeHtml(track.title);
+  const safeArtist = escapeHtml(track.artist);
+  const safeArtwork = track.artwork ? escapeHtml(track.artwork) : '';
+
+  const providerButtons = Array.isArray(track.providers)
+    ? track.providers
+        .filter((provider) => provider && provider.deepLink)
+        .map((provider) => {
+          const safeLink = escapeHtml(provider.deepLink);
+          const safeName = escapeHtml(provider.displayName || '');
+          const label = provider.isAvailable ? 'Play on' : 'Search on';
+          const classes = `provider-btn ${escapeHtml(provider.name || '')}${provider.isAvailable ? '' : ' unavailable'}`;
+          const targetAttrs = provider.isAvailable ? '' : ' target="_blank" rel="noopener noreferrer"';
+          return `
+            <a href="${safeLink}" class="${classes}"${targetAttrs}>
+              ${label} ${safeName}
+            </a>`;
+        })
+        .join('')
+    : '';
+
+  const providerContent = providerButtons || '<p class="empty-state">We could not find direct links for this track yet.</p>';
+
   res.send(`
     <!DOCTYPE html>
     <html>
     <head>
-      <title>${track.title} - ${track.artist} | TrackShare</title>
+      <title>${safeTitle} - ${safeArtist} | TrackShare</title>
       <meta name="viewport" content="width=device-width, initial-scale=1">
-      <meta property="og:title" content="${track.title} - ${track.artist}">
-      <meta property="og:description" content="Listen to ${track.title} by ${track.artist} on your preferred music platform">
-      <meta property="og:image" content="${track.artwork || ''}">
+      <meta property="og:title" content="${safeTitle} - ${safeArtist}">
+      <meta property="og:description" content="Listen to ${safeTitle} by ${safeArtist} on your preferred music platform">
+      <meta property="og:image" content="${safeArtwork}">
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
+        body {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           min-height: 100vh;
@@ -342,12 +935,20 @@ app.get('/t/:id', (req, res) => {
           background: #f8f9ff;
           transform: translateY(-2px);
         }
+        .provider-btn.unavailable {
+          border-style: dashed;
+          opacity: 0.8;
+        }
         .spotify { border-color: #1db954; }
         .spotify:hover { background: #f0fff4; }
-        .apple { border-color: #fa243c; }
-        .apple:hover { background: #fff0f0; }
-        .youtube { border-color: #ff0000; }
-        .youtube:hover { background: #fff0f0; }
+        .apple_music { border-color: #fa243c; }
+        .apple_music:hover { background: #fff0f0; }
+        .youtube_music { border-color: #ff0000; }
+        .youtube_music:hover { background: #fff0f0; }
+        .empty-state {
+          color: #555;
+          font-size: 15px;
+        }
         .footer {
           margin-top: 30px;
           font-size: 14px;
@@ -358,19 +959,15 @@ app.get('/t/:id', (req, res) => {
     <body>
       <div class="container">
         <div class="artwork">
-          ${track.artwork ? `<img src="${track.artwork}" alt="Track artwork">` : '🎵'}
+          ${safeArtwork ? `<img src="${safeArtwork}" alt="Track artwork">` : '🎵'}
         </div>
-        <h1>${track.title}</h1>
-        <div class="artist">${track.artist}</div>
-        
+        <h1>${safeTitle}</h1>
+        <div class="artist">${safeArtist}</div>
+
         <div class="providers">
-          ${track.providers.map(provider => `
-            <a href="${provider.deepLink}" class="provider-btn ${provider.name}">
-              Play on ${provider.displayName}
-            </a>
-          `).join('')}
+          ${providerContent}
         </div>
-        
+
         <div class="footer">
           Powered by TrackShare
         </div>
