@@ -522,25 +522,27 @@
         }
 
         function signInWithGoogle() {
-            // Redirect to Google OAuth
-            const googleAuthUrl = `https://accounts.google.com/oauth/authorize?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/auth/google/callback')}&response_type=code&scope=openid%20email%20profile`;
-            window.location.href = googleAuthUrl;
+            // TODO: Set up real Google OAuth
+            alert('Google Sign-In will be available soon! We\'re setting up OAuth integration.');
+            closeModal('signInModal');
         }
 
         function signInWithApple() {
-            // Redirect to Apple OAuth
-            const appleAuthUrl = `https://appleid.apple.com/auth/authorize?client_id=${APPLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/auth/apple/callback')}&response_type=code&scope=name%20email`;
-            window.location.href = appleAuthUrl;
+            // TODO: Set up real Apple OAuth
+            alert('Apple Sign-In will be available soon! We\'re setting up OAuth integration.');
+            closeModal('signInModal');
         }
 
         function signUpWithGoogle() {
-            // Same as sign in for OAuth
-            signInWithGoogle();
+            // TODO: Set up real Google OAuth
+            alert('Google Sign-Up will be available soon! We\'re setting up OAuth integration.');
+            closeModal('signUpModal');
         }
 
         function signUpWithApple() {
-            // Same as sign in for OAuth
-            signInWithApple();
+            // TODO: Set up real Apple OAuth
+            alert('Apple Sign-Up will be available soon! We\'re setting up OAuth integration.');
+            closeModal('signUpModal');
         }
 
         function copyShareLink() {
