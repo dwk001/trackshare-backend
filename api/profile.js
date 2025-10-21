@@ -64,15 +64,25 @@ module.exports = async (req, res) => {
 async function handleGetProfile(req, res, userId) {
   const { user_id, include_stats = false, include_posts = false, analytics_type, analytics_period = '30d' } = req.query;
   
-  // Handle analytics requests
-  if (analytics_type) {
-    return await handleGetAnalytics(req, res, userId, analytics_type, analytics_period);
-  }
-  
-  // Handle activity history requests
-  if (req.query.activity_history === 'true') {
-    return await handleGetActivityHistory(req, res, userId);
-  }
+        // Handle analytics requests
+        if (analytics_type) {
+            return await handleGetAnalytics(req, res, userId, analytics_type, analytics_period);
+        }
+        
+        // Handle activity history requests
+        if (req.query.activity_history === 'true') {
+            return await handleGetActivityHistory(req, res, userId);
+        }
+        
+        // Handle recommendations requests
+        if (req.query.recommendations === 'true') {
+            return await handleGetRecommendations(req, res, userId);
+        }
+        
+        // Handle activity requests
+        if (req.query.activity === 'true') {
+            return await handleGetActivity(req, res, userId);
+        }
   
   // If no user_id specified, get current user's profile
   const targetUserId = user_id || userId;
@@ -1263,5 +1273,448 @@ async function getActivityStats(userId, startDate, endDate) {
   } catch (error) {
     console.error('Error getting activity stats:', error);
     return {};
+  }
+}
+
+// Recommendations functionality
+async function handleGetRecommendations(req, res, userId) {
+  const { 
+    type = 'mixed', 
+    limit = 20, 
+    offset = 0,
+    genre = null,
+    mood = null,
+    energy = null
+  } = req.query;
+
+  try {
+    let recommendations = [];
+
+    if (userId) {
+      // Personalized recommendations for signed-in users
+      recommendations = await getPersonalizedRecommendations(userId, {
+        type,
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        genre,
+        mood,
+        energy
+      });
+    } else {
+      // General recommendations for anonymous users
+      recommendations = await getGeneralRecommendations({
+        type,
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        genre,
+        mood,
+        energy
+      });
+    }
+
+    res.json({
+      success: true,
+      recommendations,
+      total: recommendations.length,
+      has_more: recommendations.length === parseInt(limit),
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error in handleGetRecommendations:', error);
+    res.status(500).json({ error: 'Failed to fetch recommendations' });
+  }
+}
+
+// Get personalized recommendations based on user activity
+async function getPersonalizedRecommendations(userId, options) {
+  const recommendations = [];
+  
+  try {
+    // 1. Get user's music preferences
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('music_preferences')
+      .eq('id', userId)
+      .single();
+
+    const musicPreferences = profile?.music_preferences || {};
+
+    // 2. Get user's recent posts to understand taste
+    const { data: recentPosts } = await supabase
+      .from('music_posts')
+      .select('track_title, track_artist, track_album')
+      .eq('user_id', userId)
+      .order('posted_at', { ascending: false })
+      .limit(10);
+
+    // 3. Get user's liked posts
+    const { data: likedPosts } = await supabase
+      .from('post_likes')
+      .select(`
+        music_posts!post_likes_post_id_fkey (
+          track_title, track_artist, track_album
+        )
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    // 4. Get friends' recent posts for social recommendations
+    const { data: friendsPosts } = await supabase
+      .from('friendships')
+      .select(`
+        profiles!friendships_addressee_id_fkey (
+          music_posts (
+            track_title, track_artist, track_album, track_artwork_url,
+            track_spotify_url, like_count, comment_count, posted_at
+          )
+        )
+      `)
+      .eq('requester_id', userId)
+      .eq('status', 'accepted')
+      .limit(5);
+
+    // 5. Generate recommendations based on different strategies
+    const strategies = ['similar_artists', 'trending_friends', 'genre_exploration', 'mood_based'];
+    
+    for (const strategy of strategies) {
+      if (recommendations.length >= options.limit) break;
+      
+      let strategyRecommendations = [];
+      
+      switch (strategy) {
+        case 'similar_artists':
+          strategyRecommendations = await getSimilarArtistRecommendations(recentPosts, likedPosts, options);
+          break;
+        case 'trending_friends':
+          strategyRecommendations = await getTrendingFriendsRecommendations(friendsPosts, options);
+          break;
+        case 'genre_exploration':
+          strategyRecommendations = await getGenreExplorationRecommendations(musicPreferences, options);
+          break;
+        case 'mood_based':
+          strategyRecommendations = await getMoodBasedRecommendations(options);
+          break;
+      }
+      
+      recommendations.push(...strategyRecommendations);
+    }
+
+    // 6. Remove duplicates and limit results
+    const uniqueRecommendations = removeDuplicateRecommendations(recommendations);
+    return uniqueRecommendations.slice(options.offset, options.offset + options.limit);
+
+  } catch (error) {
+    console.error('Error getting personalized recommendations:', error);
+    return await getGeneralRecommendations(options);
+  }
+}
+
+// Get general recommendations for anonymous users
+async function getGeneralRecommendations(options) {
+  try {
+    // Use trending music as general recommendations
+    const trendingResponse = await fetch(`${process.env.TRACKSHARE_BASE_URL || 'https://www.trackshare.online'}/api/trending?limit=${options.limit}&offset=${options.offset}`);
+    const trendingData = await trendingResponse.json();
+    
+    if (trendingData.success && trendingData.tracks) {
+      return trendingData.tracks.map(track => ({
+        id: track.id,
+        title: track.title,
+        artist: track.artist,
+        album: track.album,
+        artwork: track.artwork,
+        url: track.url,
+        popularity: track.popularity,
+        explicit: track.explicit,
+        recommendation_reason: 'Trending now',
+        recommendation_type: 'trending',
+        confidence: 0.8
+      }));
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Error getting general recommendations:', error);
+    return [];
+  }
+}
+
+// Get recommendations based on similar artists
+async function getSimilarArtistRecommendations(userPosts, likedPosts, options) {
+  const recommendations = [];
+  
+  // Extract artists from user's activity
+  const userArtists = new Set();
+  userPosts?.forEach(post => userArtists.add(post.track_artist));
+  likedPosts?.forEach(like => {
+    if (like.music_posts?.track_artist) {
+      userArtists.add(like.music_posts.track_artist);
+    }
+  });
+
+  // For now, return mock similar artist recommendations
+  // In a real implementation, you'd use Spotify's "Get Artist's Related Artists" API
+  const similarArtists = Array.from(userArtists).slice(0, 3);
+  
+  similarArtists.forEach(artist => {
+    recommendations.push({
+      id: `similar_${artist}_${Math.random()}`,
+      title: `Song by ${artist}`,
+      artist: artist,
+      album: 'Similar Artist Album',
+      artwork: 'https://via.placeholder.com/300x300/667eea/ffffff?text=Music',
+      url: 'https://open.spotify.com/track/example',
+      popularity: 75,
+      explicit: false,
+      recommendation_reason: `Similar to ${artist}`,
+      recommendation_type: 'similar_artist',
+      confidence: 0.9
+    });
+  });
+
+  return recommendations.slice(0, 5);
+}
+
+// Get trending recommendations from friends
+async function getTrendingFriendsRecommendations(friendsPosts, options) {
+  const recommendations = [];
+  
+  friendsPosts?.forEach(friendship => {
+    const posts = friendship.profiles?.music_posts || [];
+    posts.forEach(post => {
+      recommendations.push({
+        id: `friend_${post.id}`,
+        title: post.track_title,
+        artist: post.track_artist,
+        album: post.track_album,
+        artwork: post.track_artwork_url,
+        url: post.track_spotify_url,
+        popularity: (post.like_count || 0) + (post.comment_count || 0),
+        explicit: false,
+        recommendation_reason: 'Popular with friends',
+        recommendation_type: 'trending_friends',
+        confidence: 0.7
+      });
+    });
+  });
+
+  // Sort by popularity and return top recommendations
+  return recommendations
+    .sort((a, b) => b.popularity - a.popularity)
+    .slice(0, 5);
+}
+
+// Get genre exploration recommendations
+async function getGenreExplorationRecommendations(musicPreferences, options) {
+  const recommendations = [];
+  
+  // Get user's preferred genres
+  const preferredGenres = musicPreferences.preferred_genres || ['pop', 'rock', 'electronic'];
+  
+  // Generate recommendations for each preferred genre
+  preferredGenres.forEach(genre => {
+    recommendations.push({
+      id: `genre_${genre}_${Math.random()}`,
+      title: `Discover ${genre.charAt(0).toUpperCase() + genre.slice(1)}`,
+      artist: `${genre.charAt(0).toUpperCase() + genre.slice(1)} Artist`,
+      album: `${genre.charAt(0).toUpperCase() + genre.slice(1)} Album`,
+      artwork: 'https://via.placeholder.com/300x300/764ba2/ffffff?text=Genre',
+      url: 'https://open.spotify.com/track/example',
+      popularity: 60,
+      explicit: false,
+      recommendation_reason: `Explore ${genre} music`,
+      recommendation_type: 'genre_exploration',
+      confidence: 0.6
+    });
+  });
+
+  return recommendations.slice(0, 3);
+}
+
+// Get mood-based recommendations
+async function getMoodBasedRecommendations(options) {
+  const recommendations = [];
+  
+  const moods = ['happy', 'chill', 'energetic', 'melancholic'];
+  const selectedMood = options.mood || moods[Math.floor(Math.random() * moods.length)];
+  
+  recommendations.push({
+    id: `mood_${selectedMood}_${Math.random()}`,
+    title: `${selectedMood.charAt(0).toUpperCase() + selectedMood.slice(1)} Vibes`,
+    artist: 'Mood Artist',
+    album: `${selectedMood.charAt(0).toUpperCase() + selectedMood.slice(1)} Album`,
+    artwork: 'https://via.placeholder.com/300x300/f093fb/ffffff?text=Mood',
+    url: 'https://open.spotify.com/track/example',
+    popularity: 70,
+    explicit: false,
+    recommendation_reason: `Perfect for ${selectedMood} mood`,
+    recommendation_type: 'mood_based',
+    confidence: 0.8
+  });
+
+  return recommendations;
+}
+
+// Remove duplicate recommendations
+function removeDuplicateRecommendations(recommendations) {
+  const seen = new Set();
+  return recommendations.filter(rec => {
+    const key = `${rec.title}_${rec.artist}`;
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+}
+
+// Activity functionality (simplified from activity.js)
+async function handleGetActivity(req, res, userId) {
+  const { 
+    type = 'feed', // 'feed', 'history', 'saved'
+    limit = 20, 
+    offset = 0 
+  } = req.query;
+
+  try {
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    let result = {};
+
+    switch (type) {
+      case 'feed':
+        result = await getFeedActivity(userId, parseInt(limit), parseInt(offset));
+        break;
+      case 'history':
+        result = await getHistoryActivity(userId, parseInt(limit), parseInt(offset));
+        break;
+      case 'saved':
+        result = await getSavedActivity(userId, parseInt(limit), parseInt(offset));
+        break;
+      default:
+        return res.status(400).json({ error: 'Invalid activity type' });
+    }
+
+    res.json({
+      success: true,
+      ...result,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error in handleGetActivity:', error);
+    res.status(500).json({ error: 'Failed to fetch activity' });
+  }
+}
+
+// Get feed activity (friends' posts)
+async function getFeedActivity(userId, limit, offset) {
+  try {
+    // Get friends' posts
+    const { data: posts, error } = await supabase
+      .from('music_posts')
+      .select(`
+        *,
+        profiles!music_posts_user_id_fkey (
+          id,
+          display_name,
+          avatar_url
+        )
+      `)
+      .in('user_id', await getFriendIds(userId))
+      .in('privacy', ['public', 'friends'])
+      .order('posted_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) throw error;
+
+    return {
+      items: posts || [],
+      total: posts?.length || 0,
+      has_more: posts?.length === limit
+    };
+  } catch (error) {
+    console.error('Error getting feed activity:', error);
+    return { items: [], total: 0, has_more: false };
+  }
+}
+
+// Get history activity (user's own posts)
+async function getHistoryActivity(userId, limit, offset) {
+  try {
+    const { data: posts, error } = await supabase
+      .from('music_posts')
+      .select('*')
+      .eq('user_id', userId)
+      .order('posted_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) throw error;
+
+    return {
+      items: posts || [],
+      total: posts?.length || 0,
+      has_more: posts?.length === limit
+    };
+  } catch (error) {
+    console.error('Error getting history activity:', error);
+    return { items: [], total: 0, has_more: false };
+  }
+}
+
+// Get saved activity (user's saved posts)
+async function getSavedActivity(userId, limit, offset) {
+  try {
+    const { data: savedPosts, error } = await supabase
+      .from('saved_posts')
+      .select(`
+        *,
+        music_posts!saved_posts_post_id_fkey (
+          *,
+          profiles!music_posts_user_id_fkey (
+            id,
+            display_name,
+            avatar_url
+          )
+        )
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) throw error;
+
+    return {
+      items: savedPosts || [],
+      total: savedPosts?.length || 0,
+      has_more: savedPosts?.length === limit
+    };
+  } catch (error) {
+    console.error('Error getting saved activity:', error);
+    return { items: [], total: 0, has_more: false };
+  }
+}
+
+// Helper function to get friend IDs
+async function getFriendIds(userId) {
+  try {
+    const { data: friendships } = await supabase
+      .from('friendships')
+      .select('requester_id, addressee_id')
+      .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`)
+      .eq('status', 'accepted');
+
+    if (!friendships) return [];
+
+    return friendships.map(friendship => 
+      friendship.requester_id === userId ? friendship.addressee_id : friendship.requester_id
+    );
+  } catch (error) {
+    console.error('Error getting friend IDs:', error);
+    return [];
   }
 }

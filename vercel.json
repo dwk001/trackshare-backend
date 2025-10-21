@@ -11,9 +11,6 @@
     "api/providers.js": {
       "maxDuration": 30
     },
-    "api/activity.js": {
-      "maxDuration": 30
-    },
     "api/privacy.js": {
       "maxDuration": 30
     },
@@ -36,12 +33,6 @@
       "maxDuration": 30
     },
     "api/profile.js": {
-      "maxDuration": 30
-    },
-    "api/recommendations.js": {
-      "maxDuration": 30
-    },
-    "api/playlists.js": {
       "maxDuration": 30
     }
   },
