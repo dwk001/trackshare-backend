@@ -533,13 +533,308 @@
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
         }
 
-        .track-card.recommended::before {
-            content: '✨';
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
+        /* Playlist Management Styles */
+        .playlist-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .playlist-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .playlist-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .playlist-artwork {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .playlist-artwork img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .playlist-details h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .playlist-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .playlist-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .playlist-tracks {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .track-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .track-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .track-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(4px);
+        }
+
+        .track-number {
+            width: 30px;
+            text-align: center;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .track-item-artwork {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 1.2rem;
-            z-index: 2;
+        }
+
+        .track-item-artwork img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .track-item-info {
+            flex: 1;
+        }
+
+        .track-item-title {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+
+        .track-item-artist {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .track-item-duration {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+        }
+
+        .track-item-actions {
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .track-item:hover .track-item-actions {
+            opacity: 1;
+        }
+
+        .playlist-create-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .playlist-create-form {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .playlist-form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .playlist-form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .playlist-form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .playlist-form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .playlist-form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color 0.3s ease;
+        }
+
+        .playlist-form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .playlist-form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .playlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .playlist-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .playlist-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .playlist-card-artwork {
+            width: 100%;
+            height: 200px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .playlist-card-artwork img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .playlist-card-info h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .playlist-card-meta {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 1rem;
+        }
+
+        .playlist-card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .playlist-card-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .playlist-card-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .playlist-card-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
+        .playlist-card-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
         @media (max-width: 768px) {
             .feed-tabs {
@@ -2938,6 +3233,75 @@
                             <button class="btn btn-primary" id="submitCommentBtn" onclick="submitComment()" disabled>Post Comment</button>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Playlist Create Modal -->
+    <div id="playlistCreateModal" class="playlist-create-modal">
+        <div class="playlist-create-form">
+            <h2>Create New Playlist</h2>
+            <form id="playlistCreateForm">
+                <div class="playlist-form-group">
+                    <label for="playlistName">Playlist Name</label>
+                    <input type="text" id="playlistName" class="playlist-form-input" placeholder="My Awesome Playlist" required>
+                </div>
+                
+                <div class="playlist-form-group">
+                    <label for="playlistDescription">Description (Optional)</label>
+                    <textarea id="playlistDescription" class="playlist-form-textarea" placeholder="Describe your playlist..."></textarea>
+                </div>
+                
+                <div class="playlist-form-group">
+                    <label for="playlistPrivacy">Privacy</label>
+                    <select id="playlistPrivacy" class="playlist-form-input">
+                        <option value="private">Private</option>
+                        <option value="friends">Friends Only</option>
+                        <option value="public">Public</option>
+                    </select>
+                </div>
+                
+                <div class="playlist-form-group">
+                    <label for="playlistCollaborative">Collaborative</label>
+                    <select id="playlistCollaborative" class="playlist-form-input">
+                        <option value="false">No</option>
+                        <option value="true">Yes - Friends can add tracks</option>
+                    </select>
+                </div>
+                
+                <div class="playlist-form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closePlaylistCreateModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Playlist</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Playlist View Modal -->
+    <div id="playlistViewModal" class="playlist-create-modal">
+        <div class="playlist-create-form" style="max-width: 800px;">
+            <div class="playlist-header">
+                <div class="playlist-info">
+                    <div class="playlist-artwork" id="playlistViewArtwork">
+                        🎵
+                    </div>
+                    <div class="playlist-details">
+                        <h1 id="playlistViewName">Playlist Name</h1>
+                        <div class="playlist-meta">
+                            <span id="playlistViewMeta">0 tracks • Created by You</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="playlist-actions">
+                    <button class="btn btn-primary" onclick="playPlaylist()">Play All</button>
+                    <button class="btn btn-secondary" onclick="closePlaylistViewModal()">Close</button>
+                </div>
+            </div>
+            
+            <div class="playlist-tracks">
+                <div class="track-list" id="playlistTrackList">
+                    <!-- Tracks will be loaded here -->
                 </div>
             </div>
         </div>
@@ -5583,6 +5947,299 @@
             document.getElementById('discoveryStats').style.display = 'grid';
         }
 
+        // Playlist Management Functions
+        let currentPlaylist = null;
+        let userPlaylists = [];
+
+        async function loadPlaylists() {
+            const grid = document.getElementById('musicGrid');
+            grid.innerHTML = '<div class="loading">Loading playlists...</div>';
+            
+            try {
+                const response = await fetch('/api/posts?playlists=true&limit=20', {
+                    headers: isSignedIn ? { 'Authorization': `Bearer ${userToken}` } : {}
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.playlists) {
+                    displayPlaylists(data.playlists);
+                } else {
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">🎵</div>
+                            <h3>No Playlists Found</h3>
+                            <p>Create your first playlist to get started!</p>
+                            ${isSignedIn ? '<button class="btn btn-primary" onclick="showCreatePlaylistModal()">Create Playlist</button>' : ''}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading playlists:', error);
+                grid.innerHTML = `
+                    <div class="error-state">
+                        <div class="error-icon">⚠️</div>
+                        <h3>Error Loading Playlists</h3>
+                        <p>Something went wrong. Please try again.</p>
+                        <button class="btn btn-primary" onclick="loadPlaylists()">Retry</button>
+                    </div>
+                `;
+            }
+        }
+
+        function displayPlaylists(playlists) {
+            const grid = document.getElementById('musicGrid');
+            
+            if (playlists.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🎵</div>
+                        <h3>No Playlists Yet</h3>
+                        <p>Create your first playlist to get started!</p>
+                        ${isSignedIn ? '<button class="btn btn-primary" onclick="showCreatePlaylistModal()">Create Playlist</button>' : ''}
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = `
+                <div class="playlist-grid">
+                    ${playlists.map(playlist => `
+                        <div class="playlist-card" onclick="viewPlaylist('${playlist.id}')">
+                            <div class="playlist-card-artwork">
+                                ${playlist.artwork_url ? 
+                                    `<img src="${playlist.artwork_url}" alt="${escapeHtml(playlist.name)}">` : 
+                                    '🎵'
+                                }
+                            </div>
+                            <div class="playlist-card-info">
+                                <h3>${escapeHtml(playlist.name)}</h3>
+                                <div class="playlist-card-meta">
+                                    ${playlist.track_count || 0} tracks • ${playlist.privacy || 'private'}
+                                    ${playlist.collaborative ? ' • Collaborative' : ''}
+                                </div>
+                            </div>
+                            <div class="playlist-card-actions">
+                                <button class="playlist-card-btn primary" onclick="event.stopPropagation(); playPlaylist('${playlist.id}')">
+                                    Play
+                                </button>
+                                <button class="playlist-card-btn" onclick="event.stopPropagation(); sharePlaylist('${playlist.id}')">
+                                    Share
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                ${isSignedIn ? `
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button class="btn btn-primary" onclick="showCreatePlaylistModal()">
+                            Create New Playlist
+                        </button>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        function showCreatePlaylistModal() {
+            if (!isSignedIn) {
+                showSignInModal();
+                return;
+            }
+            
+            document.getElementById('playlistCreateModal').style.display = 'flex';
+            document.getElementById('playlistName').focus();
+        }
+
+        function closePlaylistCreateModal() {
+            document.getElementById('playlistCreateModal').style.display = 'none';
+            document.getElementById('playlistCreateForm').reset();
+        }
+
+        async function createPlaylist(event) {
+            event.preventDefault();
+            
+            if (!isSignedIn || !userToken) {
+                showSignInModal();
+                return;
+            }
+            
+            const formData = {
+                name: document.getElementById('playlistName').value,
+                description: document.getElementById('playlistDescription').value,
+                privacy: document.getElementById('playlistPrivacy').value,
+                collaborative: document.getElementById('playlistCollaborative').value === 'true'
+            };
+            
+            try {
+                const response = await fetch('/api/posts?playlists=true', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Playlist created successfully!', 'success');
+                    closePlaylistCreateModal();
+                    await loadPlaylists();
+                } else {
+                    showNotification(data.error || 'Failed to create playlist', 'error');
+                }
+            } catch (error) {
+                console.error('Error creating playlist:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+
+        async function viewPlaylist(playlistId) {
+            try {
+                const response = await fetch(`/api/posts?playlists=true&playlist_id=${playlistId}`, {
+                    headers: isSignedIn ? { 'Authorization': `Bearer ${userToken}` } : {}
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.playlist) {
+                    currentPlaylist = data.playlist;
+                    displayPlaylistView(data.playlist);
+                    document.getElementById('playlistViewModal').style.display = 'flex';
+                } else {
+                    showNotification('Failed to load playlist', 'error');
+                }
+            } catch (error) {
+                console.error('Error viewing playlist:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+
+        function displayPlaylistView(playlist) {
+            document.getElementById('playlistViewName').textContent = playlist.name;
+            document.getElementById('playlistViewMeta').textContent = 
+                `${playlist.track_count || 0} tracks • Created by ${playlist.creator?.display_name || 'Unknown'}`;
+            
+            const artworkEl = document.getElementById('playlistViewArtwork');
+            if (playlist.artwork_url) {
+                artworkEl.innerHTML = `<img src="${playlist.artwork_url}" alt="${escapeHtml(playlist.name)}">`;
+            } else {
+                artworkEl.innerHTML = '🎵';
+            }
+            
+            const trackListEl = document.getElementById('playlistTrackList');
+            if (playlist.tracks && playlist.tracks.length > 0) {
+                trackListEl.innerHTML = playlist.tracks.map((track, index) => `
+                    <div class="track-item" onclick="playTrack('${escapeJs(track.url)}', '${escapeJs(track.title)}', '${escapeJs(track.artist)}')">
+                        <div class="track-number">${index + 1}</div>
+                        <div class="track-item-artwork">
+                            ${track.artwork ? 
+                                `<img src="${track.artwork}" alt="${escapeHtml(track.title)}">` : 
+                                '🎵'
+                            }
+                        </div>
+                        <div class="track-item-info">
+                            <div class="track-item-title">${escapeHtml(track.title)}</div>
+                            <div class="track-item-artist">${escapeHtml(track.artist)}</div>
+                        </div>
+                        <div class="track-item-duration">${formatDuration(track.duration_ms || 0)}</div>
+                        <div class="track-item-actions">
+                            <button class="btn btn-sm" onclick="event.stopPropagation(); removeFromPlaylist('${track.id}')">
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                trackListEl.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🎵</div>
+                        <h3>No Tracks Yet</h3>
+                        <p>Add some tracks to your playlist!</p>
+                    </div>
+                `;
+            }
+        }
+
+        function closePlaylistViewModal() {
+            document.getElementById('playlistViewModal').style.display = 'none';
+            currentPlaylist = null;
+        }
+
+        async function playPlaylist(playlistId = null) {
+            const playlist = playlistId ? 
+                userPlaylists.find(p => p.id === playlistId) : 
+                currentPlaylist;
+            
+            if (!playlist || !playlist.tracks || playlist.tracks.length === 0) {
+                showNotification('No tracks to play', 'error');
+                return;
+            }
+            
+            // Play first track
+            const firstTrack = playlist.tracks[0];
+            playTrack(firstTrack.url, firstTrack.title, firstTrack.artist);
+            
+            showNotification(`Playing "${playlist.name}"`, 'success');
+        }
+
+        async function removeFromPlaylist(trackId) {
+            if (!isSignedIn || !userToken || !currentPlaylist) return;
+            
+            try {
+                const response = await fetch('/api/posts?playlists=true', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        playlist_id: currentPlaylist.id,
+                        track_id: trackId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Track removed from playlist', 'success');
+                    await viewPlaylist(currentPlaylist.id); // Refresh view
+                } else {
+                    showNotification(data.error || 'Failed to remove track', 'error');
+                }
+            } catch (error) {
+                console.error('Error removing track from playlist:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+
+        function sharePlaylist(playlistId) {
+            const playlist = userPlaylists.find(p => p.id === playlistId);
+            if (!playlist) return;
+            
+            const shareUrl = `${window.location.origin}/playlist/${playlistId}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: playlist.name,
+                    text: `Check out my playlist: ${playlist.name}`,
+                    url: shareUrl
+                });
+            } else {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    showNotification('Playlist link copied to clipboard!', 'success');
+                });
+            }
+        }
+
+        function formatDuration(ms) {
+            const minutes = Math.floor(ms / 60000);
+            const seconds = Math.floor((ms % 60000) / 1000);
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
         // Enhanced switchGenre function
         async function switchGenre(genre) {
             currentGenre = genre;
@@ -7034,6 +7691,17 @@
             
             // Setup form event listeners
             document.getElementById('editProfileForm').addEventListener('submit', saveProfileChanges);
+            
+            // Setup playlist form
+            document.getElementById('playlistCreateForm').addEventListener('submit', createPlaylist);
+            
+            // Setup modal close handlers
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('playlist-create-modal')) {
+                    closePlaylistCreateModal();
+                    closePlaylistViewModal();
+                }
+            });
         });
 
         // Handle Enter key in search
