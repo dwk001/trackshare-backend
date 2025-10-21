@@ -1343,6 +1343,125 @@
             background: #e5e7eb;
         }
 
+        /* Settings Modal Styles */
+        .settings-sections {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .settings-section {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .settings-section h3 {
+            margin: 0 0 1rem 0;
+            color: #1f2937;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-item-content {
+            flex: 1;
+        }
+
+        .settings-item-content h4 {
+            margin: 0 0 0.25rem 0;
+            color: #1f2937;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .settings-item-content p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .settings-select {
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: white;
+            font-size: 0.875rem;
+            min-width: 120px;
+        }
+
+        .settings-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .settings-actions {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        /* Toggle Switch Styles */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #667eea;
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .toggle-switch input:focus + .toggle-slider {
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
         @media (max-width: 768px) {
             .profile-content {
                 grid-template-columns: 1fr;
@@ -1359,6 +1478,16 @@
             
             .form-row {
                 grid-template-columns: 1fr;
+            }
+            
+            .settings-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .settings-select {
+                width: 100%;
             }
         }
         
@@ -1970,6 +2099,146 @@
                 <div class="loading-spinner">
                     <div class="spinner"></div>
                     <p>Loading notifications...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Profile</h2>
+                <button class="close-btn" onclick="closeModal('editProfileModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editProfileForm" class="profile-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="profileDisplayName">Display Name</label>
+                            <input type="text" id="profileDisplayName" name="display_name" maxlength="50" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="profileLocation">Location</label>
+                            <input type="text" id="profileLocation" name="location" maxlength="100" placeholder="City, Country">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profileBio">Bio</label>
+                        <textarea id="profileBio" name="bio" maxlength="500" placeholder="Tell us about yourself..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profileWebsite">Website</label>
+                        <input type="url" id="profileWebsite" name="website" placeholder="https://yourwebsite.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profileBirthDate">Birth Date</label>
+                        <input type="date" id="profileBirthDate" name="birth_date">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profileAvatarUrl">Avatar URL</label>
+                        <input type="url" id="profileAvatarUrl" name="avatar_url" placeholder="https://example.com/avatar.jpg">
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="closeModal('editProfileModal')">Cancel</button>
+                        <button type="submit" class="btn-save">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="close-btn" onclick="closeModal('settingsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-sections">
+                    <div class="settings-section">
+                        <h3>Account</h3>
+                        <div class="settings-item">
+                            <div class="settings-item-content">
+                                <h4>Email Notifications</h4>
+                                <p>Receive email updates about your account</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="emailNotifications" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-content">
+                                <h4>Push Notifications</h4>
+                                <p>Get notified about new likes and comments</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="pushNotifications" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h3>Privacy</h3>
+                        <div class="settings-item">
+                            <div class="settings-item-content">
+                                <h4>Profile Visibility</h4>
+                                <p>Who can see your profile</p>
+                            </div>
+                            <select id="profileVisibility" class="settings-select">
+                                <option value="public">Public</option>
+                                <option value="friends">Friends Only</option>
+                                <option value="private">Private</option>
+                            </select>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-content">
+                                <h4>Show Email</h4>
+                                <p>Display your email on your profile</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="showEmail">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h3>Music</h3>
+                        <div class="settings-item">
+                            <div class="settings-item-content">
+                                <h4>Auto-share Listening</h4>
+                                <p>Automatically share what you're listening to</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="autoShare">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-content">
+                                <h4>Default Post Privacy</h4>
+                                <p>Default privacy setting for new posts</p>
+                            </div>
+                            <select id="defaultPostPrivacy" class="settings-select">
+                                <option value="public">Public</option>
+                                <option value="friends">Friends Only</option>
+                                <option value="private">Private</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-actions">
+                    <button class="btn-save" onclick="saveSettings()">Save Settings</button>
                 </div>
             </div>
         </div>
@@ -2979,13 +3248,170 @@
         }
 
         function showEditProfileModal() {
-            // TODO: Implement edit profile modal
-            alert('Edit profile feature coming soon!');
+            if (!isSignedIn || !userToken) {
+                showSignInModal();
+                return;
+            }
+
+            // Load current profile data
+            loadCurrentProfileData();
+            
+            // Show modal
+            document.getElementById('editProfileModal').style.display = 'flex';
+        }
+
+        async function loadCurrentProfileData() {
+            try {
+                const response = await fetch('/api/profile');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const profile = data.profile;
+                    
+                    // Populate form fields
+                    document.getElementById('profileDisplayName').value = profile.display_name || '';
+                    document.getElementById('profileLocation').value = profile.location || '';
+                    document.getElementById('profileBio').value = profile.bio || '';
+                    document.getElementById('profileWebsite').value = profile.website || '';
+                    document.getElementById('profileBirthDate').value = profile.birth_date || '';
+                    document.getElementById('profileAvatarUrl').value = profile.avatar_url || '';
+                }
+            } catch (error) {
+                console.error('Error loading profile data:', error);
+                showNotification('Failed to load profile data', 'error');
+            }
+        }
+
+        async function saveProfileChanges(event) {
+            event.preventDefault();
+            
+            if (!isSignedIn || !userToken) {
+                showSignInModal();
+                return;
+            }
+
+            const form = document.getElementById('editProfileForm');
+            const formData = new FormData(form);
+            
+            const profileData = {
+                display_name: formData.get('display_name'),
+                location: formData.get('location'),
+                bio: formData.get('bio'),
+                website: formData.get('website'),
+                birth_date: formData.get('birth_date'),
+                avatar_url: formData.get('avatar_url')
+            };
+
+            try {
+                const response = await fetch('/api/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(profileData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification('Profile updated successfully!', 'success');
+                    closeModal('editProfileModal');
+                    
+                    // Reload profile page if currently viewing it
+                    if (currentFeed === 'profile') {
+                        await loadProfileData();
+                    }
+                } else {
+                    throw new Error(data.error || 'Failed to update profile');
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                showNotification('Failed to update profile. Please try again.', 'error');
+            }
         }
 
         function showSettingsModal() {
-            // TODO: Implement settings modal
-            alert('Settings feature coming soon!');
+            if (!isSignedIn || !userToken) {
+                showSignInModal();
+                return;
+            }
+
+            // Load current settings
+            loadCurrentSettings();
+            
+            // Show modal
+            document.getElementById('settingsModal').style.display = 'flex';
+        }
+
+        async function loadCurrentSettings() {
+            try {
+                const response = await fetch('/api/profile');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const profile = data.profile;
+                    const privacySettings = profile.privacy_settings || {};
+                    
+                    // Set privacy settings
+                    document.getElementById('profileVisibility').value = privacySettings.profile_visibility || 'public';
+                    document.getElementById('showEmail').checked = privacySettings.show_email || false;
+                    document.getElementById('defaultPostPrivacy').value = privacySettings.default_post_privacy || 'friends';
+                    
+                    // Set notification settings (these would come from a separate settings API)
+                    document.getElementById('emailNotifications').checked = true; // Default
+                    document.getElementById('pushNotifications').checked = true; // Default
+                    document.getElementById('autoShare').checked = false; // Default
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+                showNotification('Failed to load settings', 'error');
+            }
+        }
+
+        async function saveSettings() {
+            if (!isSignedIn || !userToken) {
+                showSignInModal();
+                return;
+            }
+
+            const settingsData = {
+                privacy_settings: {
+                    profile_visibility: document.getElementById('profileVisibility').value,
+                    show_email: document.getElementById('showEmail').checked,
+                    default_post_privacy: document.getElementById('defaultPostPrivacy').value,
+                    allow_friend_requests: true, // Default
+                    allow_messages: true // Default
+                },
+                music_preferences: {
+                    auto_share: document.getElementById('autoShare').checked,
+                    email_notifications: document.getElementById('emailNotifications').checked,
+                    push_notifications: document.getElementById('pushNotifications').checked
+                }
+            };
+
+            try {
+                const response = await fetch('/api/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(settingsData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification('Settings saved successfully!', 'success');
+                    closeModal('settingsModal');
+                } else {
+                    throw new Error(data.error || 'Failed to save settings');
+                }
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                showNotification('Failed to save settings. Please try again.', 'error');
+            }
         }
 
         function showMusicPreferencesModal() {
@@ -4250,6 +4676,9 @@
             checkExistingAuth();
             setupSearchHandlers(); // Initialize enhanced search
             loadFeed('trending'); // Load social feed by default
+            
+            // Setup form event listeners
+            document.getElementById('editProfileForm').addEventListener('submit', saveProfileChanges);
         });
 
         // Handle Enter key in search
