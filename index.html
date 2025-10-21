@@ -220,21 +220,22 @@
         .feed-post {
             background: white;
             border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
         }
 
         .feed-post:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
         }
 
         .post-header {
             display: flex;
             align-items: center;
-            margin-bottom: 1rem;
+            padding: 1rem 1.5rem 0.5rem 1.5rem;
         }
 
         .post-avatar {
@@ -270,23 +271,42 @@
         .post-track {
             display: flex;
             align-items: center;
-            background: #f8fafc;
-            border-radius: 12px;
+            margin: 0.5rem 1.5rem 1rem 1.5rem;
             padding: 1rem;
-            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .post-track::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
         }
 
         .post-track-artwork {
-            width: 60px;
-            height: 60px;
-            border-radius: 8px;
-            margin-right: 0.75rem;
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            margin-right: 1rem;
             background: #e5e7eb;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #9ca3af;
             font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease;
+        }
+
+        .post-track:hover .post-track-artwork {
+            transform: scale(1.05);
         }
 
         .post-track-artwork img {
@@ -318,9 +338,16 @@
         .post-actions {
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #f0f0f0;
+            background: #fafafa;
+        }
+
+        .post-actions-left {
+            display: flex;
+            align-items: center;
             gap: 1.5rem;
-            padding-top: 0.75rem;
-            border-top: 1px solid #e5e7eb;
         }
 
         .post-action {
@@ -331,16 +358,36 @@
             border: none;
             color: #6b7280;
             cursor: pointer;
-            transition: color 0.2s ease;
+            transition: all 0.2s ease;
             font-size: 0.875rem;
+            padding: 0.5rem;
+            border-radius: 8px;
         }
 
         .post-action:hover {
-            color: #374151;
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
         }
 
         .post-action.liked {
-            color: #ef4444;
+            color: #e74c3c;
+        }
+
+        .post-action.liked:hover {
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.2); }
+            50% { transform: scale(1.1); }
+            75% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .post-action.liked {
+            color: #e74c3c;
+            animation: heartBeat 0.6s ease-in-out;
         }
 
         .post-action.liked:hover {
@@ -348,19 +395,20 @@
         }
 
         .post-action-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
             padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            font-weight: 500;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s ease;
+            transition: all 0.2s ease;
         }
 
         .post-action-btn:hover {
             transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
         /* Mobile Feed Styles */
@@ -3182,20 +3230,22 @@
                     </div>
                     
                     <div class="post-actions">
-                        <button class="post-action ${post.is_liked ? 'liked' : ''}" onclick="toggleLike('${post.id}')">
-                            <span>${post.is_liked ? '❤️' : '🤍'}</span>
-                            <span>${post.like_count || 0}</span>
-                        </button>
-                        
-                        <button class="post-action" onclick="showComments('${post.id}')">
-                            <span>💬</span>
-                            <span>${post.comment_count || 0}</span>
-                        </button>
-                        
-                        <button class="post-action" onclick="sharePost('${post.id}')">
-                            <span>📤</span>
-                            <span>${post.share_count || 0}</span>
-                        </button>
+                        <div class="post-actions-left">
+                            <button class="post-action ${post.is_liked ? 'liked' : ''}" onclick="toggleLike('${post.id}')">
+                                <span>${post.is_liked ? '❤️' : '🤍'}</span>
+                                <span>${post.like_count || 0}</span>
+                            </button>
+                            
+                            <button class="post-action" onclick="showComments('${post.id}')">
+                                <span>💬</span>
+                                <span>${post.comment_count || 0}</span>
+                            </button>
+                            
+                            <button class="post-action" onclick="sharePost('${post.id}')">
+                                <span>📤</span>
+                                <span>${post.share_count || 0}</span>
+                            </button>
+                        </div>
                         
                         <button class="post-action-btn" onclick="playTrack('${escapeJs(post.track_spotify_url)}', '${escapeJs(post.track_title)}', '${escapeJs(post.track_artist)}')">
                             Play & Share
@@ -3227,7 +3277,20 @@
             const postElement = document.querySelector(`[data-post-id="${postId}"]`);
             const likeButton = postElement.querySelector('.post-action');
             const likeCount = likeButton.querySelector('span:last-child');
+            const likeIcon = likeButton.querySelector('span:first-child');
             const isLiked = likeButton.classList.contains('liked');
+            const currentCount = parseInt(likeCount.textContent) || 0;
+            
+            // Optimistic UI update
+            if (isLiked) {
+                likeButton.classList.remove('liked');
+                likeIcon.textContent = '🤍';
+                likeCount.textContent = Math.max(0, currentCount - 1);
+            } else {
+                likeButton.classList.add('liked');
+                likeIcon.textContent = '❤️';
+                likeCount.textContent = currentCount + 1;
+            }
             
             try {
                 if (isLiked) {
@@ -3239,10 +3302,12 @@
                         }
                     });
                     
-                    if (response.ok) {
-                        likeButton.classList.remove('liked');
-                        likeButton.querySelector('span:first-child').textContent = '🤍';
-                        likeCount.textContent = parseInt(likeCount.textContent) - 1;
+                    if (!response.ok) {
+                        // Revert optimistic update on error
+                        likeButton.classList.add('liked');
+                        likeIcon.textContent = '❤️';
+                        likeCount.textContent = currentCount;
+                        showNotification('Failed to unlike post', 'error');
                     }
                 } else {
                     // Like
@@ -3258,14 +3323,27 @@
                         })
                     });
                     
-                    if (response.ok) {
-                        likeButton.classList.add('liked');
-                        likeButton.querySelector('span:first-child').textContent = '❤️';
-                        likeCount.textContent = parseInt(likeCount.textContent) + 1;
+                    if (!response.ok) {
+                        // Revert optimistic update on error
+                        likeButton.classList.remove('liked');
+                        likeIcon.textContent = '🤍';
+                        likeCount.textContent = currentCount;
+                        showNotification('Failed to like post', 'error');
                     }
                 }
             } catch (error) {
                 console.error('Like toggle error:', error);
+                // Revert optimistic update on error
+                if (isLiked) {
+                    likeButton.classList.add('liked');
+                    likeIcon.textContent = '❤️';
+                    likeCount.textContent = currentCount;
+                } else {
+                    likeButton.classList.remove('liked');
+                    likeIcon.textContent = '🤍';
+                    likeCount.textContent = currentCount;
+                }
+                showNotification('Network error', 'error');
             }
         }
 
