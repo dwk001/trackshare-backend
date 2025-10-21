@@ -1889,6 +1889,416 @@
             gap: 1rem;
             justify-content: flex-end;
         }
+
+        /* Music Events & Festivals Styles */
+        .events-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .events-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .events-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .events-header p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .events-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .event-tab {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .event-tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .event-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .event-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .event-card.live {
+            border: 2px solid #ef4444;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+        }
+
+        .event-card.live::before {
+            content: '🔴 LIVE';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.2);
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .event-card.upcoming {
+            border: 2px solid #f59e0b;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+        }
+
+        .event-card.upcoming::before {
+            content: '⏰ UPCOMING';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #f59e0b;
+            background: rgba(245, 158, 11, 0.2);
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+        }
+
+        .event-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .event-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            overflow: hidden;
+        }
+
+        .event-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .event-info h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .event-meta {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.25rem;
+        }
+
+        .event-date {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .event-description {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .event-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .event-detail {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .event-detail-icon {
+            font-size: 1rem;
+        }
+
+        .event-stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .event-stat {
+            text-align: center;
+        }
+
+        .event-stat-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.25rem;
+        }
+
+        .event-stat-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .event-lineup {
+            margin-bottom: 1.5rem;
+        }
+
+        .event-lineup h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.75rem;
+        }
+
+        .lineup-artists {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .lineup-artist {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .lineup-artist-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        .lineup-artist-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .event-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .event-action-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .event-action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .event-action-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
+        .event-action-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .event-action-btn.live {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-color: #ef4444;
+        }
+
+        .event-action-btn.live:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .event-action-btn.attending {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #10b981;
+        }
+
+        .event-action-btn.attending:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .event-create-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .event-create-form {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .event-form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .event-form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .event-form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .event-form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .event-form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color 0.3s ease;
+        }
+
+        .event-form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .event-form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .event-countdown {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            justify-content: center;
+        }
+
+        .countdown-item {
+            text-align: center;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            min-width: 50px;
+        }
+
+        .countdown-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.25rem;
+        }
+
+        .countdown-label {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
         @media (max-width: 768px) {
             .feed-tabs {
                 padding: 0 1rem;
@@ -4062,6 +4472,9 @@
                     <div class="tab" data-feed="challenges" onclick="switchFeed('challenges')">
                         🏆 Challenges
                     </div>
+                    <div class="tab" data-feed="events" onclick="switchFeed('events')">
+                        🎪 Events
+                    </div>
                     <div class="tab" data-feed="requests" onclick="switchFeed('requests')">
                         📬 Requests
                     </div>
@@ -4248,6 +4661,49 @@
                     <div style="text-align: center; margin-top: 2rem;">
                         <button class="btn btn-primary" onclick="showCreateChallengeModal()">
                             Create Challenge
+                        </button>
+                    </div>
+                ` : ''}
+            </div>
+        </section>
+
+        <!-- Music Events & Festivals (Hidden by default) -->
+        <section id="musicEvents" class="events-section" style="display: none;">
+            <div class="events-container">
+                <div class="events-header">
+                    <h1>Music Events & Festivals</h1>
+                    <p>Discover live music events, festivals, and concerts happening around you!</p>
+                </div>
+                
+                <div class="events-tabs">
+                    <div class="event-tab active" data-event-type="all" onclick="filterEvents('all')">
+                        All Events
+                    </div>
+                    <div class="event-tab" data-event-type="live" onclick="filterEvents('live')">
+                        🔴 Live Now
+                    </div>
+                    <div class="event-tab" data-event-type="upcoming" onclick="filterEvents('upcoming')">
+                        ⏰ Upcoming
+                    </div>
+                    <div class="event-tab" data-event-type="festivals" onclick="filterEvents('festivals')">
+                        🎪 Festivals
+                    </div>
+                    <div class="event-tab" data-event-type="concerts" onclick="filterEvents('concerts')">
+                        🎵 Concerts
+                    </div>
+                    <div class="event-tab" data-event-type="my-events" onclick="filterEvents('my-events')">
+                        My Events
+                    </div>
+                </div>
+                
+                <div class="events-grid" id="eventsGrid">
+                    <!-- Events will be loaded here -->
+                </div>
+                
+                ${isSignedIn ? `
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button class="btn btn-primary" onclick="showCreateEventModal()">
+                            Create Event
                         </button>
                     </div>
                 ` : ''}
@@ -4552,6 +5008,81 @@
                 <div class="challenge-form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeChallengeCreateModal()">Cancel</button>
                     <button type="submit" class="btn btn-primary">Create Challenge</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Event Create Modal -->
+    <div id="eventCreateModal" class="event-create-modal">
+        <div class="event-create-form">
+            <h2>Create Music Event</h2>
+            <form id="eventCreateForm">
+                <div class="event-form-group">
+                    <label for="eventName">Event Name</label>
+                    <input type="text" id="eventName" class="event-form-input" placeholder="My Music Event" required>
+                </div>
+                
+                <div class="event-form-group">
+                    <label for="eventDescription">Description</label>
+                    <textarea id="eventDescription" class="event-form-textarea" placeholder="Describe your event..."></textarea>
+                </div>
+                
+                <div class="event-form-group">
+                    <label for="eventType">Event Type</label>
+                    <select id="eventType" class="event-form-input">
+                        <option value="concert">Concert</option>
+                        <option value="festival">Festival</option>
+                        <option value="live-stream">Live Stream</option>
+                        <option value="virtual-event">Virtual Event</option>
+                        <option value="listening-party">Listening Party</option>
+                        <option value="music-meetup">Music Meetup</option>
+                    </select>
+                </div>
+                
+                <div class="event-form-group">
+                    <label for="eventDate">Event Date & Time</label>
+                    <input type="datetime-local" id="eventDate" class="event-form-input" required>
+                </div>
+                
+                <div class="event-form-group">
+                    <label for="eventLocation">Location</label>
+                    <input type="text" id="eventLocation" class="event-form-input" placeholder="Venue or Online" required>
+                </div>
+                
+                <div class="event-form-group">
+                    <label for="eventArtists">Featured Artists</label>
+                    <input type="text" id="eventArtists" class="event-form-input" placeholder="Artist 1, Artist 2, Artist 3">
+                </div>
+                
+                <div class="event-form-group">
+                    <label for="eventGenre">Genre</label>
+                    <select id="eventGenre" class="event-form-input">
+                        <option value="all">All Genres</option>
+                        <option value="pop">Pop</option>
+                        <option value="rock">Rock</option>
+                        <option value="hip-hop">Hip-Hop</option>
+                        <option value="electronic">Electronic</option>
+                        <option value="jazz">Jazz</option>
+                        <option value="classical">Classical</option>
+                        <option value="country">Country</option>
+                        <option value="indie">Indie</option>
+                    </select>
+                </div>
+                
+                <div class="event-form-group">
+                    <label for="eventCapacity">Capacity</label>
+                    <input type="number" id="eventCapacity" class="event-form-input" placeholder="Maximum attendees" min="1">
+                </div>
+                
+                <div class="event-form-group">
+                    <label for="eventPrice">Price</label>
+                    <input type="text" id="eventPrice" class="event-form-input" placeholder="Free, $20, etc.">
+                </div>
+                
+                <div class="event-form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEventCreateModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Event</button>
                 </div>
             </form>
         </div>
@@ -4977,12 +5508,14 @@
             const musicDiscovery = document.getElementById('musicDiscovery');
             const musicGroups = document.getElementById('musicGroups');
             const musicChallenges = document.getElementById('musicChallenges');
+            const musicEvents = document.getElementById('musicEvents');
             
             if (feedType === 'discover') {
                 socialFeed.style.display = 'none';
                 musicDiscovery.style.display = 'block';
                 musicGroups.style.display = 'none';
                 musicChallenges.style.display = 'none';
+                musicEvents.style.display = 'none';
                 // Load music discovery if not already loaded
                 if (!genreCache.all || genreCache.all.length === 0) {
                     await fetchTrendingMusic();
@@ -4992,36 +5525,49 @@
                 musicDiscovery.style.display = 'none';
                 musicGroups.style.display = 'block';
                 musicChallenges.style.display = 'none';
+                musicEvents.style.display = 'none';
                 await loadGroups();
             } else if (feedType === 'challenges') {
                 socialFeed.style.display = 'none';
                 musicDiscovery.style.display = 'none';
                 musicGroups.style.display = 'none';
                 musicChallenges.style.display = 'block';
+                musicEvents.style.display = 'none';
                 await loadChallenges();
+            } else if (feedType === 'events') {
+                socialFeed.style.display = 'none';
+                musicDiscovery.style.display = 'none';
+                musicGroups.style.display = 'none';
+                musicChallenges.style.display = 'none';
+                musicEvents.style.display = 'block';
+                await loadEvents();
             } else if (feedType === 'friends') {
                 socialFeed.style.display = 'block';
                 musicDiscovery.style.display = 'none';
                 musicGroups.style.display = 'none';
                 musicChallenges.style.display = 'none';
+                musicEvents.style.display = 'none';
                 await displayFriends();
             } else if (feedType === 'requests') {
                 socialFeed.style.display = 'block';
                 musicDiscovery.style.display = 'none';
                 musicGroups.style.display = 'none';
                 musicChallenges.style.display = 'none';
+                musicEvents.style.display = 'none';
                 await displayFriendRequests();
             } else if (feedType === 'profile') {
                 socialFeed.style.display = 'block';
                 musicDiscovery.style.display = 'none';
                 musicGroups.style.display = 'none';
                 musicChallenges.style.display = 'none';
+                musicEvents.style.display = 'none';
                 await loadProfileData();
             } else {
                 socialFeed.style.display = 'block';
                 musicDiscovery.style.display = 'none';
                 musicGroups.style.display = 'none';
                 musicChallenges.style.display = 'none';
+                musicEvents.style.display = 'none';
                 await loadFeed(feedType);
             }
         }
@@ -8543,6 +9089,474 @@
             `;
         }
 
+        // Music Events & Festivals Functions
+        let currentEventFilter = 'all';
+        let userEvents = [];
+
+        async function loadEvents() {
+            const eventsGrid = document.getElementById('eventsGrid');
+            eventsGrid.innerHTML = '<div class="loading">Loading events...</div>';
+            
+            try {
+                const response = await fetch(`/api/posts?events=true&filter=${currentEventFilter}`, {
+                    headers: isSignedIn ? { 'Authorization': `Bearer ${userToken}` } : {}
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.events) {
+                    displayEvents(data.events);
+                } else {
+                    displayEventsEmpty();
+                }
+            } catch (error) {
+                console.error('Error loading events:', error);
+                displayEventsError();
+            }
+        }
+
+        function displayEvents(events) {
+            const eventsGrid = document.getElementById('eventsGrid');
+            
+            if (events.length === 0) {
+                displayEventsEmpty();
+                return;
+            }
+            
+            eventsGrid.innerHTML = events.map(event => `
+                <div class="event-card ${event.status}" onclick="viewEvent('${event.id}')">
+                    <div class="event-header">
+                        <div class="event-image">
+                            ${event.image ? `<img src="${event.image}" alt="${event.name}">` : getEventIcon(event.type)}
+                        </div>
+                        <div class="event-info">
+                            <h3>${escapeHtml(event.name)}</h3>
+                            <div class="event-meta">
+                                ${event.type.charAt(0).toUpperCase() + event.type.slice(1).replace('-', ' ')}
+                                ${event.genre && event.genre !== 'all' ? ` • ${event.genre.charAt(0).toUpperCase() + event.genre.slice(1)}` : ''}
+                            </div>
+                            <div class="event-date">
+                                ${formatEventDate(event.date)} • ${event.location}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="event-description">
+                        ${escapeHtml(event.description || 'No description available')}
+                    </div>
+                    
+                    ${event.countdown ? `
+                        <div class="event-countdown">
+                            ${generateCountdown(event.countdown)}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="event-details">
+                        <div class="event-detail">
+                            <span class="event-detail-icon">📍</span>
+                            ${escapeHtml(event.location)}
+                        </div>
+                        <div class="event-detail">
+                            <span class="event-detail-icon">💰</span>
+                            ${event.price || 'Free'}
+                        </div>
+                        <div class="event-detail">
+                            <span class="event-detail-icon">👥</span>
+                            ${event.capacity ? `${event.attendees || 0}/${event.capacity}` : 'Unlimited'}
+                        </div>
+                        <div class="event-detail">
+                            <span class="event-detail-icon">🎵</span>
+                            ${event.artists ? event.artists.split(',').length : 0} Artists
+                        </div>
+                    </div>
+                    
+                    ${event.artists ? `
+                        <div class="event-lineup">
+                            <h4>Featured Artists</h4>
+                            <div class="lineup-artists">
+                                ${generateLineupArtists(event.artists)}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="event-stats">
+                        <div class="event-stat">
+                            <div class="event-stat-number">${event.attendees || 0}</div>
+                            <div class="event-stat-label">Attendees</div>
+                        </div>
+                        <div class="event-stat">
+                            <div class="event-stat-number">${event.interested || 0}</div>
+                            <div class="event-stat-label">Interested</div>
+                        </div>
+                        <div class="event-stat">
+                            <div class="event-stat-number">${event.shares || 0}</div>
+                            <div class="event-stat-label">Shares</div>
+                        </div>
+                    </div>
+                    
+                    <div class="event-actions">
+                        ${generateEventActions(event)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function generateCountdown(countdown) {
+            return `
+                <div class="countdown-item">
+                    <div class="countdown-number">${countdown.days || 0}</div>
+                    <div class="countdown-label">Days</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number">${countdown.hours || 0}</div>
+                    <div class="countdown-label">Hours</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number">${countdown.minutes || 0}</div>
+                    <div class="countdown-label">Minutes</div>
+                </div>
+            `;
+        }
+
+        function generateLineupArtists(artists) {
+            return artists.split(',').slice(0, 5).map(artist => `
+                <div class="lineup-artist">
+                    <div class="lineup-artist-avatar">
+                        ${artist.trim().charAt(0).toUpperCase()}
+                    </div>
+                    ${escapeHtml(artist.trim())}
+                </div>
+            `).join('');
+        }
+
+        function generateEventActions(event) {
+            const isAttending = event.is_attending;
+            const isInterested = event.is_interested;
+            const isLive = event.status === 'live';
+            const isUpcoming = event.status === 'upcoming';
+            
+            if (isLive) {
+                return `
+                    <button class="event-action-btn live" onclick="event.stopPropagation(); joinLiveEvent('${event.id}')">
+                        Join Live
+                    </button>
+                    <button class="event-action-btn" onclick="event.stopPropagation(); shareEvent('${event.id}')">
+                        Share
+                    </button>
+                `;
+            } else if (isAttending) {
+                return `
+                    <button class="event-action-btn attending" onclick="event.stopPropagation(); leaveEvent('${event.id}')">
+                        Attending
+                    </button>
+                    <button class="event-action-btn" onclick="event.stopPropagation(); shareEvent('${event.id}')">
+                        Share
+                    </button>
+                `;
+            } else if (isInterested) {
+                return `
+                    <button class="event-action-btn primary" onclick="event.stopPropagation(); attendEvent('${event.id}')">
+                        Attend
+                    </button>
+                    <button class="event-action-btn" onclick="event.stopPropagation(); uninterestedEvent('${event.id}')">
+                        Not Interested
+                    </button>
+                `;
+            } else {
+                return `
+                    <button class="event-action-btn primary" onclick="event.stopPropagation(); interestedEvent('${event.id}')">
+                        Interested
+                    </button>
+                    <button class="event-action-btn" onclick="event.stopPropagation(); shareEvent('${event.id}')">
+                        Share
+                    </button>
+                `;
+            }
+        }
+
+        function getEventIcon(type) {
+            const icons = {
+                'concert': '🎵',
+                'festival': '🎪',
+                'live-stream': '📺',
+                'virtual-event': '💻',
+                'listening-party': '🎧',
+                'music-meetup': '👥'
+            };
+            return icons[type] || '🎵';
+        }
+
+        function formatEventDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = date - now;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays < 0) {
+                return 'Past Event';
+            } else if (diffDays === 0) {
+                return 'Today';
+            } else if (diffDays === 1) {
+                return 'Tomorrow';
+            } else if (diffDays <= 7) {
+                return `In ${diffDays} days`;
+            } else {
+                return date.toLocaleDateString();
+            }
+        }
+
+        function filterEvents(filter) {
+            // Update filter buttons
+            document.querySelectorAll('.event-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-event-type="${filter}"]`).classList.add('active');
+            
+            currentEventFilter = filter;
+            loadEvents();
+        }
+
+        function showCreateEventModal() {
+            if (!isSignedIn) {
+                showSignInModal();
+                return;
+            }
+            
+            document.getElementById('eventCreateModal').style.display = 'flex';
+            document.getElementById('eventName').focus();
+        }
+
+        function closeEventCreateModal() {
+            document.getElementById('eventCreateModal').style.display = 'none';
+            document.getElementById('eventCreateForm').reset();
+        }
+
+        async function createEvent(event) {
+            event.preventDefault();
+            
+            if (!isSignedIn || !userToken) {
+                showSignInModal();
+                return;
+            }
+            
+            const formData = {
+                name: document.getElementById('eventName').value,
+                description: document.getElementById('eventDescription').value,
+                type: document.getElementById('eventType').value,
+                date: document.getElementById('eventDate').value,
+                location: document.getElementById('eventLocation').value,
+                artists: document.getElementById('eventArtists').value,
+                genre: document.getElementById('eventGenre').value,
+                capacity: document.getElementById('eventCapacity').value,
+                price: document.getElementById('eventPrice').value
+            };
+            
+            try {
+                const response = await fetch('/api/posts?events=true', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Event created successfully!', 'success');
+                    closeEventCreateModal();
+                    await loadEvents();
+                } else {
+                    showNotification(data.error || 'Failed to create event', 'error');
+                }
+            } catch (error) {
+                console.error('Error creating event:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+
+        async function interestedEvent(eventId) {
+            if (!isSignedIn || !userToken) return;
+            
+            try {
+                const response = await fetch('/api/posts?events=true', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        event_id: eventId,
+                        action: 'interested'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Marked as interested!', 'success');
+                    await loadEvents();
+                } else {
+                    showNotification(data.error || 'Failed to mark interest', 'error');
+                }
+            } catch (error) {
+                console.error('Error marking interest:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+
+        async function attendEvent(eventId) {
+            if (!isSignedIn || !userToken) return;
+            
+            try {
+                const response = await fetch('/api/posts?events=true', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        event_id: eventId,
+                        action: 'attend'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('You\'re attending this event!', 'success');
+                    await loadEvents();
+                } else {
+                    showNotification(data.error || 'Failed to attend event', 'error');
+                }
+            } catch (error) {
+                console.error('Error attending event:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+
+        async function leaveEvent(eventId) {
+            if (!isSignedIn || !userToken) return;
+            
+            try {
+                const response = await fetch('/api/posts?events=true', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        event_id: eventId,
+                        action: 'leave'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('You\'re no longer attending this event', 'info');
+                    await loadEvents();
+                } else {
+                    showNotification(data.error || 'Failed to leave event', 'error');
+                }
+            } catch (error) {
+                console.error('Error leaving event:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+
+        async function joinLiveEvent(eventId) {
+            if (!isSignedIn || !userToken) return;
+            
+            try {
+                const response = await fetch('/api/posts?events=true', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        event_id: eventId,
+                        action: 'join_live'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Joined live event!', 'success');
+                    // In a real implementation, this would open the live stream
+                    window.open(data.stream_url || '#', '_blank');
+                } else {
+                    showNotification(data.error || 'Failed to join live event', 'error');
+                }
+            } catch (error) {
+                console.error('Error joining live event:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+
+        async function shareEvent(eventId) {
+            if (!isSignedIn || !userToken) return;
+            
+            try {
+                const response = await fetch('/api/posts?events=true', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        event_id: eventId,
+                        action: 'share'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Event shared successfully!', 'success');
+                    await loadEvents();
+                } else {
+                    showNotification(data.error || 'Failed to share event', 'error');
+                }
+            } catch (error) {
+                console.error('Error sharing event:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+
+        function viewEvent(eventId) {
+            // For now, just show a notification
+            // In a full implementation, this would open a detailed event view
+            showNotification('Event details coming soon!', 'info');
+        }
+
+        function displayEventsEmpty() {
+            const eventsGrid = document.getElementById('eventsGrid');
+            eventsGrid.innerHTML = `
+                <div class="insights-empty">
+                    <div class="insights-empty-icon">🎪</div>
+                    <h3>No Events Found</h3>
+                    <p>No events match your current filter. Try a different category or create your own event!</p>
+                    ${isSignedIn ? '<button class="btn btn-primary" onclick="showCreateEventModal()">Create Event</button>' : ''}
+                </div>
+            `;
+        }
+
+        function displayEventsError() {
+            const eventsGrid = document.getElementById('eventsGrid');
+            eventsGrid.innerHTML = `
+                <div class="insights-empty">
+                    <div class="insights-empty-icon">⚠️</div>
+                    <h3>Error Loading Events</h3>
+                    <p>Something went wrong while loading events.</p>
+                    <button class="btn btn-primary" onclick="loadEvents()">Try Again</button>
+                </div>
+            `;
+        }
+
         // Enhanced switchGenre function
         async function switchGenre(genre) {
             currentGenre = genre;
@@ -10003,6 +11017,9 @@
             
             // Setup challenge form
             document.getElementById('challengeCreateForm').addEventListener('submit', createChallenge);
+            
+            // Setup event form
+            document.getElementById('eventCreateForm').addEventListener('submit', createEvent);
             
             // Setup modal close handlers
             document.addEventListener('click', function(e) {
