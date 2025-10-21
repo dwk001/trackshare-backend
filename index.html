@@ -836,6 +836,301 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
+
+        /* User Listening Insights Styles */
+        .insights-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .insights-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .insights-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .insights-header p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .insight-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .insight-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .insight-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .insight-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .insight-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: white;
+            margin: 0;
+        }
+
+        .insight-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .insight-description {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 1rem;
+        }
+
+        .insight-chart {
+            height: 200px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: end;
+            height: 150px;
+            gap: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .chart-bar-item {
+            flex: 1;
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 4px 4px 0 0;
+            min-height: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .chart-bar-item:hover {
+            background: linear-gradient(to top, #764ba2, #667eea);
+            transform: scaleY(1.05);
+        }
+
+        .chart-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .insight-trend {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .trend-indicator {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .trend-up {
+            color: #10b981;
+        }
+
+        .trend-down {
+            color: #ef4444;
+        }
+
+        .trend-neutral {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .insights-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .insight-filter-btn {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .insight-filter-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .insight-filter-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
+        .top-artists-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .artist-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .artist-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .artist-rank {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .artist-info {
+            flex: 1;
+        }
+
+        .artist-name {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+
+        .artist-plays {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .artist-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .artist-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .listening-pattern {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .pattern-day {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .pattern-day.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .pattern-day:hover {
+            transform: scale(1.1);
+        }
+
+        .insights-empty {
+            text-align: center;
+            padding: 3rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .insights-empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .insights-empty h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .insights-empty p {
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
         @media (max-width: 768px) {
             .feed-tabs {
                 padding: 0 1rem;
@@ -3565,6 +3860,35 @@
         </div>
     </div>
 
+    <!-- Listening Insights Modal -->
+    <div id="insightsModal" class="modal">
+        <div class="modal-content" style="max-width: 1000px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h2>Your Listening Insights</h2>
+                <button class="close-btn" onclick="closeModal('insightsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="insights-container">
+                    <div class="insights-header">
+                        <h1>Your Music Journey</h1>
+                        <p>Discover your unique listening patterns, favorite artists, and musical evolution over time.</p>
+                    </div>
+                    
+                    <div class="insights-filters">
+                        <button class="insight-filter-btn active" data-period="30d" onclick="filterInsights('30d')">Last 30 Days</button>
+                        <button class="insight-filter-btn" data-period="90d" onclick="filterInsights('90d')">Last 3 Months</button>
+                        <button class="insight-filter-btn" data-period="1y" onclick="filterInsights('1y')">Last Year</button>
+                        <button class="insight-filter-btn" data-period="all" onclick="filterInsights('all')">All Time</button>
+                    </div>
+                    
+                    <div class="insights-grid" id="insightsGrid">
+                        <!-- Insights will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentGenre = 'all';
         let currentTrack = null;
@@ -4760,6 +5084,14 @@
                                 <p>Discover your music listening patterns and insights.</p>
                                 <button class="btn btn-secondary" onclick="showAnalyticsModal()">
                                     View Analytics
+                                </button>
+                            </div>
+                            
+                            <div class="profile-widget">
+                                <h3>Listening Insights</h3>
+                                <p>Deep dive into your personal music journey and trends.</p>
+                                <button class="btn btn-primary" onclick="showInsightsModal()">
+                                    View Insights
                                 </button>
                             </div>
                         </div>
@@ -6238,6 +6570,291 @@
             const minutes = Math.floor(ms / 60000);
             const seconds = Math.floor((ms % 60000) / 1000);
             return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function formatDuration(ms) {
+            const minutes = Math.floor(ms / 60000);
+            const seconds = Math.floor((ms % 60000) / 1000);
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // User Listening Insights Functions
+        let currentInsightsPeriod = '30d';
+        let insightsData = {};
+
+        function showInsightsModal() {
+            if (!isSignedIn) {
+                showSignInModal();
+                return;
+            }
+            
+            document.getElementById('insightsModal').style.display = 'flex';
+            loadListeningInsights();
+        }
+
+        async function loadListeningInsights() {
+            const insightsGrid = document.getElementById('insightsGrid');
+            insightsGrid.innerHTML = `
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Analyzing your listening patterns...</p>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch(`/api/profile?analytics_type=insights&analytics_period=${currentInsightsPeriod}`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.insights) {
+                    insightsData = data.insights;
+                    displayListeningInsights(data.insights);
+                } else {
+                    displayInsightsEmpty();
+                }
+            } catch (error) {
+                console.error('Error loading insights:', error);
+                displayInsightsError();
+            }
+        }
+
+        function displayListeningInsights(insights) {
+            const insightsGrid = document.getElementById('insightsGrid');
+            
+            insightsGrid.innerHTML = `
+                <!-- Total Listening Time -->
+                <div class="insight-card">
+                    <div class="insight-card-header">
+                        <div class="insight-icon">⏱️</div>
+                        <h3 class="insight-title">Total Listening Time</h3>
+                    </div>
+                    <div class="insight-value">${formatListeningTime(insights.total_listening_time || 0)}</div>
+                    <div class="insight-description">Time spent listening to music this period</div>
+                    <div class="insight-trend">
+                        <span class="trend-indicator ${getTrendClass(insights.listening_time_trend)}">
+                            ${getTrendIcon(insights.listening_time_trend)} ${insights.listening_time_trend || 0}%
+                        </span>
+                        <span>vs previous period</span>
+                    </div>
+                </div>
+
+                <!-- Tracks Played -->
+                <div class="insight-card">
+                    <div class="insight-card-header">
+                        <div class="insight-icon">🎵</div>
+                        <h3 class="insight-title">Tracks Played</h3>
+                    </div>
+                    <div class="insight-value">${(insights.tracks_played || 0).toLocaleString()}</div>
+                    <div class="insight-description">Unique tracks you've discovered</div>
+                    <div class="insight-trend">
+                        <span class="trend-indicator ${getTrendClass(insights.tracks_trend)}">
+                            ${getTrendIcon(insights.tracks_trend)} ${insights.tracks_trend || 0}%
+                        </span>
+                        <span>vs previous period</span>
+                    </div>
+                </div>
+
+                <!-- Top Genre -->
+                <div class="insight-card">
+                    <div class="insight-card-header">
+                        <div class="insight-icon">🎭</div>
+                        <h3 class="insight-title">Top Genre</h3>
+                    </div>
+                    <div class="insight-value">${insights.top_genre || 'Unknown'}</div>
+                    <div class="insight-description">Your most listened genre</div>
+                    <div class="insight-chart">
+                        <div class="chart-bar">
+                            ${generateGenreChart(insights.genre_distribution || {})}
+                        </div>
+                        <div class="chart-labels">
+                            <span>Least</span>
+                            <span>Most</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Discovery Score -->
+                <div class="insight-card">
+                    <div class="insight-card-header">
+                        <div class="insight-icon">🔍</div>
+                        <h3 class="insight-title">Discovery Score</h3>
+                    </div>
+                    <div class="insight-value">${insights.discovery_score || 0}%</div>
+                    <div class="insight-description">How much new music you've discovered</div>
+                    <div class="insight-trend">
+                        <span class="trend-indicator ${getTrendClass(insights.discovery_trend)}">
+                            ${getTrendIcon(insights.discovery_trend)} ${insights.discovery_trend || 0}%
+                        </span>
+                        <span>vs previous period</span>
+                    </div>
+                </div>
+
+                <!-- Top Artists -->
+                <div class="insight-card" style="grid-column: 1 / -1;">
+                    <div class="insight-card-header">
+                        <div class="insight-icon">👤</div>
+                        <h3 class="insight-title">Top Artists</h3>
+                    </div>
+                    <div class="top-artists-list">
+                        ${generateTopArtists(insights.top_artists || [])}
+                    </div>
+                </div>
+
+                <!-- Listening Pattern -->
+                <div class="insight-card" style="grid-column: 1 / -1;">
+                    <div class="insight-card-header">
+                        <div class="insight-icon">📅</div>
+                        <h3 class="insight-title">Weekly Listening Pattern</h3>
+                    </div>
+                    <div class="insight-description">Your most active listening days</div>
+                    <div class="listening-pattern">
+                        ${generateWeeklyPattern(insights.weekly_pattern || {})}
+                    </div>
+                </div>
+
+                <!-- Music Mood -->
+                <div class="insight-card">
+                    <div class="insight-card-header">
+                        <div class="insight-icon">😊</div>
+                        <h3 class="insight-title">Music Mood</h3>
+                    </div>
+                    <div class="insight-value">${insights.dominant_mood || 'Balanced'}</div>
+                    <div class="insight-description">Your overall music mood</div>
+                    <div class="insight-chart">
+                        <div class="chart-bar">
+                            ${generateMoodChart(insights.mood_distribution || {})}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Listening Streak -->
+                <div class="insight-card">
+                    <div class="insight-card-header">
+                        <div class="insight-icon">🔥</div>
+                        <h3 class="insight-title">Listening Streak</h3>
+                    </div>
+                    <div class="insight-value">${insights.listening_streak || 0}</div>
+                    <div class="insight-description">Days in a row you've listened to music</div>
+                    <div class="insight-trend">
+                        <span class="trend-indicator ${getTrendClass(insights.streak_trend)}">
+                            ${getTrendIcon(insights.streak_trend)} ${insights.streak_trend || 0}%
+                        </span>
+                        <span>vs previous period</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateGenreChart(distribution) {
+            const genres = Object.keys(distribution);
+            const maxValue = Math.max(...Object.values(distribution));
+            
+            return genres.map(genre => {
+                const height = (distribution[genre] / maxValue) * 100;
+                return `<div class="chart-bar-item" style="height: ${height}%" title="${genre}: ${distribution[genre]} plays"></div>`;
+            }).join('');
+        }
+
+        function generateMoodChart(distribution) {
+            const moods = Object.keys(distribution);
+            const maxValue = Math.max(...Object.values(distribution));
+            
+            return moods.map(mood => {
+                const height = (distribution[mood] / maxValue) * 100;
+                return `<div class="chart-bar-item" style="height: ${height}%" title="${mood}: ${distribution[mood]} plays"></div>`;
+            }).join('');
+        }
+
+        function generateTopArtists(artists) {
+            if (artists.length === 0) {
+                return '<div class="insights-empty"><p>No artist data available</p></div>';
+            }
+            
+            return artists.slice(0, 5).map((artist, index) => `
+                <div class="artist-item">
+                    <div class="artist-rank">${index + 1}</div>
+                    <div class="artist-image">
+                        ${artist.image ? `<img src="${artist.image}" alt="${escapeHtml(artist.name)}">` : '🎤'}
+                    </div>
+                    <div class="artist-info">
+                        <div class="artist-name">${escapeHtml(artist.name)}</div>
+                        <div class="artist-plays">${artist.plays || 0} plays</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function generateWeeklyPattern(pattern) {
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const maxValue = Math.max(...Object.values(pattern));
+            
+            return days.map(day => {
+                const value = pattern[day.toLowerCase()] || 0;
+                const intensity = maxValue > 0 ? (value / maxValue) * 100 : 0;
+                const isActive = intensity > 20;
+                
+                return `<div class="pattern-day ${isActive ? 'active' : ''}" style="opacity: ${intensity / 100}" title="${day}: ${value} plays"></div>`;
+            }).join('');
+        }
+
+        function formatListeningTime(ms) {
+            const hours = Math.floor(ms / 3600000);
+            const minutes = Math.floor((ms % 3600000) / 60000);
+            
+            if (hours > 0) {
+                return `${hours}h ${minutes}m`;
+            } else {
+                return `${minutes}m`;
+            }
+        }
+
+        function getTrendClass(trend) {
+            if (trend > 0) return 'trend-up';
+            if (trend < 0) return 'trend-down';
+            return 'trend-neutral';
+        }
+
+        function getTrendIcon(trend) {
+            if (trend > 0) return '↗️';
+            if (trend < 0) return '↘️';
+            return '➡️';
+        }
+
+        function filterInsights(period) {
+            // Update filter buttons
+            document.querySelectorAll('.insight-filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-period="${period}"]`).classList.add('active');
+            
+            currentInsightsPeriod = period;
+            loadListeningInsights();
+        }
+
+        function displayInsightsEmpty() {
+            const insightsGrid = document.getElementById('insightsGrid');
+            insightsGrid.innerHTML = `
+                <div class="insights-empty">
+                    <div class="insights-empty-icon">📊</div>
+                    <h3>No Insights Yet</h3>
+                    <p>Start listening to music to see your personalized insights!</p>
+                    <button class="btn btn-primary" onclick="switchGenre('all')">Discover Music</button>
+                </div>
+            `;
+        }
+
+        function displayInsightsError() {
+            const insightsGrid = document.getElementById('insightsGrid');
+            insightsGrid.innerHTML = `
+                <div class="insights-empty">
+                    <div class="insights-empty-icon">⚠️</div>
+                    <h3>Error Loading Insights</h3>
+                    <p>Something went wrong while loading your insights.</p>
+                    <button class="btn btn-primary" onclick="loadListeningInsights()">Try Again</button>
+                </div>
+            `;
         }
 
         // Enhanced switchGenre function
