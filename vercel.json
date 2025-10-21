@@ -17,36 +17,36 @@
     "api/privacy.js": {
       "maxDuration": 30
     },
-            "api/trending.js": {
-                "maxDuration": 60
-            },
-            "api/search.js": {
-                "maxDuration": 30
-            },
+    "api/trending.js": {
+      "maxDuration": 60
+    },
+    "api/search.js": {
+      "maxDuration": 30
+    },
     "api/auth/google/callback.js": {
       "maxDuration": 30
     },
-            "api/auth/apple/callback.js": {
-              "maxDuration": 30
-            },
-            "api/posts.js": {
-              "maxDuration": 30
-            },
-            "api/friends.js": {
-              "maxDuration": 30
-            },
-            "api/profile.js": {
-              "maxDuration": 30
-            },
-            "api/activity-history.js": {
-              "maxDuration": 30
-            },
-            "api/recommendations.js": {
-              "maxDuration": 30
-            },
-            "api/playlists.js": {
-              "maxDuration": 30
-            },
+    "api/auth/apple/callback.js": {
+      "maxDuration": 30
+    },
+    "api/posts.js": {
+      "maxDuration": 30
+    },
+    "api/friends.js": {
+      "maxDuration": 30
+    },
+    "api/profile.js": {
+      "maxDuration": 30
+    },
+    "api/activity-history.js": {
+      "maxDuration": 30
+    },
+    "api/recommendations.js": {
+      "maxDuration": 30
+    },
+    "api/playlists.js": {
+      "maxDuration": 30
+    }
   },
   "crons": [{
     "path": "/api/trending?refresh=true",
