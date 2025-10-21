@@ -26,13 +26,25 @@
     "api/auth/google/callback.js": {
       "maxDuration": 30
     },
-    "api/auth/apple/callback.js": {
-      "maxDuration": 30
-    }
+            "api/auth/apple/callback.js": {
+              "maxDuration": 30
+            },
+            "api/posts.js": {
+              "maxDuration": 30
+            },
+            "api/engagement.js": {
+              "maxDuration": 30
+            },
+            "api/seed-trending-posts.js": {
+              "maxDuration": 60
+            }
   },
   "crons": [{
     "path": "/api/trending?refresh=true",
     "schedule": "0 2 * * *"
+  }, {
+    "path": "/api/seed-trending-posts",
+    "schedule": "0 3 * * *"
   }],
   "rewrites": [
     {
