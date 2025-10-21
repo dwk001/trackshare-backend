@@ -1,11 +1,49 @@
 const { kv } = require('@vercel/kv');
 
-// Spotify API credentials (these should be in environment variables)
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 
-// Get Spotify access token using client credentials
+// Genre-specific Spotify playlists
+const GENRE_PLAYLISTS = {
+  all: [
+    '37i9dQZF1DXcBWIGoYBM5M', // Today's Top Hits
+    '37i9dQZF1DX0XUsuxWHRQd', // RapCaviar
+    '37i9dQZF1DWXRqgorJj26U'  // Rock Classics
+  ],
+  pop: [
+    '37i9dQZF1DXcBWIGoYBM5M', // Today's Top Hits
+    '37i9dQZF1DX4JAvHpjipBk', // New Music Friday
+    '37i9dQZF1DX10zKzsJ2jva'  // Summer Hits
+  ],
+  rock: [
+    '37i9dQZF1DWXRqgorJj26U', // Rock Classics
+    '37i9dQZF1DX3oM43CtKnRV', // Rock This
+    '37i9dQZF1DWWwzidNQX6jx'  // All Out 2000s
+  ],
+  'hip-hop': [
+    '37i9dQZF1DX0XUsuxWHRQd', // RapCaviar
+    '37i9dQZF1DWY4xHQp97fN6', // Get Turnt
+    '37i9dQZF1DX2RxBh64BHjQ'  // Feelin' Myself
+  ],
+  country: [
+    '37i9dQZF1DX1lVhptIYRda', // Hot Country
+    '37i9dQZF1DWZBCPUIUs2iR', // Country Gold
+    '37i9dQZF1DX93D9SC7vVVB'  // Wild Country
+  ],
+  electronic: [
+    '37i9dQZF1DX4dyzvuaRJ0n', // mint
+    '37i9dQZF1DX6J5NfMJS675', // Dance Rising
+    '37i9dQZF1DX8tZsk68tuDw'  // Electronic Circus
+  ]
+};
+
 async function getSpotifyAccessToken() {
+  // Check cache first
+  try {
+    const cached = await kv.get('spotify:access_token');
+    if (cached) return cached;
+  } catch (e) {}
+  
   const auth = Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64');
   
   const response = await fetch('https://accounts.spotify.com/api/token', {
@@ -18,73 +56,72 @@ async function getSpotifyAccessToken() {
   });
   
   const data = await response.json();
+  
+  // Cache for 55 minutes (tokens valid for 1 hour)
+  if (data.access_token) {
+    try {
+      await kv.setex('spotify:access_token', 3300, data.access_token);
+    } catch (e) {}
+  }
+  
   return data.access_token;
 }
 
-// Fetch trending tracks using Spotify's Browse API (New Releases)
-async function fetchTrendingTracks() {
-  try {
-    const accessToken = await getSpotifyAccessToken();
-    console.log('Got access token:', accessToken ? 'Yes' : 'No');
-    
-    // Use Browse API to get new releases instead of playlists
-    // This doesn't require special permissions
-    const response = await fetch(`https://api.spotify.com/v1/browse/new-releases?limit=20`, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`
-      }
-    });
-    
-    const data = await response.json();
-    
-    console.log('Spotify API response status:', response.status);
-    
-    // Check if response has albums
-    if (!data || !data.albums || !data.albums.items) {
-      console.log('No items in response:', JSON.stringify(data, null, 2));
-      return [];
-    }
-    
-    // Get tracks from the first few albums
-    const tracks = [];
-    for (const album of data.albums.items.slice(0, 10)) {
-      try {
-        const albumResponse = await fetch(`https://api.spotify.com/v1/albums/${album.id}/tracks?limit=2`, {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
-        });
-        
-        const albumData = await albumResponse.json();
-        
-        if (albumData && albumData.items) {
-          for (const track of albumData.items) {
-            tracks.push({
-              id: track.id,
-              title: track.name,
-              artist: track.artists[0].name,
-              artwork: album.images[0]?.url || null,
-              url: track.external_urls.spotify,
-              genre: 'new-release',
-              popularity: album.popularity || 50
-            });
-            
-            if (tracks.length >= 20) break;
-          }
+async function fetchGenreTracks(genre = 'all', limit = 20) {
+  const accessToken = await getSpotifyAccessToken();
+  const playlistIds = GENRE_PLAYLISTS[genre] || GENRE_PLAYLISTS.all;
+  
+  const allTracks = [];
+  
+  for (const playlistId of playlistIds) {
+    try {
+      const response = await fetch(
+        `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=10`,
+        {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
         }
+      );
+      
+      const data = await response.json();
+      
+      if (data && data.items) {
+        const tracks = data.items
+          .filter(item => item.track && !item.track.is_local)
+          .map(item => ({
+            id: item.track.id,
+            title: item.track.name,
+            artist: item.track.artists[0].name,
+            artwork: item.track.album.images[0]?.url,
+            url: item.track.external_urls.spotify,
+            album: item.track.album.name,
+            popularity: item.track.popularity,
+            previewUrl: item.track.preview_url,
+            durationMs: item.track.duration_ms,
+            releaseDate: item.track.album.release_date,
+            genre: genre,
+            explicit: item.track.explicit
+          }));
         
-        if (tracks.length >= 20) break;
-      } catch (err) {
-        console.error('Error fetching album tracks:', err);
+        allTracks.push(...tracks);
       }
+    } catch (error) {
+      console.error(`Error fetching playlist ${playlistId}:`, error);
     }
     
-    console.log(`Successfully fetched ${tracks.length} tracks`);
-    return tracks;
-  } catch (error) {
-    console.error('Error fetching trending tracks:', error);
-    return [];
+    if (allTracks.length >= limit) break;
   }
+  
+  // Shuffle and return requested number of tracks
+  return shuffleArray(allTracks).slice(0, limit);
+}
+
+function shuffleArray(array) {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
 }
 
 // Vercel serverless function handler
@@ -100,6 +137,8 @@ module.exports = async (req, res) => {
     return;
   }
   
+  const { genre = 'all' } = req.query;
+  
   // Handle cron job request to refresh cache
   if (req.query.refresh === 'true') {
     const authHeader = req.headers['authorization'];
@@ -110,7 +149,7 @@ module.exports = async (req, res) => {
     
     try {
       console.log('Starting trending music cache refresh...');
-      const tracks = await fetchTrendingTracks();
+      const tracks = await fetchGenreTracks(genre, 20);
       
       if (tracks.length === 0) {
         console.log('No tracks fetched, skipping cache update');
@@ -120,16 +159,17 @@ module.exports = async (req, res) => {
         });
       }
       
-      await kv.setex('trending:music:latest', 86400, JSON.stringify({
+      await kv.setex(`trending:music:${genre}`, 86400, JSON.stringify({
         tracks,
         cached_at: new Date().toISOString()
       }));
       
-      console.log(`Successfully cached ${tracks.length} tracks`);
+      console.log(`Successfully cached ${tracks.length} tracks for genre ${genre}`);
       
       return res.json({ 
         success: true, 
         cached: tracks.length, 
+        genre: genre,
         timestamp: new Date().toISOString()
       });
     } catch (error) {
@@ -141,39 +181,37 @@ module.exports = async (req, res) => {
     }
   }
   
+  // Check cache first
   try {
-    // Try to get cached data first
-    let cachedData;
-    try {
-      cachedData = await kv.get('trending:music:latest');
-    } catch (kvError) {
-      console.log('KV cache error:', kvError);
-    }
-    
-    if (cachedData) {
-      const data = typeof cachedData === 'string' ? JSON.parse(cachedData) : cachedData;
-      console.log('Returning cached trending music from:', data.cached_at);
+    const cached = await kv.get(`trending:music:${genre}`);
+    if (cached) {
+      const data = typeof cached === 'string' ? JSON.parse(cached) : cached;
+      console.log(`Returning cached ${genre} music from:`, data.cached_at);
       return res.json({
         success: true,
         tracks: data.tracks,
+        genre: genre,
         cached_at: data.cached_at,
         from_cache: true,
         timestamp: new Date().toISOString()
       });
     }
+  } catch (kvError) {
+    console.log('Cache miss, fetching fresh data');
+  }
+  
+  // Fetch fresh data
+  try {
+    const tracks = await fetchGenreTracks(genre, 20);
     
-    // If no cache, fetch fresh data
-    console.log('Cache miss, fetching fresh data from Spotify');
-    const tracks = await fetchTrendingTracks();
-    
-    // Cache the fresh data for 24 hours
+    // Cache for 24 hours
     if (tracks.length > 0) {
       try {
-        await kv.setex('trending:music:latest', 86400, JSON.stringify({
+        await kv.setex(`trending:music:${genre}`, 86400, JSON.stringify({
           tracks,
           cached_at: new Date().toISOString()
         }));
-        console.log('Cached fresh trending music');
+        console.log(`Cached fresh ${genre} music`);
       } catch (kvError) {
         console.error('Error caching data:', kvError);
       }
@@ -182,6 +220,7 @@ module.exports = async (req, res) => {
     res.json({
       success: true,
       tracks,
+      genre: genre,
       from_cache: false,
       timestamp: new Date().toISOString()
     });

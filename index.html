@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>TrackShare - Discover & Share Music</title>
     <meta property="og:title" content="TrackShare - Discover & Share Music">
     <meta property="og:description" content="Discover trending music and share it across all platforms">
@@ -78,6 +81,276 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
+        
+        /* Touch targets minimum 44x44px for mobile */
+        .btn, .tab, a {
+            min-height: 44px;
+            min-width: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Smooth scrolling on mobile */
+        html {
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Pull-to-refresh indicator */
+        .ptr-indicator {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem;
+            background: white;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 1000;
+        }
+        
+        .ptr-indicator.active {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateX(-50%) translateY(-100%); }
+            to { transform: translateX(-50%) translateY(0); }
+        }
+        
+        /* Loading spinner */
+        .loading-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: #666;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #666;
+        }
+        
+        .empty-state .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .empty-state .suggestion {
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+        
+        /* Track popularity bars */
+        .track-popularity {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+        
+        /* Explicit badge */
+        .explicit-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        /* Play overlay */
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .track-card:hover .play-overlay {
+            opacity: 1;
+        }
+        
+        .play-button {
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .play-button:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Load more container */
+        .load-more-container {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        /* Responsive breakpoints - Mobile First */
+        
+        /* Extra Small (Mobile) - 320px to 575px */
+        @media (max-width: 575px) {
+            .feed-container { 
+                padding: 0.5rem; 
+            }
+            
+            .feed-card {
+                width: 100%;
+                margin-bottom: 1rem;
+            }
+            
+            .track-artwork {
+                height: 300px; /* Full width square */
+            }
+            
+            .genre-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+                padding: 0 1rem;
+            }
+            
+            .tab {
+                display: inline-block;
+                min-width: 80px;
+                font-size: 0.875rem;
+                margin-right: 0.5rem;
+            }
+            
+            .music-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .hero {
+                padding: 2rem 1rem;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .search-bar {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .search-bar input {
+                width: 100%;
+            }
+        }
+        
+        /* Small (Large Mobile) - 576px to 767px */
+        @media (min-width: 576px) and (max-width: 767px) {
+            .music-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            
+            .feed-card {
+                max-width: 100%;
+            }
+        }
+        
+        /* Medium (Tablet) - 768px to 991px */
+        @media (min-width: 768px) and (max-width: 991px) {
+            .music-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1.5rem;
+            }
+            
+            .navbar {
+                padding: 1rem 2rem;
+            }
+            
+            .feed-container {
+                max-width: 720px;
+                margin: 0 auto;
+            }
+        }
+        
+        /* Large (Desktop) - 992px to 1199px */
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .music-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 2rem;
+            }
+            
+            .feed-container {
+                max-width: 960px;
+                margin: 0 auto;
+            }
+            
+            /* Two-column layout for feed + sidebar */
+            .main-layout {
+                display: grid;
+                grid-template-columns: 1fr 300px;
+                gap: 2rem;
+            }
+        }
+        
+        /* Extra Large (Large Desktop) - 1200px+ */
+        @media (min-width: 1200px) {
+            .music-grid {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 2rem;
+            }
+            
+            .feed-container {
+                max-width: 1140px;
+                margin: 0 auto;
+            }
+            
+            .main-layout {
+                display: grid;
+                grid-template-columns: 300px 1fr 300px; /* sidebar, feed, recommendations */
+                gap: 2rem;
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+        }
         .hero {
             text-align: center;
             padding: 4rem 2rem;
@@ -132,11 +405,12 @@
             margin-bottom: 2rem;
             color: #333;
         }
-        .platform-tabs {
+        .genre-tabs {
             display: flex;
             justify-content: center;
             gap: 1rem;
             margin-bottom: 2rem;
+            flex-wrap: wrap;
         }
         .tab {
             padding: 0.75rem 1.5rem;
@@ -177,6 +451,8 @@
             justify-content: center;
             font-size: 3rem;
             color: #999;
+            position: relative;
+            overflow: hidden;
         }
         .track-artwork img {
             width: 100%;
@@ -311,7 +587,7 @@
         <section class="discovery-section">
             <div class="container">
                 <h2 class="section-title">Trending Now</h2>
-                <div class="platform-tabs">
+                <div class="genre-tabs">
                     <div class="tab active" data-genre="all" onclick="switchGenre('all')">All Genres</div>
                     <div class="tab" data-genre="pop" onclick="switchGenre('pop')">Pop</div>
                     <div class="tab" data-genre="rock" onclick="switchGenre('rock')">Rock</div>
@@ -375,6 +651,10 @@
     <script>
         let currentGenre = 'all';
         let currentTrack = null;
+        let searchDebounceTimer = null;
+        let currentSearchQuery = '';
+        let searchOffset = 0;
+        let genreCache = {}; // Client-side cache for instant switching
         
         // OAuth Client IDs
         const GOOGLE_CLIENT_ID = '150328378525-ldggejup0i37ntgo3954aatocrgtrada.apps.googleusercontent.com';
@@ -396,56 +676,23 @@
         // Fetch trending music from API
         async function fetchTrendingMusic() {
             if (isLoadingTrending) return;
-            
             isLoadingTrending = true;
             
             try {
-                const response = await fetch('/api/trending');
+                const response = await fetch('/api/trending?genre=all');
                 const data = await response.json();
                 
                 if (data.success && data.tracks) {
-                    // Clear existing data
-                    trendingMusic.all = [];
-                    trendingMusic.pop = [];
-                    trendingMusic.rock = [];
-                    trendingMusic['hip-hop'] = [];
-                    trendingMusic.country = [];
-                    trendingMusic.electronic = [];
-                    
-                    // Add all tracks to 'all' category
-                    trendingMusic.all = data.tracks;
-                    
-                    // For now, we'll categorize based on artist name patterns
-                    // In a real implementation, you'd use Spotify's genre data
-                    data.tracks.forEach(track => {
-                        const artistLower = track.artist.toLowerCase();
-                        
-                        if (artistLower.includes('taylor') || artistLower.includes('swift') || 
-                            artistLower.includes('ed sheeran') || artistLower.includes('weeknd') ||
-                            artistLower.includes('ariana') || artistLower.includes('justin')) {
-                            trendingMusic.pop.push(track);
-                        } else if (artistLower.includes('queen') || artistLower.includes('guns') ||
-                                   artistLower.includes('eagles') || artistLower.includes('led zeppelin')) {
-                            trendingMusic.rock.push(track);
-                        } else if (artistLower.includes('drake') || artistLower.includes('kendrick') ||
-                                   artistLower.includes('travis') || artistLower.includes('kanye')) {
-                            trendingMusic['hip-hop'].push(track);
-                        } else if (artistLower.includes('country') || artistLower.includes('lil nas')) {
-                            trendingMusic.country.push(track);
-                        } else {
-                            trendingMusic.electronic.push(track);
-                        }
-                    });
-                    
-                    // Load the current genre
-                    loadTrendingMusic(currentGenre);
+                    // Store in cache for instant switching
+                    genreCache.all = data.tracks;
+                    displayTracks(data.tracks);
                 } else {
                     console.error('Failed to fetch trending music:', data.error);
-                    showFallbackMusic();
+                    showError('Failed to load trending music');
                 }
             } catch (error) {
                 console.error('Error fetching trending music:', error);
-                showFallbackMusic();
+                showError('Network error loading music');
             } finally {
                 isLoadingTrending = false;
             }
@@ -474,17 +721,91 @@
             loadTrendingMusic(currentGenre);
         }
 
-        function switchGenre(genre) {
+        async function switchGenre(genre) {
             currentGenre = genre;
             
-            // Update tab styles
+            // Update tab visual state
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
             document.querySelector(`[data-genre="${genre}"]`).classList.add('active');
             
-            // Load music for the genre
-            loadTrendingMusic(genre);
+            // Show loading state
+            showLoadingIndicator();
+            
+            // Check client-side cache first
+            if (genreCache[genre]) {
+                displayTracks(genreCache[genre]);
+                hideLoadingIndicator();
+                return;
+            }
+            
+            // Fetch from API
+            try {
+                const response = await fetch(`/api/trending?genre=${genre}`);
+                const data = await response.json();
+                
+                if (data.success && data.tracks) {
+                    genreCache[genre] = data.tracks;
+                    displayTracks(data.tracks);
+                } else {
+                    showError('Failed to load genre music');
+                }
+            } catch (error) {
+                console.error('Genre fetch error:', error);
+                showError('Network error');
+            } finally {
+                hideLoadingIndicator();
+            }
+        }
+
+        function displayTracks(tracks) {
+            const grid = document.getElementById('musicGrid');
+            
+            if (tracks.length === 0) {
+                grid.innerHTML = '<div class="empty-state">No tracks found</div>';
+                return;
+            }
+            
+            grid.innerHTML = tracks.map(track => `
+                <div class="track-card" data-track-id="${track.id}">
+                    <div class="track-artwork">
+                        <img src="${track.artwork}" 
+                             alt="${track.title}"
+                             loading="lazy"
+                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjBGMEYwIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7wn5GVPzwvdGV4dD4KPC9zdmc+'"
+                             onload="this.classList.add('loaded')">
+                        <div class="play-overlay">
+                            <button class="play-button" onclick="playTrack('${escapeJs(track.url)}', '${escapeJs(track.title)}', '${escapeJs(track.artist)}')">
+                                ▶️
+                            </button>
+                        </div>
+                        ${track.explicit ? '<div class="explicit-badge">E</div>' : ''}
+                    </div>
+                    <div class="track-info">
+                        <div class="track-title">${escapeHtml(track.title)}</div>
+                        <div class="track-artist">${escapeHtml(track.artist)}</div>
+                        ${track.popularity ? `<div class="track-popularity">${getPopularityBars(track.popularity)}</div>` : ''}
+                    </div>
+                    <button class="track-action-btn" onclick="playTrack('${escapeJs(track.url)}', '${escapeJs(track.title)}', '${escapeJs(track.artist)}')">
+                        Play & Share
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function showError(message) {
+            const grid = document.getElementById('musicGrid');
+            grid.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">⚠️</div>
+                    <h3>Error</h3>
+                    <p>${message}</p>
+                    <button class="btn btn-primary" onclick="switchGenre('${currentGenre}')">
+                        Try Again
+                    </button>
+                </div>
+            `;
         }
 
         function loadTrendingMusic(genre) {
@@ -761,10 +1082,189 @@
             }
         }
 
+        }
+
+        // Enhanced search functionality
+        function setupSearchHandlers() {
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.querySelector('.btn-search');
+            
+            // Debounced search on typing
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.trim();
+                
+                // Clear previous timer
+                clearTimeout(searchDebounceTimer);
+                
+                if (query.length === 0) {
+                    // Back to trending
+                    switchGenre(currentGenre);
+                    return;
+                }
+                
+                if (query.length < 2) {
+                    return; // Wait for at least 2 characters
+                }
+                
+                // Debounce 300ms
+                searchDebounceTimer = setTimeout(() => {
+                    performSearch(query);
+                }, 300);
+            });
+            
+            // Immediate search on button click
+            searchButton.addEventListener('click', () => {
+                const query = searchInput.value.trim();
+                if (query) {
+                    performSearch(query);
+                }
+            });
+            
+            // Search on Enter key
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const query = searchInput.value.trim();
+                    if (query) {
+                        clearTimeout(searchDebounceTimer);
+                        performSearch(query);
+                    }
+                }
+            });
+        }
+
+        async function performSearch(query) {
+            currentSearchQuery = query;
+            searchOffset = 0;
+            
+            // Check if it's a URL
+            if (query.startsWith('http://') || query.startsWith('https://')) {
+                resolveUrl(query);
+                return;
+            }
+            
+            // Show loading
+            showLoadingIndicator();
+            updateSectionTitle('Searching...');
+            
+            try {
+                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&limit=20`);
+                const data = await response.json();
+                
+                if (data.success && data.tracks && data.tracks.length > 0) {
+                    displaySearchResults(data.tracks, data.hasMore);
+                    updateSectionTitle(`Search Results for "${query}" (${data.total.toLocaleString()} found)`);
+                } else {
+                    displayEmptyState(
+                        'No Results',
+                        `We couldn't find any tracks matching "${query}".`,
+                        'Try a different search term or browse trending music.'
+                    );
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                displayErrorState(
+                    'Search Failed',
+                    'Something went wrong while searching.',
+                    'Please try again or browse trending music.'
+                );
+            } finally {
+                hideLoadingIndicator();
+            }
+        }
+
+        function displaySearchResults(tracks, hasMore) {
+            const grid = document.getElementById('musicGrid');
+            
+            grid.innerHTML = tracks.map(track => `
+                <div class="track-card search-result" data-track-id="${track.id}">
+                    <div class="track-artwork">
+                        <img src="${track.artwork || track.artworkMedium}" 
+                             alt="${track.title}"
+                             loading="lazy"
+                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjBGMEYwIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7wn5GVPzwvdGV4dD4KPC9zdmc+'"
+                             onload="this.classList.add('loaded')">
+                        <div class="play-overlay">
+                            <button class="play-button" onclick="playTrack('${escapeJs(track.url)}', '${escapeJs(track.title)}', '${escapeJs(track.artist)}')">
+                                ▶️
+                            </button>
+                        </div>
+                        ${track.explicit ? '<div class="explicit-badge">E</div>' : ''}
+                    </div>
+                    <div class="track-info">
+                        <div class="track-title">${escapeHtml(track.title)}</div>
+                        <div class="track-artist">${escapeHtml(track.artist)}</div>
+                        <div class="track-meta">
+                            <span class="track-album">${escapeHtml(track.album)}</span>
+                            ${track.popularity ? `<span class="track-popularity">${getPopularityBars(track.popularity)}</span>` : ''}
+                        </div>
+                    </div>
+                    <button class="track-action-btn" onclick="playTrack('${escapeJs(track.url)}', '${escapeJs(track.title)}', '${escapeJs(track.artist)}')">
+                        Play & Share
+                    </button>
+                </div>
+            `).join('');
+            
+            // Add "Load More" button if there are more results
+            if (hasMore) {
+                grid.innerHTML += `
+                    <div class="load-more-container">
+                        <button class="btn btn-secondary" onclick="loadMoreSearchResults()">
+                            Load More Results
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function getPopularityBars(popularity) {
+            const bars = Math.ceil(popularity / 20); // 0-5 bars
+            return '🔥'.repeat(bars);
+        }
+
+        function escapeJs(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function showLoadingIndicator() {
+            const grid = document.getElementById('musicGrid');
+            grid.innerHTML = `
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Loading...</p>
+                </div>
+            `;
+        }
+
+        function hideLoadingIndicator() {
+            // Loading indicator will be replaced by content
+        }
+
+        function updateSectionTitle(title) {
+            const titleElement = document.querySelector('.section-title');
+            if (titleElement) {
+                titleElement.textContent = title;
+            }
+        }
+
+        function searchMusic() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (query) {
+                performSearch(query);
+            }
+        }
+
         // Load initial music
         document.addEventListener('DOMContentLoaded', () => {
             checkAuthCallback();
             checkExistingAuth();
+            setupSearchHandlers(); // Initialize enhanced search
             fetchTrendingMusic(); // Load dynamic trending music
         });
 
