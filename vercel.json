@@ -46,7 +46,7 @@
             },
             "api/playlists.js": {
               "maxDuration": 30
-            }
+            },
   },
   "crons": [{
     "path": "/api/trending?refresh=true",

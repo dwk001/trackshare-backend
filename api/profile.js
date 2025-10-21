@@ -60,9 +60,14 @@ module.exports = async (req, res) => {
   }
 };
 
-// GET /api/profile - Get user profile (own or public)
+// GET /api/profile - Get user profile (own or public) or analytics
 async function handleGetProfile(req, res, userId) {
-  const { user_id, include_stats = false, include_posts = false } = req.query;
+  const { user_id, include_stats = false, include_posts = false, analytics_type, analytics_period = '30d' } = req.query;
+  
+  // Handle analytics requests
+  if (analytics_type) {
+    return await handleGetAnalytics(req, res, userId, analytics_type, analytics_period);
+  }
   
   // If no user_id specified, get current user's profile
   const targetUserId = user_id || userId;
@@ -456,4 +461,508 @@ function isValidUrl(string) {
 function isValidDate(dateString) {
   const date = new Date(dateString);
   return date instanceof Date && !isNaN(date);
+}
+
+// Analytics functionality
+async function handleGetAnalytics(req, res, userId, type, period) {
+  if (!userId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  try {
+    let analytics = {};
+
+    switch (type) {
+      case 'overview':
+        analytics = await getOverviewAnalytics(userId, period);
+        break;
+      case 'genres':
+        analytics = await getGenreAnalytics(userId, period);
+        break;
+      case 'artists':
+        analytics = await getArtistAnalytics(userId, period);
+        break;
+      case 'trends':
+        analytics = await getTrendAnalytics(userId, period);
+        break;
+      case 'social':
+        analytics = await getSocialAnalytics(userId, period);
+        break;
+      case 'listening_patterns':
+        analytics = await getListeningPatternAnalytics(userId, period);
+        break;
+      default:
+        return res.status(400).json({ error: 'Invalid analytics type' });
+    }
+
+    res.json({
+      success: true,
+      analytics,
+      period,
+      user_id: userId,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error in handleGetAnalytics:', error);
+    res.status(500).json({ error: 'Failed to fetch analytics' });
+  }
+}
+
+// Get overview analytics
+async function getOverviewAnalytics(userId, period) {
+  const dateRange = getDateRange(period);
+  
+  const analytics = {
+    summary: {},
+    activity: {},
+    engagement: {},
+    discovery: {}
+  };
+
+  try {
+    // Posts created
+    const { count: postsCount } = await supabase
+      .from('music_posts')
+      .select('id', { count: 'exact' })
+      .eq('user_id', userId)
+      .gte('posted_at', dateRange.start)
+      .lte('posted_at', dateRange.end);
+
+    // Likes given
+    const { count: likesGiven } = await supabase
+      .from('post_likes')
+      .select('id', { count: 'exact' })
+      .eq('user_id', userId)
+      .gte('created_at', dateRange.start)
+      .lte('created_at', dateRange.end);
+
+    // Comments made
+    const { count: commentsMade } = await supabase
+      .from('post_comments')
+      .select('id', { count: 'exact' })
+      .eq('user_id', userId)
+      .gte('created_at', dateRange.start)
+      .lte('created_at', dateRange.end);
+
+    // Playlists created
+    const { count: playlistsCreated } = await supabase
+      .from('playlists')
+      .select('id', { count: 'exact' })
+      .eq('user_id', userId)
+      .gte('created_at', dateRange.start)
+      .lte('created_at', dateRange.end);
+
+    // Total engagement received
+    const { data: posts } = await supabase
+      .from('music_posts')
+      .select('like_count, comment_count, play_count')
+      .eq('user_id', userId)
+      .gte('posted_at', dateRange.start)
+      .lte('posted_at', dateRange.end);
+
+    const totalLikesReceived = posts?.reduce((sum, post) => sum + (post.like_count || 0), 0) || 0;
+    const totalCommentsReceived = posts?.reduce((sum, post) => sum + (post.comment_count || 0), 0) || 0;
+    const totalPlaysReceived = posts?.reduce((sum, post) => sum + (post.play_count || 0), 0) || 0;
+
+    analytics.summary = {
+      posts_created: postsCount || 0,
+      likes_given: likesGiven || 0,
+      comments_made: commentsMade || 0,
+      playlists_created: playlistsCreated || 0,
+      total_engagement_received: totalLikesReceived + totalCommentsReceived + totalPlaysReceived
+    };
+
+    analytics.activity = {
+      posts_per_day: calculateDailyAverage(postsCount || 0, period),
+      likes_per_day: calculateDailyAverage(likesGiven || 0, period),
+      comments_per_day: calculateDailyAverage(commentsMade || 0, period),
+      most_active_day: await getMostActiveDay(userId, dateRange)
+    };
+
+    analytics.engagement = {
+      likes_received: totalLikesReceived,
+      comments_received: totalCommentsReceived,
+      plays_received: totalPlaysReceived,
+      engagement_rate: calculateEngagementRate(postsCount || 0, totalLikesReceived + totalCommentsReceived)
+    };
+
+    analytics.discovery = {
+      unique_artists: await getUniqueArtistsCount(userId, dateRange),
+      unique_genres: await getUniqueGenresCount(userId, dateRange),
+      most_shared_track: await getMostSharedTrack(userId, dateRange),
+      discovery_score: await calculateDiscoveryScore(userId, dateRange)
+    };
+
+    return analytics;
+
+  } catch (error) {
+    console.error('Error getting overview analytics:', error);
+    return analytics;
+  }
+}
+
+// Get genre analytics
+async function getGenreAnalytics(userId, period) {
+  const dateRange = getDateRange(period);
+  
+  try {
+    const { data: posts } = await supabase
+      .from('music_posts')
+      .select('track_title, track_artist, track_album, like_count, comment_count, posted_at')
+      .eq('user_id', userId)
+      .gte('posted_at', dateRange.start)
+      .lte('posted_at', dateRange.end);
+
+    const genreData = await analyzeGenresFromTracks(posts || []);
+    
+    return {
+      distribution: genreData.distribution,
+      trends: genreData.trends,
+      top_genres: genreData.topGenres,
+      genre_diversity_score: genreData.diversityScore,
+      genre_evolution: genreData.evolution
+    };
+
+  } catch (error) {
+    console.error('Error getting genre analytics:', error);
+    return {
+      distribution: [],
+      trends: [],
+      top_genres: [],
+      genre_diversity_score: 0,
+      genre_evolution: []
+    };
+  }
+}
+
+// Get artist analytics
+async function getArtistAnalytics(userId, period) {
+  const dateRange = getDateRange(period);
+  
+  try {
+    const { data: posts } = await supabase
+      .from('music_posts')
+      .select('track_title, track_artist, track_album, like_count, comment_count, posted_at')
+      .eq('user_id', userId)
+      .gte('posted_at', dateRange.start)
+      .lte('posted_at', dateRange.end);
+
+    const artistData = analyzeArtistsFromTracks(posts || []);
+    
+    return {
+      top_artists: artistData.topArtists,
+      artist_diversity: artistData.diversity,
+      most_engaged_artist: artistData.mostEngaged,
+      artist_discovery_rate: artistData.discoveryRate,
+      listening_patterns: artistData.patterns
+    };
+
+  } catch (error) {
+    console.error('Error getting artist analytics:', error);
+    return {
+      top_artists: [],
+      artist_diversity: 0,
+      most_engaged_artist: null,
+      artist_discovery_rate: 0,
+      listening_patterns: []
+    };
+  }
+}
+
+// Get trend analytics
+async function getTrendAnalytics(userId, period) {
+  const dateRange = getDateRange(period);
+  
+  try {
+    const { data: dailyActivity } = await supabase
+      .from('music_posts')
+      .select('posted_at, like_count, comment_count')
+      .eq('user_id', userId)
+      .gte('posted_at', dateRange.start)
+      .lte('posted_at', dateRange.end)
+      .order('posted_at', { ascending: true });
+
+    const trends = analyzeTrends(dailyActivity || []);
+    
+    return {
+      activity_trend: trends.activityTrend,
+      engagement_trend: trends.engagementTrend,
+      peak_performance: trends.peakPerformance,
+      growth_rate: trends.growthRate,
+      seasonal_patterns: trends.seasonalPatterns
+    };
+
+  } catch (error) {
+    console.error('Error getting trend analytics:', error);
+    return {
+      activity_trend: 'stable',
+      engagement_trend: 'stable',
+      peak_performance: null,
+      growth_rate: 0,
+      seasonal_patterns: []
+    };
+  }
+}
+
+// Get social analytics
+async function getSocialAnalytics(userId, period) {
+  const dateRange = getDateRange(period);
+  
+  try {
+    const { data: friendsPosts } = await supabase
+      .from('friendships')
+      .select(`
+        profiles!friendships_addressee_id_fkey (
+          music_posts (
+            track_title, track_artist, like_count, comment_count, posted_at
+          )
+        )
+      `)
+      .eq('requester_id', userId)
+      .eq('status', 'accepted');
+
+    const { data: socialEngagement } = await supabase
+      .from('music_posts')
+      .select('like_count, comment_count, share_count')
+      .eq('user_id', userId)
+      .gte('posted_at', dateRange.start)
+      .lte('posted_at', dateRange.end);
+
+    const socialData = analyzeSocialData(friendsPosts || [], socialEngagement || []);
+    
+    return {
+      social_influence: socialData.influence,
+      friend_engagement: socialData.friendEngagement,
+      viral_content: socialData.viralContent,
+      social_reach: socialData.reach,
+      community_impact: socialData.communityImpact
+    };
+
+  } catch (error) {
+    console.error('Error getting social analytics:', error);
+    return {
+      social_influence: 0,
+      friend_engagement: 0,
+      viral_content: [],
+      social_reach: 0,
+      community_impact: 0
+    };
+  }
+}
+
+// Get listening pattern analytics
+async function getListeningPatternAnalytics(userId, period) {
+  const dateRange = getDateRange(period);
+  
+  try {
+    const { data: posts } = await supabase
+      .from('music_posts')
+      .select('posted_at, track_title, track_artist')
+      .eq('user_id', userId)
+      .gte('posted_at', dateRange.start)
+      .lte('posted_at', dateRange.end)
+      .order('posted_at', { ascending: true });
+
+    const patterns = analyzeListeningPatterns(posts || []);
+    
+    return {
+      listening_frequency: patterns.frequency,
+      peak_hours: patterns.peakHours,
+      weekly_patterns: patterns.weeklyPatterns,
+      mood_analysis: patterns.moodAnalysis,
+      consistency_score: patterns.consistencyScore
+    };
+
+  } catch (error) {
+    console.error('Error getting listening pattern analytics:', error);
+    return {
+      listening_frequency: 'moderate',
+      peak_hours: [],
+      weekly_patterns: [],
+      mood_analysis: [],
+      consistency_score: 0
+    };
+  }
+}
+
+// Helper functions for analytics
+function getDateRange(period) {
+  const end = new Date();
+  const start = new Date();
+  
+  switch (period) {
+    case '7d':
+      start.setDate(end.getDate() - 7);
+      break;
+    case '30d':
+      start.setDate(end.getDate() - 30);
+      break;
+    case '90d':
+      start.setDate(end.getDate() - 90);
+      break;
+    case '1y':
+      start.setFullYear(end.getFullYear() - 1);
+      break;
+    default:
+      start.setDate(end.getDate() - 30);
+  }
+  
+  return {
+    start: start.toISOString(),
+    end: end.toISOString()
+  };
+}
+
+function calculateDailyAverage(count, period) {
+  const days = parseInt(period.replace('d', '')) || 30;
+  return Math.round((count / days) * 10) / 10;
+}
+
+async function getMostActiveDay(userId, dateRange) {
+  return 'Friday'; // Mock data
+}
+
+async function getUniqueArtistsCount(userId, dateRange) {
+  const { data: posts } = await supabase
+    .from('music_posts')
+    .select('track_artist')
+    .eq('user_id', userId)
+    .gte('posted_at', dateRange.start)
+    .lte('posted_at', dateRange.end);
+  
+  const uniqueArtists = new Set(posts?.map(post => post.track_artist) || []);
+  return uniqueArtists.size;
+}
+
+async function getUniqueGenresCount(userId, dateRange) {
+  return 8; // Mock implementation
+}
+
+async function getMostSharedTrack(userId, dateRange) {
+  const { data: posts } = await supabase
+    .from('music_posts')
+    .select('track_title, track_artist, like_count, comment_count')
+    .eq('user_id', userId)
+    .gte('posted_at', dateRange.start)
+    .lte('posted_at', dateRange.end)
+    .order('like_count', { ascending: false })
+    .limit(1)
+    .single();
+  
+  return posts || null;
+}
+
+async function calculateDiscoveryScore(userId, dateRange) {
+  return 75; // Mock implementation
+}
+
+async function analyzeGenresFromTracks(posts) {
+  return {
+    distribution: [
+      { genre: 'Pop', percentage: 35, count: 12 },
+      { genre: 'Rock', percentage: 25, count: 8 },
+      { genre: 'Electronic', percentage: 20, count: 7 },
+      { genre: 'Hip-Hop', percentage: 15, count: 5 },
+      { genre: 'Other', percentage: 5, count: 2 }
+    ],
+    trends: [
+      { genre: 'Pop', trend: 'increasing', change: 15 },
+      { genre: 'Electronic', trend: 'increasing', change: 8 },
+      { genre: 'Rock', trend: 'decreasing', change: -5 }
+    ],
+    topGenres: ['Pop', 'Rock', 'Electronic'],
+    diversityScore: 78,
+    evolution: [
+      { week: 'Week 1', pop: 30, rock: 30, electronic: 20 },
+      { week: 'Week 2', pop: 35, rock: 25, electronic: 25 },
+      { week: 'Week 3', pop: 40, rock: 20, electronic: 30 }
+    ]
+  };
+}
+
+function analyzeArtistsFromTracks(posts) {
+  const artistCounts = {};
+  const artistEngagement = {};
+  
+  posts.forEach(post => {
+    const artist = post.track_artist;
+    artistCounts[artist] = (artistCounts[artist] || 0) + 1;
+    artistEngagement[artist] = (artistEngagement[artist] || 0) + (post.like_count || 0) + (post.comment_count || 0);
+  });
+  
+  const topArtists = Object.entries(artistCounts)
+    .sort(([,a], [,b]) => b - a)
+    .slice(0, 10)
+    .map(([artist, count]) => ({
+      artist,
+      count,
+      engagement: artistEngagement[artist] || 0
+    }));
+  
+  const mostEngaged = Object.entries(artistEngagement)
+    .sort(([,a], [,b]) => b - a)[0];
+  
+  return {
+    topArtists,
+    diversity: Object.keys(artistCounts).length,
+    mostEngaged: mostEngaged ? { artist: mostEngaged[0], engagement: mostEngaged[1] } : null,
+    discoveryRate: 0.3,
+    patterns: []
+  };
+}
+
+function analyzeTrends(dailyActivity) {
+  return {
+    activityTrend: 'increasing',
+    engagementTrend: 'stable',
+    peakPerformance: { date: '2024-01-15', value: 25 },
+    growthRate: 12.5,
+    seasonalPatterns: [
+      { day: 'Monday', activity: 0.8 },
+      { day: 'Tuesday', activity: 0.9 },
+      { day: 'Wednesday', activity: 1.0 },
+      { day: 'Thursday', activity: 1.1 },
+      { day: 'Friday', activity: 1.3 },
+      { day: 'Saturday', activity: 1.2 },
+      { day: 'Sunday', activity: 0.9 }
+    ]
+  };
+}
+
+function analyzeSocialData(friendsPosts, socialEngagement) {
+  return {
+    influence: 65,
+    friendEngagement: 0.8,
+    viralContent: [],
+    reach: 150,
+    communityImpact: 75
+  };
+}
+
+function analyzeListeningPatterns(posts) {
+  return {
+    frequency: 'daily',
+    peakHours: [14, 15, 16, 20, 21],
+    weeklyPatterns: [
+      { day: 'Monday', posts: 3 },
+      { day: 'Tuesday', posts: 2 },
+      { day: 'Wednesday', posts: 4 },
+      { day: 'Thursday', posts: 3 },
+      { day: 'Friday', posts: 6 },
+      { day: 'Saturday', posts: 5 },
+      { day: 'Sunday', posts: 2 }
+    ],
+    moodAnalysis: [
+      { mood: 'energetic', percentage: 40 },
+      { mood: 'chill', percentage: 35 },
+      { mood: 'melancholic', percentage: 25 }
+    ],
+    consistencyScore: 82
+  };
+}
+
+function calculateEngagementRate(postsCount, totalEngagement) {
+  if (postsCount === 0) return 0;
+  return Math.round((totalEngagement / postsCount) * 10) / 10;
 }

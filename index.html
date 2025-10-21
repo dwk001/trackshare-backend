@@ -1714,6 +1714,213 @@
             display: inline-block;
         }
 
+        /* Analytics Modal Styles */
+        .analytics-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .analytics-content {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .analytics-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .analytics-section h3 {
+            margin: 0 0 1rem 0;
+            color: #1f2937;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .analytics-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .analytics-card .card-title {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .analytics-card .card-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .analytics-card .card-change {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .analytics-card .card-change.positive {
+            color: #10b981;
+        }
+
+        .analytics-card .card-change.negative {
+            color: #ef4444;
+        }
+
+        .analytics-card .card-change.neutral {
+            color: #6b7280;
+        }
+
+        .chart-container {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .chart-title {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .chart-bar-label {
+            width: 80px;
+            font-size: 0.8rem;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .chart-bar-fill {
+            flex: 1;
+            height: 20px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            margin: 0 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-bar-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .chart-bar-value {
+            width: 40px;
+            font-size: 0.8rem;
+            color: #6b7280;
+            text-align: right;
+        }
+
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+        }
+
+        .trend-indicator.increasing {
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .trend-indicator.decreasing {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .trend-indicator.stable {
+            color: #6b7280;
+            background: rgba(107, 114, 128, 0.1);
+        }
+
+        .insight-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .insight-card h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .insight-card p {
+            margin: 0;
+            font-size: 0.875rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .pattern-day {
+            text-align: center;
+            padding: 0.5rem;
+            background: #f8fafc;
+            border-radius: 6px;
+        }
+
+        .pattern-day-label {
+            font-size: 0.7rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+
+        .pattern-day-value {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .pattern-day.high {
+            background: rgba(102, 126, 234, 0.2);
+        }
+
+        .pattern-day.medium {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .pattern-day.low {
+            background: #f8fafc;
+        }
+
         @media (max-width: 768px) {
             .profile-content {
                 grid-template-columns: 1fr;
@@ -1760,6 +1967,23 @@
             
             .playlist-actions {
                 flex-direction: column;
+            }
+            
+            .analytics-filters {
+                flex-direction: column;
+            }
+            
+            .analytics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .pattern-grid {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 0.25rem;
+            }
+            
+            .pattern-day {
+                padding: 0.25rem;
             }
         }
         
@@ -2573,6 +2797,47 @@
                     <div class="loading-spinner">
                         <div class="spinner"></div>
                         <p>Loading activity...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Modal -->
+    <div id="analyticsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Music Analytics</h2>
+                <button class="close-btn" onclick="closeModal('analyticsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="analytics-filters">
+                    <div class="filter-group">
+                        <label for="analyticsType">Analytics Type:</label>
+                        <select id="analyticsType" onchange="loadAnalytics()">
+                            <option value="overview">Overview</option>
+                            <option value="genres">Genres</option>
+                            <option value="artists">Artists</option>
+                            <option value="trends">Trends</option>
+                            <option value="social">Social</option>
+                            <option value="listening_patterns">Listening Patterns</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="analyticsPeriod">Time Period:</label>
+                        <select id="analyticsPeriod" onchange="loadAnalytics()">
+                            <option value="7d">Past Week</option>
+                            <option value="30d" selected>Past Month</option>
+                            <option value="90d">Past 3 Months</option>
+                            <option value="1y">Past Year</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="analytics-content" id="analyticsContent">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <p>Loading analytics...</p>
                     </div>
                 </div>
             </div>
@@ -3571,6 +3836,14 @@
                                     View Activity
                                 </button>
                             </div>
+                            
+                            <div class="profile-widget">
+                                <h3>Music Analytics</h3>
+                                <p>Discover your music listening patterns and insights.</p>
+                                <button class="btn btn-secondary" onclick="showAnalyticsModal()">
+                                    View Analytics
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -4052,6 +4325,446 @@
         function showCreatePlaylistModal() {
             // TODO: Implement create playlist modal
             alert('Create playlist feature coming soon!');
+        }
+
+        // Analytics Functions
+        function showAnalyticsModal() {
+            if (!isSignedIn || !userToken) {
+                showSignInModal();
+                return;
+            }
+
+            // Show modal
+            document.getElementById('analyticsModal').style.display = 'flex';
+            
+            // Load analytics data
+            loadAnalytics();
+        }
+
+        async function loadAnalytics() {
+            const analyticsContent = document.getElementById('analyticsContent');
+            
+            // Show loading
+            analyticsContent.innerHTML = `
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Loading analytics...</p>
+                </div>
+            `;
+            
+            try {
+                const type = document.getElementById('analyticsType').value;
+                const period = document.getElementById('analyticsPeriod').value;
+                
+                const response = await fetch(`/api/profile?analytics_type=${type}&analytics_period=${period}`, {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayAnalytics(data.analytics, type);
+                } else {
+                    throw new Error(data.error || 'Failed to load analytics');
+                }
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                analyticsContent.innerHTML = `
+                    <div class="no-activity">
+                        <div class="empty-icon">⚠️</div>
+                        <h4>Error</h4>
+                        <p>Failed to load analytics</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayAnalytics(analytics, type) {
+            const analyticsContent = document.getElementById('analyticsContent');
+            
+            switch (type) {
+                case 'overview':
+                    displayOverviewAnalytics(analytics);
+                    break;
+                case 'genres':
+                    displayGenreAnalytics(analytics);
+                    break;
+                case 'artists':
+                    displayArtistAnalytics(analytics);
+                    break;
+                case 'trends':
+                    displayTrendAnalytics(analytics);
+                    break;
+                case 'social':
+                    displaySocialAnalytics(analytics);
+                    break;
+                case 'listening_patterns':
+                    displayListeningPatternAnalytics(analytics);
+                    break;
+                default:
+                    analyticsContent.innerHTML = '<div class="no-activity"><div class="empty-icon">📊</div><h4>No Data</h4><p>No analytics data available</p></div>';
+            }
+        }
+
+        function displayOverviewAnalytics(analytics) {
+            const analyticsContent = document.getElementById('analyticsContent');
+            
+            analyticsContent.innerHTML = `
+                <div class="analytics-section">
+                    <h3>📊 Summary</h3>
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <div class="card-title">Posts Created</div>
+                            <div class="card-value">${analytics.summary?.posts_created || 0}</div>
+                            <div class="card-change positive">+${analytics.summary?.posts_created || 0} this period</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="card-title">Likes Given</div>
+                            <div class="card-value">${analytics.summary?.likes_given || 0}</div>
+                            <div class="card-change positive">+${analytics.summary?.likes_given || 0} this period</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="card-title">Comments Made</div>
+                            <div class="card-value">${analytics.summary?.comments_made || 0}</div>
+                            <div class="card-change positive">+${analytics.summary?.comments_made || 0} this period</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="card-title">Playlists Created</div>
+                            <div class="card-value">${analytics.summary?.playlists_created || 0}</div>
+                            <div class="card-change positive">+${analytics.summary?.playlists_created || 0} this period</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-section">
+                    <h3>📈 Activity</h3>
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <div class="card-title">Posts per Day</div>
+                            <div class="card-value">${analytics.activity?.posts_per_day || 0}</div>
+                            <div class="card-change neutral">Average</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="card-title">Likes per Day</div>
+                            <div class="card-value">${analytics.activity?.likes_per_day || 0}</div>
+                            <div class="card-change neutral">Average</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="card-title">Most Active Day</div>
+                            <div class="card-value">${analytics.activity?.most_active_day || 'N/A'}</div>
+                            <div class="card-change neutral">Peak activity</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-section">
+                    <h3>💬 Engagement</h3>
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <div class="card-title">Likes Received</div>
+                            <div class="card-value">${analytics.engagement?.likes_received || 0}</div>
+                            <div class="card-change positive">+${analytics.engagement?.likes_received || 0}</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="card-title">Comments Received</div>
+                            <div class="card-value">${analytics.engagement?.comments_received || 0}</div>
+                            <div class="card-change positive">+${analytics.engagement?.comments_received || 0}</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="card-title">Engagement Rate</div>
+                            <div class="card-value">${analytics.engagement?.engagement_rate || 0}</div>
+                            <div class="card-change neutral">per post</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-section">
+                    <h3>🔍 Discovery</h3>
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <div class="card-title">Unique Artists</div>
+                            <div class="card-value">${analytics.discovery?.unique_artists || 0}</div>
+                            <div class="card-change positive">Artists discovered</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="card-title">Unique Genres</div>
+                            <div class="card-value">${analytics.discovery?.unique_genres || 0}</div>
+                            <div class="card-change positive">Genres explored</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="card-title">Discovery Score</div>
+                            <div class="card-value">${analytics.discovery?.discovery_score || 0}</div>
+                            <div class="card-change neutral">out of 100</div>
+                        </div>
+                    </div>
+                </div>
+
+                ${analytics.discovery?.most_shared_track ? `
+                    <div class="insight-card">
+                        <h4>🎵 Most Shared Track</h4>
+                        <p>"${analytics.discovery.most_shared_track.track_title}" by ${analytics.discovery.most_shared_track.track_artist}</p>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        function displayGenreAnalytics(analytics) {
+            const analyticsContent = document.getElementById('analyticsContent');
+            
+            const genreChart = analytics.distribution?.map(genre => `
+                <div class="chart-bar">
+                    <div class="chart-bar-label">${genre.genre}</div>
+                    <div class="chart-bar-fill">
+                        <div class="chart-bar-progress" style="width: ${genre.percentage}%"></div>
+                    </div>
+                    <div class="chart-bar-value">${genre.percentage}%</div>
+                </div>
+            `).join('') || '';
+
+            analyticsContent.innerHTML = `
+                <div class="analytics-section">
+                    <h3>🎵 Genre Distribution</h3>
+                    <div class="chart-container">
+                        <div class="chart-title">Your Music Taste Breakdown</div>
+                        ${genreChart}
+                    </div>
+                </div>
+
+                <div class="analytics-section">
+                    <h3>📈 Genre Trends</h3>
+                    <div class="analytics-grid">
+                        ${analytics.trends?.map(trend => `
+                            <div class="analytics-card">
+                                <div class="card-title">${trend.genre}</div>
+                                <div class="card-value">
+                                    <span class="trend-indicator ${trend.trend}">
+                                        ${trend.trend === 'increasing' ? '↗️' : trend.trend === 'decreasing' ? '↘️' : '→'} 
+                                        ${trend.change}%
+                                    </span>
+                                </div>
+                            </div>
+                        `).join('') || ''}
+                    </div>
+                </div>
+
+                <div class="analytics-section">
+                    <h3>🏆 Top Genres</h3>
+                    <div class="analytics-grid">
+                        ${analytics.top_genres?.map((genre, index) => `
+                            <div class="analytics-card">
+                                <div class="card-title">#${index + 1}</div>
+                                <div class="card-value">${genre}</div>
+                            </div>
+                        `).join('') || ''}
+                    </div>
+                </div>
+
+                <div class="insight-card">
+                    <h4>🎯 Genre Diversity Score</h4>
+                    <p>Your music taste has a diversity score of ${analytics.genre_diversity_score || 0}/100. ${analytics.genre_diversity_score > 70 ? 'You have a very diverse taste in music!' : analytics.genre_diversity_score > 40 ? 'You have a moderately diverse taste in music.' : 'Consider exploring more genres to diversify your music taste.'}</p>
+                </div>
+            `;
+        }
+
+        function displayArtistAnalytics(analytics) {
+            const analyticsContent = document.getElementById('analyticsContent');
+            
+            const topArtists = analytics.top_artists?.map(artist => `
+                <div class="chart-bar">
+                    <div class="chart-bar-label">${artist.artist}</div>
+                    <div class="chart-bar-fill">
+                        <div class="chart-bar-progress" style="width: ${(artist.count / Math.max(...analytics.top_artists.map(a => a.count))) * 100}%"></div>
+                    </div>
+                    <div class="chart-bar-value">${artist.count}</div>
+                </div>
+            `).join('') || '';
+
+            analyticsContent.innerHTML = `
+                <div class="analytics-section">
+                    <h3>🎤 Top Artists</h3>
+                    <div class="chart-container">
+                        <div class="chart-title">Most Listened Artists</div>
+                        ${topArtists}
+                    </div>
+                </div>
+
+                <div class="analytics-section">
+                    <h3>📊 Artist Insights</h3>
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <div class="card-title">Artist Diversity</div>
+                            <div class="card-value">${analytics.artist_diversity || 0}</div>
+                            <div class="card-change neutral">unique artists</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="card-title">Discovery Rate</div>
+                            <div class="card-value">${Math.round((analytics.artist_discovery_rate || 0) * 100)}%</div>
+                            <div class="card-change positive">new artists</div>
+                        </div>
+                        ${analytics.most_engaged_artist ? `
+                            <div class="analytics-card">
+                                <div class="card-title">Most Engaged</div>
+                                <div class="card-value">${analytics.most_engaged_artist.artist}</div>
+                                <div class="card-change positive">${analytics.most_engaged_artist.engagement} interactions</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayTrendAnalytics(analytics) {
+            const analyticsContent = document.getElementById('analyticsContent');
+            
+            analyticsContent.innerHTML = `
+                <div class="analytics-section">
+                    <h3>📈 Activity Trends</h3>
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <div class="card-title">Activity Trend</div>
+                            <div class="card-value">
+                                <span class="trend-indicator ${analytics.activity_trend}">
+                                    ${analytics.activity_trend === 'increasing' ? '↗️' : analytics.activity_trend === 'decreasing' ? '↘️' : '→'} 
+                                    ${analytics.activity_trend}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="card-title">Engagement Trend</div>
+                            <div class="card-value">
+                                <span class="trend-indicator ${analytics.engagement_trend}">
+                                    ${analytics.engagement_trend === 'increasing' ? '↗️' : analytics.engagement_trend === 'decreasing' ? '↘️' : '→'} 
+                                    ${analytics.engagement_trend}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="card-title">Growth Rate</div>
+                            <div class="card-value">${analytics.growth_rate || 0}%</div>
+                            <div class="card-change ${analytics.growth_rate > 0 ? 'positive' : 'negative'}">monthly</div>
+                        </div>
+                    </div>
+                </div>
+
+                ${analytics.peak_performance ? `
+                    <div class="insight-card">
+                        <h4>🏆 Peak Performance</h4>
+                        <p>Your best day was ${analytics.peak_performance.date} with ${analytics.peak_performance.value} interactions!</p>
+                    </div>
+                ` : ''}
+
+                <div class="analytics-section">
+                    <h3>📅 Weekly Patterns</h3>
+                    <div class="pattern-grid">
+                        ${analytics.seasonal_patterns?.map(pattern => `
+                            <div class="pattern-day ${pattern.activity > 1.1 ? 'high' : pattern.activity > 0.9 ? 'medium' : 'low'}">
+                                <div class="pattern-day-label">${pattern.day.slice(0, 3)}</div>
+                                <div class="pattern-day-value">${pattern.activity.toFixed(1)}</div>
+                            </div>
+                        `).join('') || ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function displaySocialAnalytics(analytics) {
+            const analyticsContent = document.getElementById('analyticsContent');
+            
+            analyticsContent.innerHTML = `
+                <div class="analytics-section">
+                    <h3>👥 Social Impact</h3>
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <div class="card-title">Social Influence</div>
+                            <div class="card-value">${analytics.social_influence || 0}</div>
+                            <div class="card-change neutral">out of 100</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="card-title">Friend Engagement</div>
+                            <div class="card-value">${Math.round((analytics.friend_engagement || 0) * 100)}%</div>
+                            <div class="card-change positive">engagement rate</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="card-title">Social Reach</div>
+                            <div class="card-value">${analytics.social_reach || 0}</div>
+                            <div class="card-change positive">people reached</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="card-title">Community Impact</div>
+                            <div class="card-value">${analytics.community_impact || 0}</div>
+                            <div class="card-change neutral">out of 100</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="insight-card">
+                    <h4>🌟 Social Insights</h4>
+                    <p>Your music taste has influenced ${analytics.social_reach || 0} people in your network. Keep sharing great music!</p>
+                </div>
+            `;
+        }
+
+        function displayListeningPatternAnalytics(analytics) {
+            const analyticsContent = document.getElementById('analyticsContent');
+            
+            const peakHours = analytics.peak_hours?.map(hour => `
+                <span class="trend-indicator increasing">${hour}:00</span>
+            `).join(' ') || '';
+
+            analyticsContent.innerHTML = `
+                <div class="analytics-section">
+                    <h3>⏰ Listening Patterns</h3>
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <div class="card-title">Frequency</div>
+                            <div class="card-value">${analytics.listening_frequency || 'Daily'}</div>
+                            <div class="card-change neutral">listening habit</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="card-title">Consistency Score</div>
+                            <div class="card-value">${analytics.consistency_score || 0}</div>
+                            <div class="card-change neutral">out of 100</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-section">
+                    <h3>🕐 Peak Hours</h3>
+                    <div class="chart-container">
+                        <div class="chart-title">When You're Most Active</div>
+                        <p>${peakHours}</p>
+                    </div>
+                </div>
+
+                <div class="analytics-section">
+                    <h3>📅 Weekly Patterns</h3>
+                    <div class="pattern-grid">
+                        ${analytics.weekly_patterns?.map(pattern => `
+                            <div class="pattern-day ${pattern.posts > 4 ? 'high' : pattern.posts > 2 ? 'medium' : 'low'}">
+                                <div class="pattern-day-label">${pattern.day.slice(0, 3)}</div>
+                                <div class="pattern-day-value">${pattern.posts}</div>
+                            </div>
+                        `).join('') || ''}
+                    </div>
+                </div>
+
+                <div class="analytics-section">
+                    <h3>🎭 Mood Analysis</h3>
+                    <div class="chart-container">
+                        ${analytics.mood_analysis?.map(mood => `
+                            <div class="chart-bar">
+                                <div class="chart-bar-label">${mood.mood}</div>
+                                <div class="chart-bar-fill">
+                                    <div class="chart-bar-progress" style="width: ${mood.percentage}%"></div>
+                                </div>
+                                <div class="chart-bar-value">${mood.percentage}%</div>
+                            </div>
+                        `).join('') || ''}
+                    </div>
+                </div>
+            `;
         }
 
         // Real-time Update Functions
