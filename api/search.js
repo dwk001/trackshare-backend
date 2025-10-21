@@ -33,17 +33,60 @@ async function getSpotifyAccessToken() {
   return data.access_token;
 }
 
-async function searchSpotify(query, type = 'track', limit = 20, offset = 0) {
+async function searchSpotify(query, type = 'track', limit = 20, offset = 0, filters = {}) {
   const accessToken = await getSpotifyAccessToken();
   
+  // Build advanced query with filters
+  let searchQuery = query;
+  
+  if (filters.genre) {
+    searchQuery += ` genre:"${filters.genre}"`;
+  }
+  
+  if (filters.year) {
+    searchQuery += ` year:${filters.year}`;
+  }
+  
+  if (filters.yearRange) {
+    const [startYear, endYear] = filters.yearRange.split('-');
+    searchQuery += ` year:${startYear}-${endYear}`;
+  }
+  
+  if (filters.artist) {
+    searchQuery += ` artist:"${filters.artist}"`;
+  }
+  
+  if (filters.album) {
+    searchQuery += ` album:"${filters.album}"`;
+  }
+  
+  if (filters.tag) {
+    searchQuery += ` tag:${filters.tag}`;
+  }
+  
+  if (filters.isrc) {
+    searchQuery += ` isrc:${filters.isrc}`;
+  }
+  
+  if (filters.upc) {
+    searchQuery += ` upc:${filters.upc}`;
+  }
+  
+  const params = new URLSearchParams({
+    q: searchQuery,
+    type: type,
+    limit: limit.toString(),
+    offset: offset.toString(),
+    market: 'US'
+  });
+  
+  // Add additional parameters for advanced filtering
+  if (filters.includeExternal) {
+    params.append('include_external', 'audio');
+  }
+  
   const response = await fetch(
-    `https://api.spotify.com/v1/search?` + new URLSearchParams({
-      q: query,
-      type: type,
-      limit: limit.toString(),
-      offset: offset.toString(),
-      market: 'US'
-    }),
+    `https://api.spotify.com/v1/search?${params.toString()}`,
     {
       headers: { 'Authorization': `Bearer ${accessToken}` }
     }
@@ -111,7 +154,24 @@ module.exports = async (req, res) => {
     return res.status(200).end();
   }
   
-  const { q, type = 'track', limit = 50, offset = 0 } = req.query;
+  const { 
+    q, 
+    type = 'track', 
+    limit = 50, 
+    offset = 0,
+    genre,
+    year,
+    yearRange,
+    artist,
+    album,
+    tag,
+    isrc,
+    upc,
+    includeExternal,
+    popularity,
+    explicit,
+    sortBy
+  } = req.query;
   
   if (!q || q.trim().length === 0) {
     return res.status(400).json({ 
@@ -120,8 +180,23 @@ module.exports = async (req, res) => {
     });
   }
   
+  // Build filters object
+  const filters = {};
+  if (genre) filters.genre = genre;
+  if (year) filters.year = year;
+  if (yearRange) filters.yearRange = yearRange;
+  if (artist) filters.artist = artist;
+  if (album) filters.album = album;
+  if (tag) filters.tag = tag;
+  if (isrc) filters.isrc = isrc;
+  if (upc) filters.upc = upc;
+  if (includeExternal === 'true') filters.includeExternal = true;
+  if (popularity) filters.popularity = popularity;
+  if (explicit !== undefined) filters.explicit = explicit === 'true';
+  if (sortBy) filters.sortBy = sortBy;
+  
   // Cache search results for 10 minutes
-  const cacheKey = `search:${type}:${q}:${limit}:${offset}`;
+  const cacheKey = `search:${type}:${q}:${JSON.stringify(filters)}:${limit}:${offset}`;
   
   try {
     const cached = await kv.get(cacheKey);
@@ -141,14 +216,42 @@ module.exports = async (req, res) => {
       q.trim(),
       type,
       parseInt(limit),
-      parseInt(offset)
+      parseInt(offset),
+      filters
     );
+    
+    // Post-process results for client-side filtering
+    let processedResults = { ...results };
+    
+    if (type === 'track' && processedResults.tracks) {
+      // Filter by popularity if specified
+      if (filters.popularity) {
+        const [minPop, maxPop] = filters.popularity.split('-').map(Number);
+        processedResults.tracks = processedResults.tracks.filter(track => {
+          const pop = track.popularity || 0;
+          return pop >= (minPop || 0) && pop <= (maxPop || 100);
+        });
+      }
+      
+      // Filter by explicit content if specified
+      if (filters.explicit !== undefined) {
+        processedResults.tracks = processedResults.tracks.filter(track => 
+          track.explicit === filters.explicit
+        );
+      }
+      
+      // Sort results if specified
+      if (filters.sortBy) {
+        processedResults.tracks = sortTracks(processedResults.tracks, filters.sortBy);
+      }
+    }
     
     const response = {
       success: true,
       query: q,
       type: type,
-      ...results,
+      filters: filters,
+      ...processedResults,
       from_cache: false,
       timestamp: new Date().toISOString()
     };
@@ -171,3 +274,25 @@ module.exports = async (req, res) => {
     });
   }
 };
+
+// Helper function to sort tracks
+function sortTracks(tracks, sortBy) {
+  switch (sortBy) {
+    case 'popularity':
+      return tracks.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    case 'popularity_asc':
+      return tracks.sort((a, b) => (a.popularity || 0) - (b.popularity || 0));
+    case 'name':
+      return tracks.sort((a, b) => a.title.localeCompare(b.title));
+    case 'artist':
+      return tracks.sort((a, b) => a.primaryArtist.localeCompare(b.primaryArtist));
+    case 'album':
+      return tracks.sort((a, b) => a.album.localeCompare(b.album));
+    case 'release_date':
+      return tracks.sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0));
+    case 'duration':
+      return tracks.sort((a, b) => (b.durationMs || 0) - (a.durationMs || 0));
+    default:
+      return tracks;
+  }
+}
