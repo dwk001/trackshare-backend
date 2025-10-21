@@ -1452,6 +1452,443 @@
             font-size: 0.75rem;
             color: rgba(255, 255, 255, 0.5);
         }
+
+        /* Music Challenges & Competitions Styles */
+        .challenges-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .challenges-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .challenges-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .challenges-header p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .challenges-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .challenge-tab {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .challenge-tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .challenge-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
+        .challenges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .challenge-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .challenge-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .challenge-card.featured {
+            border: 2px solid #f59e0b;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+        }
+
+        .challenge-card.featured::before {
+            content: '⭐';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(180deg); }
+        }
+
+        .challenge-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .challenge-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .challenge-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .challenge-info h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .challenge-meta {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .challenge-description {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .challenge-stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .challenge-stat {
+            text-align: center;
+        }
+
+        .challenge-stat-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.25rem;
+        }
+
+        .challenge-stat-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .challenge-progress {
+            margin-bottom: 1.5rem;
+        }
+
+        .challenge-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .challenge-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .challenge-progress-text {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+
+        .challenge-rewards {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .challenge-reward {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .challenge-reward-icon {
+            font-size: 1rem;
+        }
+
+        .challenge-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .challenge-action-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .challenge-action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .challenge-action-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
+        .challenge-action-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .challenge-action-btn.completed {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #10b981;
+        }
+
+        .challenge-action-btn.completed:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .leaderboard-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .leaderboard-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .leaderboard-header h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .leaderboard-item.top-3 {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.1));
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .leaderboard-rank {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .leaderboard-rank.top-3 {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .leaderboard-user {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .leaderboard-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .leaderboard-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .leaderboard-info {
+            flex: 1;
+        }
+
+        .leaderboard-name {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+
+        .leaderboard-score {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .leaderboard-score-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-left: 0.5rem;
+        }
+
+        .challenge-create-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .challenge-create-form {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .challenge-form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .challenge-form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .challenge-form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .challenge-form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .challenge-form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color 0.3s ease;
+        }
+
+        .challenge-form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .challenge-form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
         @media (max-width: 768px) {
             .feed-tabs {
                 padding: 0 1rem;
@@ -3622,6 +4059,9 @@
                     <div class="tab" data-feed="groups" onclick="switchFeed('groups')">
                         🎭 Groups
                     </div>
+                    <div class="tab" data-feed="challenges" onclick="switchFeed('challenges')">
+                        🏆 Challenges
+                    </div>
                     <div class="tab" data-feed="requests" onclick="switchFeed('requests')">
                         📬 Requests
                     </div>
@@ -3768,6 +4208,46 @@
                     <div style="text-align: center; margin-top: 2rem;">
                         <button class="btn btn-primary" onclick="showCreateGroupModal()">
                             Create New Group
+                        </button>
+                    </div>
+                ` : ''}
+            </div>
+        </section>
+
+        <!-- Music Challenges (Hidden by default) -->
+        <section id="musicChallenges" class="challenges-section" style="display: none;">
+            <div class="challenges-container">
+                <div class="challenges-header">
+                    <h1>Music Challenges & Competitions</h1>
+                    <p>Compete with friends, earn rewards, and discover new music through fun challenges!</p>
+                </div>
+                
+                <div class="challenges-tabs">
+                    <div class="challenge-tab active" data-challenge-type="all" onclick="filterChallenges('all')">
+                        All Challenges
+                    </div>
+                    <div class="challenge-tab" data-challenge-type="daily" onclick="filterChallenges('daily')">
+                        Daily
+                    </div>
+                    <div class="challenge-tab" data-challenge-type="weekly" onclick="filterChallenges('weekly')">
+                        Weekly
+                    </div>
+                    <div class="challenge-tab" data-challenge-type="monthly" onclick="filterChallenges('monthly')">
+                        Monthly
+                    </div>
+                    <div class="challenge-tab" data-challenge-type="my-challenges" onclick="filterChallenges('my-challenges')">
+                        My Progress
+                    </div>
+                </div>
+                
+                <div class="challenges-grid" id="challengesGrid">
+                    <!-- Challenges will be loaded here -->
+                </div>
+                
+                ${isSignedIn ? `
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button class="btn btn-primary" onclick="showCreateChallengeModal()">
+                            Create Challenge
                         </button>
                     </div>
                 ` : ''}
@@ -4018,6 +4498,60 @@
                 <div class="group-form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeGroupCreateModal()">Cancel</button>
                     <button type="submit" class="btn btn-primary">Create Group</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Challenge Create Modal -->
+    <div id="challengeCreateModal" class="challenge-create-modal">
+        <div class="challenge-create-form">
+            <h2>Create Music Challenge</h2>
+            <form id="challengeCreateForm">
+                <div class="challenge-form-group">
+                    <label for="challengeName">Challenge Name</label>
+                    <input type="text" id="challengeName" class="challenge-form-input" placeholder="My Music Challenge" required>
+                </div>
+                
+                <div class="challenge-form-group">
+                    <label for="challengeDescription">Description</label>
+                    <textarea id="challengeDescription" class="challenge-form-textarea" placeholder="Describe your challenge..."></textarea>
+                </div>
+                
+                <div class="challenge-form-group">
+                    <label for="challengeType">Challenge Type</label>
+                    <select id="challengeType" class="challenge-form-input">
+                        <option value="listening">Listening Challenge</option>
+                        <option value="discovery">Discovery Challenge</option>
+                        <option value="sharing">Sharing Challenge</option>
+                        <option value="playlist">Playlist Challenge</option>
+                        <option value="genre">Genre Challenge</option>
+                    </select>
+                </div>
+                
+                <div class="challenge-form-group">
+                    <label for="challengeDuration">Duration</label>
+                    <select id="challengeDuration" class="challenge-form-input">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                
+                <div class="challenge-form-group">
+                    <label for="challengeGoal">Goal (e.g., 10 songs, 5 hours, etc.)</label>
+                    <input type="text" id="challengeGoal" class="challenge-form-input" placeholder="10 songs" required>
+                </div>
+                
+                <div class="challenge-form-group">
+                    <label for="challengeReward">Reward</label>
+                    <input type="text" id="challengeReward" class="challenge-form-input" placeholder="Badge, Points, etc.">
+                </div>
+                
+                <div class="challenge-form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeChallengeCreateModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Challenge</button>
                 </div>
             </form>
         </div>
@@ -4442,11 +4976,13 @@
             const socialFeed = document.getElementById('socialFeed');
             const musicDiscovery = document.getElementById('musicDiscovery');
             const musicGroups = document.getElementById('musicGroups');
+            const musicChallenges = document.getElementById('musicChallenges');
             
             if (feedType === 'discover') {
                 socialFeed.style.display = 'none';
                 musicDiscovery.style.display = 'block';
                 musicGroups.style.display = 'none';
+                musicChallenges.style.display = 'none';
                 // Load music discovery if not already loaded
                 if (!genreCache.all || genreCache.all.length === 0) {
                     await fetchTrendingMusic();
@@ -4455,26 +4991,37 @@
                 socialFeed.style.display = 'none';
                 musicDiscovery.style.display = 'none';
                 musicGroups.style.display = 'block';
+                musicChallenges.style.display = 'none';
                 await loadGroups();
+            } else if (feedType === 'challenges') {
+                socialFeed.style.display = 'none';
+                musicDiscovery.style.display = 'none';
+                musicGroups.style.display = 'none';
+                musicChallenges.style.display = 'block';
+                await loadChallenges();
             } else if (feedType === 'friends') {
                 socialFeed.style.display = 'block';
                 musicDiscovery.style.display = 'none';
                 musicGroups.style.display = 'none';
+                musicChallenges.style.display = 'none';
                 await displayFriends();
             } else if (feedType === 'requests') {
                 socialFeed.style.display = 'block';
                 musicDiscovery.style.display = 'none';
                 musicGroups.style.display = 'none';
+                musicChallenges.style.display = 'none';
                 await displayFriendRequests();
             } else if (feedType === 'profile') {
                 socialFeed.style.display = 'block';
                 musicDiscovery.style.display = 'none';
                 musicGroups.style.display = 'none';
+                musicChallenges.style.display = 'none';
                 await loadProfileData();
             } else {
                 socialFeed.style.display = 'block';
                 musicDiscovery.style.display = 'none';
                 musicGroups.style.display = 'none';
+                musicChallenges.style.display = 'none';
                 await loadFeed(feedType);
             }
         }
@@ -7636,6 +8183,366 @@
             `;
         }
 
+        // Music Challenges & Competitions Functions
+        let currentChallengeFilter = 'all';
+        let userChallenges = [];
+
+        async function loadChallenges() {
+            const challengesGrid = document.getElementById('challengesGrid');
+            challengesGrid.innerHTML = '<div class="loading">Loading challenges...</div>';
+            
+            try {
+                const response = await fetch(`/api/posts?challenges=true&filter=${currentChallengeFilter}`, {
+                    headers: isSignedIn ? { 'Authorization': `Bearer ${userToken}` } : {}
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.challenges) {
+                    displayChallenges(data.challenges);
+                } else {
+                    displayChallengesEmpty();
+                }
+            } catch (error) {
+                console.error('Error loading challenges:', error);
+                displayChallengesError();
+            }
+        }
+
+        function displayChallenges(challenges) {
+            const challengesGrid = document.getElementById('challengesGrid');
+            
+            if (challenges.length === 0) {
+                displayChallengesEmpty();
+                return;
+            }
+            
+            challengesGrid.innerHTML = challenges.map(challenge => `
+                <div class="challenge-card ${challenge.featured ? 'featured' : ''}" onclick="viewChallenge('${challenge.id}')">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">
+                            ${getChallengeIcon(challenge.type)}
+                        </div>
+                        <div class="challenge-info">
+                            <h3>${escapeHtml(challenge.name)}</h3>
+                            <div class="challenge-meta">
+                                ${challenge.type.charAt(0).toUpperCase() + challenge.type.slice(1)} • ${challenge.duration}
+                                ${challenge.genre ? ` • ${challenge.genre}` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="challenge-description">
+                        ${escapeHtml(challenge.description || 'No description available')}
+                    </div>
+                    
+                    <div class="challenge-stats">
+                        <div class="challenge-stat">
+                            <div class="challenge-stat-number">${challenge.participants || 0}</div>
+                            <div class="challenge-stat-label">Participants</div>
+                        </div>
+                        <div class="challenge-stat">
+                            <div class="challenge-stat-number">${challenge.goal}</div>
+                            <div class="challenge-stat-label">Goal</div>
+                        </div>
+                        <div class="challenge-stat">
+                            <div class="challenge-stat-number">${challenge.time_left || '0d'}</div>
+                            <div class="challenge-stat-label">Time Left</div>
+                        </div>
+                    </div>
+                    
+                    ${challenge.user_progress !== undefined ? `
+                        <div class="challenge-progress">
+                            <div class="challenge-progress-bar">
+                                <div class="challenge-progress-fill" style="width: ${(challenge.user_progress / challenge.goal) * 100}%"></div>
+                            </div>
+                            <div class="challenge-progress-text">
+                                ${challenge.user_progress}/${challenge.goal} completed
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="challenge-rewards">
+                        ${generateChallengeRewards(challenge.rewards || [])}
+                    </div>
+                    
+                    <div class="challenge-actions">
+                        ${generateChallengeActions(challenge)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function generateChallengeRewards(rewards) {
+            if (rewards.length === 0) {
+                return '<div class="challenge-reward"><span class="challenge-reward-icon">🏆</span> Completion Badge</div>';
+            }
+            
+            return rewards.map(reward => `
+                <div class="challenge-reward">
+                    <span class="challenge-reward-icon">${getRewardIcon(reward.type)}</span>
+                    ${escapeHtml(reward.name)}
+                </div>
+            `).join('');
+        }
+
+        function generateChallengeActions(challenge) {
+            const isParticipant = challenge.is_participant;
+            const isCompleted = challenge.user_progress >= challenge.goal;
+            const isExpired = challenge.time_left === '0d';
+            
+            if (isCompleted) {
+                return `
+                    <button class="challenge-action-btn completed" onclick="event.stopPropagation(); claimReward('${challenge.id}')">
+                        Claim Reward
+                    </button>
+                    <button class="challenge-action-btn" onclick="event.stopPropagation(); viewChallenge('${challenge.id}')">
+                        View Details
+                    </button>
+                `;
+            } else if (isParticipant) {
+                return `
+                    <button class="challenge-action-btn primary" onclick="event.stopPropagation(); updateProgress('${challenge.id}')">
+                        Update Progress
+                    </button>
+                    <button class="challenge-action-btn" onclick="event.stopPropagation(); viewChallenge('${challenge.id}')">
+                        View Details
+                    </button>
+                `;
+            } else if (isExpired) {
+                return `
+                    <button class="challenge-action-btn" disabled>
+                        Challenge Ended
+                    </button>
+                    <button class="challenge-action-btn" onclick="event.stopPropagation(); viewChallenge('${challenge.id}')">
+                        View Results
+                    </button>
+                `;
+            } else {
+                return `
+                    <button class="challenge-action-btn primary" onclick="event.stopPropagation(); joinChallenge('${challenge.id}')">
+                        Join Challenge
+                    </button>
+                    <button class="challenge-action-btn" onclick="event.stopPropagation(); viewChallenge('${challenge.id}')">
+                        View Details
+                    </button>
+                `;
+            }
+        }
+
+        function getChallengeIcon(type) {
+            const icons = {
+                'listening': '🎧',
+                'discovery': '🔍',
+                'sharing': '📤',
+                'playlist': '📝',
+                'genre': '🎭'
+            };
+            return icons[type] || '🏆';
+        }
+
+        function getRewardIcon(type) {
+            const icons = {
+                'badge': '🏆',
+                'points': '⭐',
+                'trophy': '🥇',
+                'medal': '🥉',
+                'certificate': '📜'
+            };
+            return icons[type] || '🏆';
+        }
+
+        function filterChallenges(filter) {
+            // Update filter buttons
+            document.querySelectorAll('.challenge-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-challenge-type="${filter}"]`).classList.add('active');
+            
+            currentChallengeFilter = filter;
+            loadChallenges();
+        }
+
+        function showCreateChallengeModal() {
+            if (!isSignedIn) {
+                showSignInModal();
+                return;
+            }
+            
+            document.getElementById('challengeCreateModal').style.display = 'flex';
+            document.getElementById('challengeName').focus();
+        }
+
+        function closeChallengeCreateModal() {
+            document.getElementById('challengeCreateModal').style.display = 'none';
+            document.getElementById('challengeCreateForm').reset();
+        }
+
+        async function createChallenge(event) {
+            event.preventDefault();
+            
+            if (!isSignedIn || !userToken) {
+                showSignInModal();
+                return;
+            }
+            
+            const formData = {
+                name: document.getElementById('challengeName').value,
+                description: document.getElementById('challengeDescription').value,
+                type: document.getElementById('challengeType').value,
+                duration: document.getElementById('challengeDuration').value,
+                goal: document.getElementById('challengeGoal').value,
+                reward: document.getElementById('challengeReward').value
+            };
+            
+            try {
+                const response = await fetch('/api/posts?challenges=true', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Challenge created successfully!', 'success');
+                    closeChallengeCreateModal();
+                    await loadChallenges();
+                } else {
+                    showNotification(data.error || 'Failed to create challenge', 'error');
+                }
+            } catch (error) {
+                console.error('Error creating challenge:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+
+        async function joinChallenge(challengeId) {
+            if (!isSignedIn || !userToken) return;
+            
+            try {
+                const response = await fetch('/api/posts?challenges=true', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        challenge_id: challengeId,
+                        action: 'join'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Joined challenge successfully!', 'success');
+                    await loadChallenges();
+                } else {
+                    showNotification(data.error || 'Failed to join challenge', 'error');
+                }
+            } catch (error) {
+                console.error('Error joining challenge:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+
+        async function updateProgress(challengeId) {
+            if (!isSignedIn || !userToken) return;
+            
+            const progress = prompt('Enter your progress (e.g., 5 songs, 2 hours):');
+            if (!progress) return;
+            
+            try {
+                const response = await fetch('/api/posts?challenges=true', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        challenge_id: challengeId,
+                        progress: progress
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Progress updated successfully!', 'success');
+                    await loadChallenges();
+                } else {
+                    showNotification(data.error || 'Failed to update progress', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating progress:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+
+        async function claimReward(challengeId) {
+            if (!isSignedIn || !userToken) return;
+            
+            try {
+                const response = await fetch('/api/posts?challenges=true', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        challenge_id: challengeId,
+                        action: 'claim_reward'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Reward claimed successfully!', 'success');
+                    await loadChallenges();
+                } else {
+                    showNotification(data.error || 'Failed to claim reward', 'error');
+                }
+            } catch (error) {
+                console.error('Error claiming reward:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+
+        function viewChallenge(challengeId) {
+            // For now, just show a notification
+            // In a full implementation, this would open a detailed challenge view
+            showNotification('Challenge details coming soon!', 'info');
+        }
+
+        function displayChallengesEmpty() {
+            const challengesGrid = document.getElementById('challengesGrid');
+            challengesGrid.innerHTML = `
+                <div class="insights-empty">
+                    <div class="insights-empty-icon">🏆</div>
+                    <h3>No Challenges Found</h3>
+                    <p>No challenges match your current filter. Try a different category or create your own challenge!</p>
+                    ${isSignedIn ? '<button class="btn btn-primary" onclick="showCreateChallengeModal()">Create Challenge</button>' : ''}
+                </div>
+            `;
+        }
+
+        function displayChallengesError() {
+            const challengesGrid = document.getElementById('challengesGrid');
+            challengesGrid.innerHTML = `
+                <div class="insights-empty">
+                    <div class="insights-empty-icon">⚠️</div>
+                    <h3>Error Loading Challenges</h3>
+                    <p>Something went wrong while loading challenges.</p>
+                    <button class="btn btn-primary" onclick="loadChallenges()">Try Again</button>
+                </div>
+            `;
+        }
+
         // Enhanced switchGenre function
         async function switchGenre(genre) {
             currentGenre = genre;
@@ -9093,6 +10000,9 @@
             
             // Setup group form
             document.getElementById('groupCreateForm').addEventListener('submit', createGroup);
+            
+            // Setup challenge form
+            document.getElementById('challengeCreateForm').addEventListener('submit', createChallenge);
             
             // Setup modal close handlers
             document.addEventListener('click', function(e) {
