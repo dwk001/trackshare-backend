@@ -40,6 +40,12 @@
             },
             "api/activity-history.js": {
               "maxDuration": 30
+            },
+            "api/recommendations.js": {
+              "maxDuration": 30
+            },
+            "api/playlists.js": {
+              "maxDuration": 30
             }
   },
   "crons": [{
