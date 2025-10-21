@@ -470,15 +470,82 @@
             }
         }
         
-        function searchInMockData(query) {
+        async function searchInMockData(query) {
+            // First try our mock data
             const allTracks = [...trendingMusic.spotify, ...trendingMusic.apple, ...trendingMusic.youtube];
-            const results = allTracks.filter(track => 
+            const mockResults = allTracks.filter(track => 
+                track.title.toLowerCase().includes(query.toLowerCase()) ||
+                track.artist.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            if (mockResults.length > 0) {
+                displaySearchResults(mockResults);
+            } else {
+                // Try to search using our API for more comprehensive results
+                try {
+                    await searchWithAPI(query);
+                } catch (error) {
+                    console.error('API search failed:', error);
+                    alert('No tracks found. Try pasting a music link instead!');
+                }
+            }
+        }
+        
+        async function searchWithAPI(query) {
+            // Use our resolve API to search for tracks
+            const searchUrl = `https://open.spotify.com/search/${encodeURIComponent(query)}`;
+            try {
+                const response = await fetch(`/api/resolve?url=${encodeURIComponent(searchUrl)}`);
+                const data = await response.json();
+                
+                if (data.success && data.track) {
+                    // Create search results from API response
+                    const apiResults = [{
+                        id: data.track.id,
+                        title: data.track.title,
+                        artist: data.track.artist,
+                        artwork: data.track.artwork,
+                        url: data.track.sourceUrl,
+                        platform: 'spotify'
+                    }];
+                    displaySearchResults(apiResults);
+                } else {
+                    // Fallback to expanded mock data
+                    displayExpandedSearchResults(query);
+                }
+            } catch (error) {
+                console.error('API search error:', error);
+                displayExpandedSearchResults(query);
+            }
+        }
+        
+        function displayExpandedSearchResults(query) {
+            // Expanded mock data for better search results
+            const expandedTracks = [
+                // Taylor Swift songs
+                { id: '1', title: 'Anti-Hero', artist: 'Taylor Swift', artwork: 'https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2a268ae0f5', url: 'https://open.spotify.com/track/0V3wPSX9ygBnCm8psDIegu', platform: 'spotify' },
+                { id: '2', title: 'Shake It Off', artist: 'Taylor Swift', artwork: 'https://i.scdn.co/image/ab67616d0000b2739abdf14e6058bd3903686148', url: 'https://open.spotify.com/track/5yIt6VMNpxjySAaG8yH2Cx', platform: 'spotify' },
+                { id: '3', title: 'Love Story', artist: 'Taylor Swift', artwork: 'https://i.scdn.co/image/ab67616d0000b2738f6b4035c82eb9cf22d356d2', url: 'https://open.spotify.com/track/1D4LO9uTzQJYX5EEM466Aw', platform: 'spotify' },
+                { id: '4', title: 'Blank Space', artist: 'Taylor Swift', artwork: 'https://i.scdn.co/image/ab67616d0000b273e787cffec20aa2a396a61647', url: 'https://open.spotify.com/track/1p80LdxRV74UKvL8gnD7ky', platform: 'spotify' },
+                { id: '5', title: 'You Belong With Me', artist: 'Taylor Swift', artwork: 'https://i.scdn.co/image/ab67616d0000b2738f6b4035c82eb9cf22d356d2', url: 'https://open.spotify.com/track/4lsPG2IQgZCVXc6m6cqRsy', platform: 'spotify' },
+                
+                // Ed Sheeran songs
+                { id: '6', title: 'Shape of You', artist: 'Ed Sheeran', artwork: 'https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96', url: 'https://open.spotify.com/track/7qiZfU4dY1lWllzX7mPBI3', platform: 'spotify' },
+                { id: '7', title: 'Perfect', artist: 'Ed Sheeran', artwork: 'https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96', url: 'https://open.spotify.com/track/0tgVpDi06FyKpA1z0VMD4v', platform: 'spotify' },
+                { id: '8', title: 'Thinking Out Loud', artist: 'Ed Sheeran', artwork: 'https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96', url: 'https://open.spotify.com/track/1Slwb6dOYkBlWalB14Wjbf', platform: 'spotify' },
+                
+                // The Weeknd songs
+                { id: '9', title: 'Blinding Lights', artist: 'The Weeknd', artwork: 'https://i.scdn.co/image/ab67616d0000b2738863bc11d2aa12b54f5aeb36', url: 'https://open.spotify.com/track/0VjIjW4WUjzctJjODdQn8f', platform: 'spotify' },
+                { id: '10', title: 'Starboy', artist: 'The Weeknd', artwork: 'https://i.scdn.co/image/ab67616d0000b2738863bc11d2aa12b54f5aeb36', url: 'https://open.spotify.com/track/7MXVkk9YMctZqd1Srtv4MB', platform: 'spotify' },
+                { id: '11', title: 'The Hills', artist: 'The Weeknd', artwork: 'https://i.scdn.co/image/ab67616d0000b2738863bc11d2aa12b54f5aeb36', url: 'https://open.spotify.com/track/7fBv7CLKzipRk6EC6TWHOB', platform: 'spotify' }
+            ];
+            
+            const results = expandedTracks.filter(track => 
                 track.title.toLowerCase().includes(query.toLowerCase()) ||
                 track.artist.toLowerCase().includes(query.toLowerCase())
             );
             
             if (results.length > 0) {
-                // Show search results
                 displaySearchResults(results);
             } else {
                 alert('No tracks found. Try pasting a music link instead!');
@@ -490,8 +557,8 @@
             grid.innerHTML = results.map(track => `
                 <div class="track-card">
                     <div class="track-artwork">
-                        ${track.artwork ? `<img src="${track.artwork}" alt="${track.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
-                        <div style="display: ${track.artwork ? 'none' : 'flex'}; align-items: center; justify-content: center; font-size: 3rem; color: #999;">🎵</div>
+                        ${track.artwork ? `<img src="${track.artwork}" alt="${track.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" onload="this.nextElementSibling.style.display='none';">` : ''}
+                        <div style="display: ${track.artwork ? 'flex' : 'flex'}; align-items: center; justify-content: center; font-size: 3rem; color: #999;">🎵</div>
                     </div>
                     <div class="track-title">${track.title}</div>
                     <div class="track-artist">${track.artist}</div>
