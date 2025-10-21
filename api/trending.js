@@ -3,37 +3,69 @@ const { kv } = require('@vercel/kv');
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 
-// Genre-specific Spotify playlists
+// Genre-specific Spotify playlists - Expanded for more variety
 const GENRE_PLAYLISTS = {
   all: [
     '37i9dQZF1DXcBWIGoYBM5M', // Today's Top Hits
     '37i9dQZF1DX0XUsuxWHRQd', // RapCaviar
-    '37i9dQZF1DWXRqgorJj26U'  // Rock Classics
+    '37i9dQZF1DWXRqgorJj26U', // Rock Classics
+    '37i9dQZF1DX4JAvHpjipBk', // New Music Friday
+    '37i9dQZF1DX10zKzsJ2jva', // Summer Hits
+    '37i9dQZF1DWY4xHQp97fN6', // Get Turnt
+    '37i9dQZF1DX3oM43CtKnRV', // Rock This
+    '37i9dQZF1DX1lVhptIYRda', // Hot Country
+    '37i9dQZF1DX4dyzvuaRJ0n', // mint
+    '37i9dQZF1DX6J5NfMJS675'  // Dance Rising
   ],
   pop: [
     '37i9dQZF1DXcBWIGoYBM5M', // Today's Top Hits
     '37i9dQZF1DX4JAvHpjipBk', // New Music Friday
-    '37i9dQZF1DX10zKzsJ2jva'  // Summer Hits
+    '37i9dQZF1DX10zKzsJ2jva', // Summer Hits
+    '37i9dQZF1DX2RxBh64BHjQ', // Feelin' Myself
+    '37i9dQZF1DX7Jl5KP2eZaS', // Pop Rising
+    '37i9dQZF1DX0XUsuxWHRQd', // RapCaviar (crossover)
+    '37i9dQZF1DX1lVhptIYRda', // Hot Country (crossover)
+    '37i9dQZF1DX4dyzvuaRJ0n'  // mint (electronic pop)
   ],
   rock: [
     '37i9dQZF1DWXRqgorJj26U', // Rock Classics
     '37i9dQZF1DX3oM43CtKnRV', // Rock This
-    '37i9dQZF1DWWwzidNQX6jx'  // All Out 2000s
+    '37i9dQZF1DWWwzidNQX6jx', // All Out 2000s
+    '37i9dQZF1DX1stG8W0Vl2U', // Rock Hard
+    '37i9dQZF1DX8f6LXxYF5km', // Rock Hits
+    '37i9dQZF1DX0XUsuxWHRQd', // RapCaviar (rock rap)
+    '37i9dQZF1DX4dyzvuaRJ0n', // mint (electronic rock)
+    '37i9dQZF1DX6J5NfMJS675'  // Dance Rising (rock dance)
   ],
   'hip-hop': [
     '37i9dQZF1DX0XUsuxWHRQd', // RapCaviar
     '37i9dQZF1DWY4xHQp97fN6', // Get Turnt
-    '37i9dQZF1DX2RxBh64BHjQ'  // Feelin' Myself
+    '37i9dQZF1DX2RxBh64BHjQ', // Feelin' Myself
+    '37i9dQZF1DX4JAvHpjipBk', // New Music Friday
+    '37i9dQZF1DX10zKzsJ2jva', // Summer Hits
+    '37i9dQZF1DX1stG8W0Vl2U', // Rock Hard (rap rock)
+    '37i9dQZF1DX4dyzvuaRJ0n', // mint (electronic rap)
+    '37i9dQZF1DX6J5NfMJS675'  // Dance Rising (rap dance)
   ],
   country: [
     '37i9dQZF1DX1lVhptIYRda', // Hot Country
     '37i9dQZF1DWZBCPUIUs2iR', // Country Gold
-    '37i9dQZF1DX93D9SC7vVVB'  // Wild Country
+    '37i9dQZF1DX93D9SC7vVVB', // Wild Country
+    '37i9dQZF1DX4JAvHpjipBk', // New Music Friday
+    '37i9dQZF1DX10zKzsJ2jva', // Summer Hits
+    '37i9dQZF1DXcBWIGoYBM5M', // Today's Top Hits (country crossover)
+    '37i9dQZF1DX0XUsuxWHRQd', // RapCaviar (country rap)
+    '37i9dQZF1DX4dyzvuaRJ0n'  // mint (country electronic)
   ],
   electronic: [
     '37i9dQZF1DX4dyzvuaRJ0n', // mint
     '37i9dQZF1DX6J5NfMJS675', // Dance Rising
-    '37i9dQZF1DX8tZsk68tuDw'  // Electronic Circus
+    '37i9dQZF1DX8tZsk68tuDw', // Electronic Circus
+    '37i9dQZF1DX4JAvHpjipBk', // New Music Friday
+    '37i9dQZF1DX10zKzsJ2jva', // Summer Hits
+    '37i9dQZF1DXcBWIGoYBM5M', // Today's Top Hits (electronic pop)
+    '37i9dQZF1DX0XUsuxWHRQd', // RapCaviar (electronic rap)
+    '37i9dQZF1DX1stG8W0Vl2U'  // Rock Hard (electronic rock)
   ]
 };
 
@@ -67,7 +99,7 @@ async function getSpotifyAccessToken() {
   return data.access_token;
 }
 
-async function fetchGenreTracks(genre = 'all', limit = 20) {
+async function fetchGenreTracks(genre = 'all', limit = 150) {
   const accessToken = await getSpotifyAccessToken();
   const playlistIds = GENRE_PLAYLISTS[genre] || GENRE_PLAYLISTS.all;
   
@@ -76,7 +108,7 @@ async function fetchGenreTracks(genre = 'all', limit = 20) {
   for (const playlistId of playlistIds) {
     try {
       const response = await fetch(
-        `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=10`,
+        `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=50`,
         {
           headers: { 'Authorization': `Bearer ${accessToken}` }
         }
@@ -137,7 +169,7 @@ module.exports = async (req, res) => {
     return;
   }
   
-  const { genre = 'all' } = req.query;
+  const { genre = 'all', limit = 20, offset = 0 } = req.query;
   
   // Handle cron job request to refresh cache
   if (req.query.refresh === 'true') {
@@ -187,12 +219,22 @@ module.exports = async (req, res) => {
     if (cached) {
       const data = typeof cached === 'string' ? JSON.parse(cached) : cached;
       console.log(`Returning cached ${genre} music from:`, data.cached_at);
+      
+      // Apply pagination to cached data
+      const startIndex = parseInt(offset);
+      const endIndex = startIndex + parseInt(limit);
+      const paginatedTracks = data.tracks.slice(startIndex, endIndex);
+      
       return res.json({
         success: true,
-        tracks: data.tracks,
+        tracks: paginatedTracks,
         genre: genre,
         cached_at: data.cached_at,
         from_cache: true,
+        total: data.tracks.length,
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        hasMore: endIndex < data.tracks.length,
         timestamp: new Date().toISOString()
       });
     }
@@ -202,7 +244,7 @@ module.exports = async (req, res) => {
   
   // Fetch fresh data
   try {
-    const tracks = await fetchGenreTracks(genre, 20);
+    const tracks = await fetchGenreTracks(genre, 150);
     
     // Cache for 24 hours
     if (tracks.length > 0) {
@@ -217,11 +259,20 @@ module.exports = async (req, res) => {
       }
     }
     
+    // Apply pagination to fresh data
+    const startIndex = parseInt(offset);
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedTracks = tracks.slice(startIndex, endIndex);
+    
     res.json({
       success: true,
-      tracks,
+      tracks: paginatedTracks,
       genre: genre,
       from_cache: false,
+      total: tracks.length,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      hasMore: endIndex < tracks.length,
       timestamp: new Date().toISOString()
     });
     

@@ -679,13 +679,16 @@
             isLoadingTrending = true;
             
             try {
-                const response = await fetch('/api/trending?genre=all');
+                // Calculate how many tracks to load based on screen size
+                const tracksPerPage = calculateTracksPerPage();
+                
+                const response = await fetch(`/api/trending?genre=all&limit=${tracksPerPage}&offset=0`);
                 const data = await response.json();
                 
                 if (data.success && data.tracks) {
                     // Store in cache for instant switching
                     genreCache.all = data.tracks;
-                    displayTracks(data.tracks);
+                    displayTracks(data.tracks, data.hasMore);
                 } else {
                     console.error('Failed to fetch trending music:', data.error);
                     showError('Failed to load trending music');
@@ -721,6 +724,34 @@
             loadTrendingMusic(currentGenre);
         }
 
+        function calculateTracksPerPage() {
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            
+            // Calculate tracks per row based on screen width
+            let tracksPerRow;
+            if (screenWidth < 576) {
+                tracksPerRow = 1; // Mobile
+            } else if (screenWidth < 768) {
+                tracksPerRow = 2; // Large mobile
+            } else if (screenWidth < 992) {
+                tracksPerRow = 3; // Tablet
+            } else if (screenWidth < 1200) {
+                tracksPerRow = 4; // Desktop
+            } else {
+                tracksPerRow = 5; // Large desktop
+            }
+            
+            // Calculate how many rows fit on screen
+            // Each track card is approximately 300px tall (200px artwork + 100px info)
+            const trackHeight = 300;
+            const availableHeight = screenHeight - 400; // Account for header, search, tabs
+            const rowsPerScreen = Math.max(2, Math.floor(availableHeight / trackHeight));
+            
+            // Return tracks per page (ensure minimum of 12)
+            return Math.max(12, tracksPerRow * rowsPerScreen);
+        }
+
         async function switchGenre(genre) {
             currentGenre = genre;
             
@@ -740,14 +771,17 @@
                 return;
             }
             
-            // Fetch from API
+            // Calculate how many tracks to load based on screen size
+            const tracksPerPage = calculateTracksPerPage();
+            
+            // Fetch from API with pagination
             try {
-                const response = await fetch(`/api/trending?genre=${genre}`);
+                const response = await fetch(`/api/trending?genre=${genre}&limit=${tracksPerPage}&offset=0`);
                 const data = await response.json();
                 
                 if (data.success && data.tracks) {
                     genreCache[genre] = data.tracks;
-                    displayTracks(data.tracks);
+                    displayTracks(data.tracks, data.hasMore);
                 } else {
                     showError('Failed to load genre music');
                 }
@@ -759,7 +793,7 @@
             }
         }
 
-        function displayTracks(tracks) {
+        function displayTracks(tracks, hasMore = false) {
             const grid = document.getElementById('musicGrid');
             
             if (tracks.length === 0) {
@@ -792,6 +826,17 @@
                     </button>
                 </div>
             `).join('');
+            
+            // Add "Load More" button if there are more results
+            if (hasMore) {
+                grid.innerHTML += `
+                    <div class="load-more-container">
+                        <button class="btn btn-secondary" onclick="loadMoreTrending()">
+                            Load More ${currentGenre} Music
+                        </button>
+                    </div>
+                `;
+            }
         }
 
         function showError(message) {
@@ -1146,7 +1191,7 @@
             updateSectionTitle('Searching...');
             
             try {
-                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&limit=20`);
+                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&limit=50`);
                 const data = await response.json();
                 
                 if (data.success && data.tracks && data.tracks.length > 0) {
@@ -1212,6 +1257,130 @@
                         </button>
                     </div>
                 `;
+            }
+        }
+
+        async function loadMoreTrending() {
+            const tracksPerPage = calculateTracksPerPage();
+            const currentOffset = document.querySelectorAll('.track-card').length;
+            
+            try {
+                const response = await fetch(`/api/trending?genre=${currentGenre}&limit=${tracksPerPage}&offset=${currentOffset}`);
+                const data = await response.json();
+                
+                if (data.success && data.tracks && data.tracks.length > 0) {
+                    // Append results to existing grid
+                    const grid = document.getElementById('musicGrid');
+                    const loadMoreBtn = grid.querySelector('.load-more-container');
+                    
+                    if (loadMoreBtn) {
+                        loadMoreBtn.remove();
+                    }
+                    
+                    const newCards = data.tracks.map(track => `
+                        <div class="track-card" data-track-id="${track.id}">
+                            <div class="track-artwork">
+                                <img src="${track.artwork}" 
+                                     alt="${track.title}"
+                                     loading="lazy"
+                                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjBGMEYwIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7wn5GVPzwvdGV4dD4KPC9zdmc+'"
+                                     onload="this.classList.add('loaded')">
+                                <div class="play-overlay">
+                                    <button class="play-button" onclick="playTrack('${escapeJs(track.url)}', '${escapeJs(track.title)}', '${escapeJs(track.artist)}')">
+                                        ▶️
+                                    </button>
+                                </div>
+                                ${track.explicit ? '<div class="explicit-badge">E</div>' : ''}
+                            </div>
+                            <div class="track-info">
+                                <div class="track-title">${escapeHtml(track.title)}</div>
+                                <div class="track-artist">${escapeHtml(track.artist)}</div>
+                                ${track.popularity ? `<div class="track-popularity">${getPopularityBars(track.popularity)}</div>` : ''}
+                            </div>
+                            <button class="track-action-btn" onclick="playTrack('${escapeJs(track.url)}', '${escapeJs(track.title)}', '${escapeJs(track.artist)}')">
+                                Play & Share
+                            </button>
+                        </div>
+                    `).join('');
+                    
+                    grid.insertAdjacentHTML('beforeend', newCards);
+                    
+                    if (data.hasMore) {
+                        grid.insertAdjacentHTML('beforeend', `
+                            <div class="load-more-container">
+                                <button class="btn btn-secondary" onclick="loadMoreTrending()">
+                                    Load More ${currentGenre} Music
+                                </button>
+                            </div>
+                        `);
+                    }
+                }
+            } catch (error) {
+                console.error('Load more trending error:', error);
+                alert('Failed to load more music');
+            }
+        }
+
+        async function loadMoreSearchResults() {
+            searchOffset += 50;
+            
+            try {
+                const response = await fetch(`/api/search?q=${encodeURIComponent(currentSearchQuery)}&limit=50&offset=${searchOffset}`);
+                const data = await response.json();
+                
+                if (data.success && data.tracks && data.tracks.length > 0) {
+                    // Append results to existing grid
+                    const grid = document.getElementById('musicGrid');
+                    const loadMoreBtn = grid.querySelector('.load-more-container');
+                    
+                    if (loadMoreBtn) {
+                        loadMoreBtn.remove();
+                    }
+                    
+                    const newCards = data.tracks.map(track => `
+                        <div class="track-card search-result" data-track-id="${track.id}">
+                            <div class="track-artwork">
+                                <img src="${track.artwork || track.artworkMedium}" 
+                                     alt="${track.title}"
+                                     loading="lazy"
+                                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjBGMEYwIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7wn5GVPzwvdGV4dD4KPC9zdmc+'"
+                                     onload="this.classList.add('loaded')">
+                                <div class="play-overlay">
+                                    <button class="play-button" onclick="playTrack('${escapeJs(track.url)}', '${escapeJs(track.title)}', '${escapeJs(track.artist)}')">
+                                        ▶️
+                                    </button>
+                                </div>
+                                ${track.explicit ? '<div class="explicit-badge">E</div>' : ''}
+                            </div>
+                            <div class="track-info">
+                                <div class="track-title">${escapeHtml(track.title)}</div>
+                                <div class="track-artist">${escapeHtml(track.artist)}</div>
+                                <div class="track-meta">
+                                    <span class="track-album">${escapeHtml(track.album)}</span>
+                                    ${track.popularity ? `<span class="track-popularity">${getPopularityBars(track.popularity)}</span>` : ''}
+                                </div>
+                            </div>
+                            <button class="track-action-btn" onclick="playTrack('${escapeJs(track.url)}', '${escapeJs(track.title)}', '${escapeJs(track.artist)}')">
+                                Play & Share
+                            </button>
+                        </div>
+                    `).join('');
+                    
+                    grid.insertAdjacentHTML('beforeend', newCards);
+                    
+                    if (data.hasMore) {
+                        grid.insertAdjacentHTML('beforeend', `
+                            <div class="load-more-container">
+                                <button class="btn btn-secondary" onclick="loadMoreSearchResults()">
+                                    Load More Results
+                                </button>
+                            </div>
+                        `);
+                    }
+                }
+            } catch (error) {
+                console.error('Load more error:', error);
+                alert('Failed to load more results');
             }
         }
 

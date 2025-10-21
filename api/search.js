@@ -111,7 +111,7 @@ module.exports = async (req, res) => {
     return res.status(200).end();
   }
   
-  const { q, type = 'track', limit = 20, offset = 0 } = req.query;
+  const { q, type = 'track', limit = 50, offset = 0 } = req.query;
   
   if (!q || q.trim().length === 0) {
     return res.status(400).json({ 
