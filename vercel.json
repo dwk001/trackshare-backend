@@ -37,6 +37,9 @@
             },
             "api/profile.js": {
               "maxDuration": 30
+            },
+            "api/activity-history.js": {
+              "maxDuration": 30
             }
   },
   "crons": [{
