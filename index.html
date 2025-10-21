@@ -167,6 +167,234 @@
             font-style: italic;
             margin-top: 0.5rem;
         }
+
+        /* Feed Tabs */
+        .feed-tabs-section {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 0;
+        }
+
+        .feed-tabs {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .feed-tabs .tab {
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            background: #f8fafc;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            border: 2px solid transparent;
+        }
+
+        .feed-tabs .tab:hover {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .feed-tabs .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* Social Feed */
+        .social-feed {
+            background: #f8fafc;
+            min-height: 60vh;
+        }
+
+        .feed-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .feed-post {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .feed-post:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .post-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin-right: 0.75rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .post-user-info h4 {
+            margin: 0;
+            font-size: 1rem;
+            color: #1f2937;
+        }
+
+        .post-user-info p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .post-content {
+            margin-bottom: 1rem;
+        }
+
+        .post-track {
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .post-track-artwork {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            margin-right: 0.75rem;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            font-size: 1.5rem;
+        }
+
+        .post-track-artwork img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .post-track-info h5 {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.95rem;
+            color: #1f2937;
+        }
+
+        .post-track-info p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .post-caption {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #374151;
+            margin-bottom: 0.75rem;
+        }
+
+        .post-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .post-action {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            font-size: 0.875rem;
+        }
+
+        .post-action:hover {
+            color: #374151;
+        }
+
+        .post-action.liked {
+            color: #ef4444;
+        }
+
+        .post-action.liked:hover {
+            color: #dc2626;
+        }
+
+        .post-action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .post-action-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Mobile Feed Styles */
+        @media (max-width: 768px) {
+            .feed-tabs {
+                padding: 0 1rem;
+                overflow-x: auto;
+                justify-content: flex-start;
+            }
+
+            .feed-tabs .tab {
+                flex-shrink: 0;
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+
+            .feed-container {
+                padding: 0.5rem;
+            }
+
+            .feed-post {
+                padding: 1rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .post-track {
+                padding: 0.75rem;
+            }
+
+            .post-track-artwork {
+                width: 50px;
+                height: 50px;
+            }
+        }
         
         /* Track popularity bars */
         .track-popularity {
@@ -584,7 +812,35 @@
             </div>
         </section>
 
-        <section class="discovery-section">
+        <!-- Feed Tabs -->
+        <section class="feed-tabs-section">
+            <div class="container">
+                <div class="feed-tabs">
+                    <div class="tab active" data-feed="trending" onclick="switchFeed('trending')">
+                        🔥 Trending
+                    </div>
+                    <div class="tab" data-feed="discover" onclick="switchFeed('discover')">
+                        🎵 Discover
+                    </div>
+                    <div class="tab" data-feed="friends" onclick="switchFeed('friends')">
+                        👥 Friends
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Social Feed -->
+        <section id="socialFeed" class="social-feed">
+            <div class="container">
+                <div class="loading-spinner" id="feedLoading">
+                    <div class="spinner"></div>
+                    <p>Loading feed...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Music Discovery (Hidden by default) -->
+        <section id="musicDiscovery" class="discovery-section" style="display: none;">
             <div class="container">
                 <h2 class="section-title">Trending Now</h2>
                 <div class="genre-tabs">
@@ -655,6 +911,13 @@
         let currentSearchQuery = '';
         let searchOffset = 0;
         let genreCache = {}; // Client-side cache for instant switching
+        
+        // Social Feed Variables
+        let currentFeed = 'trending';
+        let feedOffset = 0;
+        let feedCache = {};
+        let isSignedIn = false;
+        let userToken = null;
         
         // OAuth Client IDs
         const GOOGLE_CLIENT_ID = '150328378525-ldggejup0i37ntgo3954aatocrgtrada.apps.googleusercontent.com';
@@ -750,6 +1013,221 @@
             
             // Return tracks per page (ensure minimum of 12)
             return Math.max(12, tracksPerRow * rowsPerScreen);
+        }
+
+        // Social Feed Functions
+        async function switchFeed(feedType) {
+            currentFeed = feedType;
+            
+            // Update tab visual state
+            document.querySelectorAll('.feed-tabs .tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-feed="${feedType}"]`).classList.add('active');
+            
+            // Show/hide appropriate sections
+            const socialFeed = document.getElementById('socialFeed');
+            const musicDiscovery = document.getElementById('musicDiscovery');
+            
+            if (feedType === 'discover') {
+                socialFeed.style.display = 'none';
+                musicDiscovery.style.display = 'block';
+                // Load music discovery if not already loaded
+                if (!genreCache.all || genreCache.all.length === 0) {
+                    await fetchTrendingMusic();
+                }
+            } else {
+                socialFeed.style.display = 'block';
+                musicDiscovery.style.display = 'none';
+                await loadFeed(feedType);
+            }
+        }
+
+        async function loadFeed(feedType) {
+            const feedContainer = document.querySelector('#socialFeed .container');
+            const loadingSpinner = document.getElementById('feedLoading');
+            
+            // Show loading
+            loadingSpinner.style.display = 'flex';
+            
+            try {
+                // Check cache first
+                if (feedCache[feedType]) {
+                    displayFeed(feedCache[feedType]);
+                    loadingSpinner.style.display = 'none';
+                    return;
+                }
+                
+                // Fetch from API
+                const response = await fetch(`/api/posts?type=${feedType}&limit=20&offset=0`);
+                const data = await response.json();
+                
+                if (data.success && data.posts) {
+                    feedCache[feedType] = data.posts;
+                    displayFeed(data.posts);
+                } else {
+                    showFeedError('Failed to load feed');
+                }
+            } catch (error) {
+                console.error('Feed load error:', error);
+                showFeedError('Network error loading feed');
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        function displayFeed(posts) {
+            const feedContainer = document.querySelector('#socialFeed .container');
+            
+            if (posts.length === 0) {
+                feedContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🎵</div>
+                        <h3>No posts yet</h3>
+                        <p>Be the first to share some music!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const feedHTML = posts.map(post => `
+                <div class="feed-post" data-post-id="${post.id}">
+                    <div class="post-header">
+                        <div class="post-avatar">
+                            ${post.profiles?.display_name?.charAt(0) || '🎵'}
+                        </div>
+                        <div class="post-user-info">
+                            <h4>${escapeHtml(post.profiles?.display_name || 'TrackShare Official')}</h4>
+                            <p>${formatTimeAgo(post.posted_at)}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="post-content">
+                        <div class="post-track">
+                            <div class="post-track-artwork">
+                                ${post.track_artwork_url ? 
+                                    `<img src="${post.track_artwork_url}" alt="${escapeHtml(post.track_title)}" loading="lazy">` : 
+                                    '🎵'
+                                }
+                            </div>
+                            <div class="post-track-info">
+                                <h5>${escapeHtml(post.track_title)}</h5>
+                                <p>${escapeHtml(post.track_artist)}</p>
+                            </div>
+                        </div>
+                        
+                        ${post.caption ? `<div class="post-caption">${escapeHtml(post.caption)}</div>` : ''}
+                    </div>
+                    
+                    <div class="post-actions">
+                        <button class="post-action ${post.is_liked ? 'liked' : ''}" onclick="toggleLike('${post.id}')">
+                            <span>${post.is_liked ? '❤️' : '🤍'}</span>
+                            <span>${post.like_count || 0}</span>
+                        </button>
+                        
+                        <button class="post-action" onclick="showComments('${post.id}')">
+                            <span>💬</span>
+                            <span>${post.comment_count || 0}</span>
+                        </button>
+                        
+                        <button class="post-action" onclick="sharePost('${post.id}')">
+                            <span>📤</span>
+                            <span>${post.share_count || 0}</span>
+                        </button>
+                        
+                        <button class="post-action-btn" onclick="playTrack('${escapeJs(post.track_spotify_url)}', '${escapeJs(post.track_title)}', '${escapeJs(post.track_artist)}')">
+                            Play & Share
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            feedContainer.innerHTML = feedHTML;
+        }
+
+        function showFeedError(message) {
+            const feedContainer = document.querySelector('#socialFeed .container');
+            feedContainer.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">⚠️</div>
+                    <h3>Error</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        async function toggleLike(postId) {
+            if (!isSignedIn) {
+                showSignInModal();
+                return;
+            }
+            
+            const postElement = document.querySelector(`[data-post-id="${postId}"]`);
+            const likeButton = postElement.querySelector('.post-action');
+            const likeCount = likeButton.querySelector('span:last-child');
+            const isLiked = likeButton.classList.contains('liked');
+            
+            try {
+                if (isLiked) {
+                    // Unlike
+                    const response = await fetch(`/api/engagement?post_id=${postId}&type=like`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${userToken}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        likeButton.classList.remove('liked');
+                        likeButton.querySelector('span:first-child').textContent = '🤍';
+                        likeCount.textContent = parseInt(likeCount.textContent) - 1;
+                    }
+                } else {
+                    // Like
+                    const response = await fetch('/api/engagement', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${userToken}`
+                        },
+                        body: JSON.stringify({
+                            post_id: postId,
+                            type: 'like'
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        likeButton.classList.add('liked');
+                        likeButton.querySelector('span:first-child').textContent = '❤️';
+                        likeCount.textContent = parseInt(likeCount.textContent) + 1;
+                    }
+                }
+            } catch (error) {
+                console.error('Like toggle error:', error);
+            }
+        }
+
+        function showComments(postId) {
+            // TODO: Implement comments modal
+            alert('Comments feature coming soon!');
+        }
+
+        function sharePost(postId) {
+            // TODO: Implement share functionality
+            alert('Share feature coming soon!');
+        }
+
+        function formatTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) return 'just now';
+            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+            if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+            
+            return date.toLocaleDateString();
         }
 
         async function switchGenre(genre) {
@@ -1472,7 +1950,7 @@
             checkAuthCallback();
             checkExistingAuth();
             setupSearchHandlers(); // Initialize enhanced search
-            fetchTrendingMusic(); // Load dynamic trending music
+            loadFeed('trending'); // Load social feed by default
         });
 
         // Handle Enter key in search
