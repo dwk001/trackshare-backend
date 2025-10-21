@@ -2299,6 +2299,383 @@
             font-size: 0.7rem;
             color: rgba(255, 255, 255, 0.6);
         }
+
+        /* Playlist Analytics Styles */
+        .playlist-analytics-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .playlist-analytics-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .playlist-analytics-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .playlist-analytics-header p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .playlist-analytics-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .playlist-analytics-tab {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .playlist-analytics-tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .playlist-analytics-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
+        .playlist-analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .playlist-analytics-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .playlist-analytics-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .playlist-analytics-card.featured {
+            border: 2px solid #f59e0b;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+        }
+
+        .playlist-analytics-card.featured::before {
+            content: '⭐';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        .playlist-analytics-header-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .playlist-analytics-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            overflow: hidden;
+        }
+
+        .playlist-analytics-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .playlist-analytics-info h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .playlist-analytics-meta {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.25rem;
+        }
+
+        .playlist-analytics-description {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .playlist-analytics-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .playlist-analytics-stat {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .playlist-analytics-stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.25rem;
+        }
+
+        .playlist-analytics-stat-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .playlist-analytics-chart {
+            margin-bottom: 1.5rem;
+        }
+
+        .playlist-analytics-chart h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.75rem;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            height: 200px;
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 4px 4px 0 0;
+            min-height: 20px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .chart-bar:hover {
+            background: linear-gradient(to top, #764ba2, #667eea);
+            transform: scaleY(1.05);
+        }
+
+        .chart-bar-label {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.6);
+            white-space: nowrap;
+        }
+
+        .playlist-analytics-insights {
+            margin-bottom: 1.5rem;
+        }
+
+        .playlist-analytics-insights h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.75rem;
+        }
+
+        .insight-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .insight-icon {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .insight-text {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .playlist-analytics-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .playlist-analytics-action-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .playlist-analytics-action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .playlist-analytics-action-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
+        .playlist-analytics-action-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .playlist-analytics-action-btn.success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #10b981;
+        }
+
+        .playlist-analytics-action-btn.success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .playlist-analytics-summary {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .playlist-analytics-summary h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .summary-stat {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .summary-stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.25rem;
+        }
+
+        .summary-stat-change {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .summary-stat-change.positive {
+            color: #10b981;
+        }
+
+        .summary-stat-change.negative {
+            color: #ef4444;
+        }
+
+        .summary-stat-change.neutral {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .playlist-analytics-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .playlist-analytics-filter {
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .playlist-analytics-filter:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .playlist-analytics-filter.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
         @media (max-width: 768px) {
             .feed-tabs {
                 padding: 0 1rem;
@@ -4475,6 +4852,9 @@
                     <div class="tab" data-feed="events" onclick="switchFeed('events')">
                         🎪 Events
                     </div>
+                    <div class="tab" data-feed="analytics" onclick="switchFeed('analytics')">
+                        📊 Analytics
+                    </div>
                     <div class="tab" data-feed="requests" onclick="switchFeed('requests')">
                         📬 Requests
                     </div>
@@ -4707,6 +5087,57 @@
                         </button>
                     </div>
                 ` : ''}
+            </div>
+        </section>
+
+        <!-- Playlist Analytics (Hidden by default) -->
+        <section id="playlistAnalytics" class="playlist-analytics-section" style="display: none;">
+            <div class="playlist-analytics-container">
+                <div class="playlist-analytics-header">
+                    <h1>Playlist Analytics & Insights</h1>
+                    <p>Track your playlist performance, engagement metrics, and discover insights about your music taste!</p>
+                </div>
+                
+                <div class="playlist-analytics-filters">
+                    <div class="playlist-analytics-filter active" data-analytics-period="7d" onclick="filterAnalytics('7d')">
+                        Last 7 Days
+                    </div>
+                    <div class="playlist-analytics-filter" data-analytics-period="30d" onclick="filterAnalytics('30d')">
+                        Last 30 Days
+                    </div>
+                    <div class="playlist-analytics-filter" data-analytics-period="90d" onclick="filterAnalytics('90d')">
+                        Last 90 Days
+                    </div>
+                    <div class="playlist-analytics-filter" data-analytics-period="all" onclick="filterAnalytics('all')">
+                        All Time
+                    </div>
+                </div>
+                
+                <div class="playlist-analytics-summary" id="analyticsSummary">
+                    <!-- Summary stats will be loaded here -->
+                </div>
+                
+                <div class="playlist-analytics-tabs">
+                    <div class="playlist-analytics-tab active" data-analytics-type="overview" onclick="switchAnalyticsTab('overview')">
+                        📊 Overview
+                    </div>
+                    <div class="playlist-analytics-tab" data-analytics-type="playlists" onclick="switchAnalyticsTab('playlists')">
+                        📝 Playlists
+                    </div>
+                    <div class="playlist-analytics-tab" data-analytics-type="engagement" onclick="switchAnalyticsTab('engagement')">
+                        💬 Engagement
+                    </div>
+                    <div class="playlist-analytics-tab" data-analytics-type="trends" onclick="switchAnalyticsTab('trends')">
+                        📈 Trends
+                    </div>
+                    <div class="playlist-analytics-tab" data-analytics-type="insights" onclick="switchAnalyticsTab('insights')">
+                        💡 Insights
+                    </div>
+                </div>
+                
+                <div class="playlist-analytics-grid" id="analyticsGrid">
+                    <!-- Analytics content will be loaded here -->
+                </div>
             </div>
         </section>
     </main>
@@ -5509,6 +5940,7 @@
             const musicGroups = document.getElementById('musicGroups');
             const musicChallenges = document.getElementById('musicChallenges');
             const musicEvents = document.getElementById('musicEvents');
+            const playlistAnalytics = document.getElementById('playlistAnalytics');
             
             if (feedType === 'discover') {
                 socialFeed.style.display = 'none';
@@ -5516,6 +5948,7 @@
                 musicGroups.style.display = 'none';
                 musicChallenges.style.display = 'none';
                 musicEvents.style.display = 'none';
+                playlistAnalytics.style.display = 'none';
                 // Load music discovery if not already loaded
                 if (!genreCache.all || genreCache.all.length === 0) {
                     await fetchTrendingMusic();
@@ -5526,6 +5959,7 @@
                 musicGroups.style.display = 'block';
                 musicChallenges.style.display = 'none';
                 musicEvents.style.display = 'none';
+                playlistAnalytics.style.display = 'none';
                 await loadGroups();
             } else if (feedType === 'challenges') {
                 socialFeed.style.display = 'none';
@@ -5533,6 +5967,7 @@
                 musicGroups.style.display = 'none';
                 musicChallenges.style.display = 'block';
                 musicEvents.style.display = 'none';
+                playlistAnalytics.style.display = 'none';
                 await loadChallenges();
             } else if (feedType === 'events') {
                 socialFeed.style.display = 'none';
@@ -5540,13 +5975,23 @@
                 musicGroups.style.display = 'none';
                 musicChallenges.style.display = 'none';
                 musicEvents.style.display = 'block';
+                playlistAnalytics.style.display = 'none';
                 await loadEvents();
+            } else if (feedType === 'analytics') {
+                socialFeed.style.display = 'none';
+                musicDiscovery.style.display = 'none';
+                musicGroups.style.display = 'none';
+                musicChallenges.style.display = 'none';
+                musicEvents.style.display = 'none';
+                playlistAnalytics.style.display = 'block';
+                await loadPlaylistAnalytics();
             } else if (feedType === 'friends') {
                 socialFeed.style.display = 'block';
                 musicDiscovery.style.display = 'none';
                 musicGroups.style.display = 'none';
                 musicChallenges.style.display = 'none';
                 musicEvents.style.display = 'none';
+                playlistAnalytics.style.display = 'none';
                 await displayFriends();
             } else if (feedType === 'requests') {
                 socialFeed.style.display = 'block';
@@ -5554,6 +5999,7 @@
                 musicGroups.style.display = 'none';
                 musicChallenges.style.display = 'none';
                 musicEvents.style.display = 'none';
+                playlistAnalytics.style.display = 'none';
                 await displayFriendRequests();
             } else if (feedType === 'profile') {
                 socialFeed.style.display = 'block';
@@ -5561,6 +6007,7 @@
                 musicGroups.style.display = 'none';
                 musicChallenges.style.display = 'none';
                 musicEvents.style.display = 'none';
+                playlistAnalytics.style.display = 'none';
                 await loadProfileData();
             } else {
                 socialFeed.style.display = 'block';
@@ -5568,6 +6015,7 @@
                 musicGroups.style.display = 'none';
                 musicChallenges.style.display = 'none';
                 musicEvents.style.display = 'none';
+                playlistAnalytics.style.display = 'none';
                 await loadFeed(feedType);
             }
         }
@@ -9553,6 +10001,449 @@
                     <h3>Error Loading Events</h3>
                     <p>Something went wrong while loading events.</p>
                     <button class="btn btn-primary" onclick="loadEvents()">Try Again</button>
+                </div>
+            `;
+        }
+
+        // Playlist Analytics Functions
+        let currentAnalyticsPeriod = '7d';
+        let currentAnalyticsTab = 'overview';
+        let analyticsData = {};
+
+        async function loadPlaylistAnalytics() {
+            if (!isSignedIn || !userToken) {
+                showSignInModal();
+                return;
+            }
+
+            const analyticsGrid = document.getElementById('analyticsGrid');
+            const analyticsSummary = document.getElementById('analyticsSummary');
+            
+            analyticsGrid.innerHTML = '<div class="loading">Loading analytics...</div>';
+            analyticsSummary.innerHTML = '<div class="loading">Loading summary...</div>';
+            
+            try {
+                const response = await fetch(`/api/profile?analytics=true&period=${currentAnalyticsPeriod}&type=${currentAnalyticsTab}`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    analyticsData = data.analytics;
+                    displayAnalyticsSummary(data.summary);
+                    displayAnalyticsContent(data.analytics);
+                } else {
+                    displayAnalyticsError();
+                }
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                displayAnalyticsError();
+            }
+        }
+
+        function displayAnalyticsSummary(summary) {
+            const analyticsSummary = document.getElementById('analyticsSummary');
+            
+            analyticsSummary.innerHTML = `
+                <h3>Analytics Summary - ${getPeriodLabel(currentAnalyticsPeriod)}</h3>
+                <div class="summary-stats">
+                    <div class="summary-stat">
+                        <div class="summary-stat-number">${summary.total_plays || 0}</div>
+                        <div class="summary-stat-label">Total Plays</div>
+                        <div class="summary-stat-change ${getChangeClass(summary.plays_change)}">
+                            ${formatChange(summary.plays_change)} from last period
+                        </div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-number">${summary.total_likes || 0}</div>
+                        <div class="summary-stat-label">Total Likes</div>
+                        <div class="summary-stat-change ${getChangeClass(summary.likes_change)}">
+                            ${formatChange(summary.likes_change)} from last period
+                        </div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-number">${summary.total_comments || 0}</div>
+                        <div class="summary-stat-label">Total Comments</div>
+                        <div class="summary-stat-change ${getChangeClass(summary.comments_change)}">
+                            ${formatChange(summary.comments_change)} from last period
+                        </div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-number">${summary.total_shares || 0}</div>
+                        <div class="summary-stat-label">Total Shares</div>
+                        <div class="summary-stat-change ${getChangeClass(summary.shares_change)}">
+                            ${formatChange(summary.shares_change)} from last period
+                        </div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-number">${summary.avg_engagement || 0}%</div>
+                        <div class="summary-stat-label">Avg Engagement</div>
+                        <div class="summary-stat-change ${getChangeClass(summary.engagement_change)}">
+                            ${formatChange(summary.engagement_change)} from last period
+                        </div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-number">${summary.top_genre || 'N/A'}</div>
+                        <div class="summary-stat-label">Top Genre</div>
+                        <div class="summary-stat-change neutral">
+                            Most played genre
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayAnalyticsContent(analytics) {
+            const analyticsGrid = document.getElementById('analyticsGrid');
+            
+            switch (currentAnalyticsTab) {
+                case 'overview':
+                    displayOverviewAnalytics(analytics);
+                    break;
+                case 'playlists':
+                    displayPlaylistAnalytics(analytics);
+                    break;
+                case 'engagement':
+                    displayEngagementAnalytics(analytics);
+                    break;
+                case 'trends':
+                    displayTrendsAnalytics(analytics);
+                    break;
+                case 'insights':
+                    displayInsightsAnalytics(analytics);
+                    break;
+                default:
+                    displayOverviewAnalytics(analytics);
+            }
+        }
+
+        function displayOverviewAnalytics(analytics) {
+            const analyticsGrid = document.getElementById('analyticsGrid');
+            
+            analyticsGrid.innerHTML = `
+                <div class="playlist-analytics-card">
+                    <div class="playlist-analytics-chart">
+                        <h4>Daily Plays</h4>
+                        <div class="chart-container">
+                            ${generateChartBars(analytics.daily_plays || [])}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="playlist-analytics-card">
+                    <div class="playlist-analytics-chart">
+                        <h4>Genre Distribution</h4>
+                        <div class="chart-container">
+                            ${generateChartBars(analytics.genre_distribution || [])}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="playlist-analytics-card">
+                    <div class="playlist-analytics-insights">
+                        <h4>Top Insights</h4>
+                        ${generateInsights(analytics.insights || [])}
+                    </div>
+                </div>
+                
+                <div class="playlist-analytics-card">
+                    <div class="playlist-analytics-stats">
+                        <div class="playlist-analytics-stat">
+                            <div class="playlist-analytics-stat-number">${analytics.most_played_track || 'N/A'}</div>
+                            <div class="playlist-analytics-stat-label">Most Played Track</div>
+                        </div>
+                        <div class="playlist-analytics-stat">
+                            <div class="playlist-analytics-stat-number">${analytics.most_played_artist || 'N/A'}</div>
+                            <div class="playlist-analytics-stat-label">Most Played Artist</div>
+                        </div>
+                        <div class="playlist-analytics-stat">
+                            <div class="playlist-analytics-stat-number">${analytics.avg_session_duration || '0m'}</div>
+                            <div class="playlist-analytics-stat-label">Avg Session Duration</div>
+                        </div>
+                        <div class="playlist-analytics-stat">
+                            <div class="playlist-analytics-stat-number">${analytics.total_listening_time || '0h'}</div>
+                            <div class="playlist-analytics-stat-label">Total Listening Time</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayPlaylistAnalytics(analytics) {
+            const analyticsGrid = document.getElementById('analyticsGrid');
+            
+            if (!analytics.playlists || analytics.playlists.length === 0) {
+                analyticsGrid.innerHTML = `
+                    <div class="insights-empty">
+                        <div class="insights-empty-icon">📝</div>
+                        <h3>No Playlists Found</h3>
+                        <p>Create some playlists to see analytics!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            analyticsGrid.innerHTML = analytics.playlists.map(playlist => `
+                <div class="playlist-analytics-card ${playlist.featured ? 'featured' : ''}" onclick="viewPlaylistAnalytics('${playlist.id}')">
+                    <div class="playlist-analytics-header-card">
+                        <div class="playlist-analytics-image">
+                            ${playlist.image ? `<img src="${playlist.image}" alt="${playlist.name}">` : '📝'}
+                        </div>
+                        <div class="playlist-analytics-info">
+                            <h3>${escapeHtml(playlist.name)}</h3>
+                            <div class="playlist-analytics-meta">
+                                ${playlist.track_count} tracks • ${playlist.total_duration}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="playlist-analytics-description">
+                        ${escapeHtml(playlist.description || 'No description available')}
+                    </div>
+                    
+                    <div class="playlist-analytics-stats">
+                        <div class="playlist-analytics-stat">
+                            <div class="playlist-analytics-stat-number">${playlist.plays || 0}</div>
+                            <div class="playlist-analytics-stat-label">Plays</div>
+                        </div>
+                        <div class="playlist-analytics-stat">
+                            <div class="playlist-analytics-stat-number">${playlist.likes || 0}</div>
+                            <div class="playlist-analytics-stat-label">Likes</div>
+                        </div>
+                        <div class="playlist-analytics-stat">
+                            <div class="playlist-analytics-stat-number">${playlist.shares || 0}</div>
+                            <div class="playlist-analytics-stat-label">Shares</div>
+                        </div>
+                        <div class="playlist-analytics-stat">
+                            <div class="playlist-analytics-stat-number">${playlist.engagement_rate || 0}%</div>
+                            <div class="playlist-analytics-stat-label">Engagement</div>
+                        </div>
+                    </div>
+                    
+                    <div class="playlist-analytics-chart">
+                        <h4>Play Trend</h4>
+                        <div class="chart-container">
+                            ${generateChartBars(playlist.play_trend || [])}
+                        </div>
+                    </div>
+                    
+                    <div class="playlist-analytics-insights">
+                        <h4>Insights</h4>
+                        ${generatePlaylistInsights(playlist.insights || [])}
+                    </div>
+                    
+                    <div class="playlist-analytics-actions">
+                        <button class="playlist-analytics-action-btn primary" onclick="event.stopPropagation(); viewPlaylist('${playlist.id}')">
+                            View Playlist
+                        </button>
+                        <button class="playlist-analytics-action-btn success" onclick="event.stopPropagation(); sharePlaylist('${playlist.id}')">
+                            Share
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function displayEngagementAnalytics(analytics) {
+            const analyticsGrid = document.getElementById('analyticsGrid');
+            
+            analyticsGrid.innerHTML = `
+                <div class="playlist-analytics-card">
+                    <div class="playlist-analytics-chart">
+                        <h4>Engagement Over Time</h4>
+                        <div class="chart-container">
+                            ${generateChartBars(analytics.engagement_timeline || [])}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="playlist-analytics-card">
+                    <div class="playlist-analytics-stats">
+                        <div class="playlist-analytics-stat">
+                            <div class="playlist-analytics-stat-number">${analytics.avg_likes_per_post || 0}</div>
+                            <div class="playlist-analytics-stat-label">Avg Likes/Post</div>
+                        </div>
+                        <div class="playlist-analytics-stat">
+                            <div class="playlist-analytics-stat-number">${analytics.avg_comments_per_post || 0}</div>
+                            <div class="playlist-analytics-stat-label">Avg Comments/Post</div>
+                        </div>
+                        <div class="playlist-analytics-stat">
+                            <div class="playlist-analytics-stat-number">${analytics.avg_shares_per_post || 0}</div>
+                            <div class="playlist-analytics-stat-label">Avg Shares/Post</div>
+                        </div>
+                        <div class="playlist-analytics-stat">
+                            <div class="playlist-analytics-stat-number">${analytics.total_reach || 0}</div>
+                            <div class="playlist-analytics-stat-label">Total Reach</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="playlist-analytics-card">
+                    <div class="playlist-analytics-insights">
+                        <h4>Engagement Insights</h4>
+                        ${generateEngagementInsights(analytics.engagement_insights || [])}
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayTrendsAnalytics(analytics) {
+            const analyticsGrid = document.getElementById('analyticsGrid');
+            
+            analyticsGrid.innerHTML = `
+                <div class="playlist-analytics-card">
+                    <div class="playlist-analytics-chart">
+                        <h4>Music Trends</h4>
+                        <div class="chart-container">
+                            ${generateChartBars(analytics.music_trends || [])}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="playlist-analytics-card">
+                    <div class="playlist-analytics-insights">
+                        <h4>Trending Insights</h4>
+                        ${generateTrendInsights(analytics.trend_insights || [])}
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayInsightsAnalytics(analytics) {
+            const analyticsGrid = document.getElementById('analyticsGrid');
+            
+            analyticsGrid.innerHTML = `
+                <div class="playlist-analytics-card">
+                    <div class="playlist-analytics-insights">
+                        <h4>Music Taste Analysis</h4>
+                        ${generateMusicTasteInsights(analytics.music_taste || [])}
+                    </div>
+                </div>
+                
+                <div class="playlist-analytics-card">
+                    <div class="playlist-analytics-insights">
+                        <h4>Listening Patterns</h4>
+                        ${generateListeningPatternInsights(analytics.listening_patterns || [])}
+                    </div>
+                </div>
+                
+                <div class="playlist-analytics-card">
+                    <div class="playlist-analytics-insights">
+                        <h4>Recommendations</h4>
+                        ${generateRecommendationInsights(analytics.recommendations || [])}
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateChartBars(data) {
+            if (!data || data.length === 0) {
+                return '<div style="text-align: center; color: rgba(255,255,255,0.6); padding: 2rem;">No data available</div>';
+            }
+            
+            const maxValue = Math.max(...data.map(item => item.value));
+            
+            return data.map(item => `
+                <div class="chart-bar" style="height: ${(item.value / maxValue) * 100}%">
+                    <div class="chart-bar-label">${item.label}</div>
+                </div>
+            `).join('');
+        }
+
+        function generateInsights(insights) {
+            if (!insights || insights.length === 0) {
+                return '<div style="text-align: center; color: rgba(255,255,255,0.6); padding: 1rem;">No insights available</div>';
+            }
+            
+            return insights.map(insight => `
+                <div class="insight-item">
+                    <div class="insight-icon">${insight.icon || '💡'}</div>
+                    <div class="insight-text">${escapeHtml(insight.text)}</div>
+                </div>
+            `).join('');
+        }
+
+        function generatePlaylistInsights(insights) {
+            return generateInsights(insights);
+        }
+
+        function generateEngagementInsights(insights) {
+            return generateInsights(insights);
+        }
+
+        function generateTrendInsights(insights) {
+            return generateInsights(insights);
+        }
+
+        function generateMusicTasteInsights(insights) {
+            return generateInsights(insights);
+        }
+
+        function generateListeningPatternInsights(insights) {
+            return generateInsights(insights);
+        }
+
+        function generateRecommendationInsights(insights) {
+            return generateInsights(insights);
+        }
+
+        function filterAnalytics(period) {
+            // Update filter buttons
+            document.querySelectorAll('.playlist-analytics-filter').forEach(filter => {
+                filter.classList.remove('active');
+            });
+            document.querySelector(`[data-analytics-period="${period}"]`).classList.add('active');
+            
+            currentAnalyticsPeriod = period;
+            loadPlaylistAnalytics();
+        }
+
+        function switchAnalyticsTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.playlist-analytics-tab').forEach(tabEl => {
+                tabEl.classList.remove('active');
+            });
+            document.querySelector(`[data-analytics-type="${tab}"]`).classList.add('active');
+            
+            currentAnalyticsTab = tab;
+            displayAnalyticsContent(analyticsData);
+        }
+
+        function getPeriodLabel(period) {
+            const labels = {
+                '7d': 'Last 7 Days',
+                '30d': 'Last 30 Days',
+                '90d': 'Last 90 Days',
+                'all': 'All Time'
+            };
+            return labels[period] || period;
+        }
+
+        function getChangeClass(change) {
+            if (change > 0) return 'positive';
+            if (change < 0) return 'negative';
+            return 'neutral';
+        }
+
+        function formatChange(change) {
+            if (change > 0) return `+${change}%`;
+            if (change < 0) return `${change}%`;
+            return '0%';
+        }
+
+        function viewPlaylistAnalytics(playlistId) {
+            showNotification('Playlist analytics details coming soon!', 'info');
+        }
+
+        function displayAnalyticsError() {
+            const analyticsGrid = document.getElementById('analyticsGrid');
+            analyticsGrid.innerHTML = `
+                <div class="insights-empty">
+                    <div class="insights-empty-icon">⚠️</div>
+                    <h3>Error Loading Analytics</h3>
+                    <p>Something went wrong while loading analytics.</p>
+                    <button class="btn btn-primary" onclick="loadPlaylistAnalytics()">Try Again</button>
                 </div>
             `;
         }
