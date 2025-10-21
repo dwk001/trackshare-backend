@@ -34,6 +34,9 @@
             },
             "api/friends.js": {
               "maxDuration": 30
+            },
+            "api/profile.js": {
+              "maxDuration": 30
             }
   },
   "crons": [{

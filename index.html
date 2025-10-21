@@ -1028,6 +1028,339 @@
             font-size: 3rem;
             margin-bottom: 1rem;
         }
+
+        /* Profile Page Styles */
+        .profile-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .profile-header {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 1rem auto;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .profile-name {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-bio {
+            color: #6b7280;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .profile-meta {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .profile-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-stat {
+            text-align: center;
+        }
+
+        .profile-stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+            display: block;
+        }
+
+        .profile-stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .profile-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .profile-action-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-edit-profile {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-edit-profile:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-settings {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+        }
+
+        .btn-settings:hover {
+            background: #e5e7eb;
+        }
+
+        .profile-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+        }
+
+        .profile-main {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .profile-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .profile-widget {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .profile-widget h3 {
+            margin: 0 0 1rem 0;
+            color: #1f2937;
+            font-size: 1.1rem;
+        }
+
+        .profile-posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .profile-post-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+
+        .profile-post-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .profile-post-artwork {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            background: #e5e7eb;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+        }
+
+        .profile-post-artwork img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-post-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .profile-post-artist {
+            color: #6b7280;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-post-stats {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+
+        .profile-form {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .profile-form h2 {
+            margin: 0 0 1.5rem 0;
+            color: #1f2937;
+            text-align: center;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 25px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 0.75rem 2rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 25px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel:hover {
+            background: #e5e7eb;
+        }
+
+        @media (max-width: 768px) {
+            .profile-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-meta {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .profile-stats {
+                gap: 1rem;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
         
         /* Track popularity bars */
         .track-popularity {
@@ -1468,6 +1801,9 @@
                     <div class="tab" data-feed="requests" onclick="switchFeed('requests')">
                         📬 Requests
                     </div>
+                    <div class="tab" data-feed="profile" onclick="switchFeed('profile')">
+                        👤 Profile
+                    </div>
                 </div>
             </div>
         </section>
@@ -1781,6 +2117,10 @@
                 socialFeed.style.display = 'block';
                 musicDiscovery.style.display = 'none';
                 await loadFriendsData(feedType);
+            } else if (feedType === 'profile') {
+                socialFeed.style.display = 'block';
+                musicDiscovery.style.display = 'none';
+                await loadProfileData();
             } else {
                 socialFeed.style.display = 'block';
                 musicDiscovery.style.display = 'none';
@@ -2480,6 +2820,182 @@
                     <p>${message}</p>
                 </div>
             `;
+        }
+
+        // Profile Functions
+        async function loadProfileData() {
+            if (!isSignedIn || !userToken) {
+                showSignInModal();
+                return;
+            }
+
+            const feedContainer = document.querySelector('#socialFeed .container');
+            const loadingSpinner = document.getElementById('feedLoading');
+            
+            // Show loading
+            loadingSpinner.style.display = 'flex';
+            
+            try {
+                const response = await fetch('/api/profile?include_stats=true&include_posts=true');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayProfile(data.profile, data.stats, data.posts);
+                } else {
+                    showProfileError('Failed to load profile');
+                }
+            } catch (error) {
+                console.error('Profile load error:', error);
+                showProfileError('Network error loading profile');
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        function displayProfile(profile, stats, posts) {
+            const feedContainer = document.querySelector('#socialFeed .container');
+            
+            const profileHTML = `
+                <div class="profile-container">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            ${profile.avatar_url ? 
+                                `<img src="${profile.avatar_url}" alt="Profile Avatar">` :
+                                profile.display_name?.charAt(0) || '🎵'
+                            }
+                        </div>
+                        <div class="profile-name">${escapeHtml(profile.display_name || 'User')}</div>
+                        ${profile.bio ? `<div class="profile-bio">${escapeHtml(profile.bio)}</div>` : ''}
+                        
+                        <div class="profile-meta">
+                            ${profile.location ? `
+                                <div class="profile-meta-item">
+                                    <span>📍</span>
+                                    <span>${escapeHtml(profile.location)}</span>
+                                </div>
+                            ` : ''}
+                            ${profile.website ? `
+                                <div class="profile-meta-item">
+                                    <span>🌐</span>
+                                    <a href="${profile.website}" target="_blank" rel="noopener">${escapeHtml(profile.website)}</a>
+                                </div>
+                            ` : ''}
+                            <div class="profile-meta-item">
+                                <span>📅</span>
+                                <span>Joined ${formatTimeAgo(profile.created_at)}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-stats">
+                            <div class="profile-stat">
+                                <span class="profile-stat-number">${stats?.total_posts || 0}</span>
+                                <span class="profile-stat-label">Posts</span>
+                            </div>
+                            <div class="profile-stat">
+                                <span class="profile-stat-number">${stats?.friends_count || 0}</span>
+                                <span class="profile-stat-label">Friends</span>
+                            </div>
+                            <div class="profile-stat">
+                                <span class="profile-stat-number">${stats?.public_posts || 0}</span>
+                                <span class="profile-stat-label">Public</span>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-actions">
+                            <button class="profile-action-btn btn-edit-profile" onclick="showEditProfileModal()">
+                                ✏️ Edit Profile
+                            </button>
+                            <button class="profile-action-btn btn-settings" onclick="showSettingsModal()">
+                                ⚙️ Settings
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-content">
+                        <div class="profile-main">
+                            <h3>Recent Posts</h3>
+                            ${posts && posts.length > 0 ? `
+                                <div class="profile-posts-grid">
+                                    ${posts.map(post => `
+                                        <div class="profile-post-card">
+                                            <div class="profile-post-artwork">
+                                                ${post.track_artwork_url ? 
+                                                    `<img src="${post.track_artwork_url}" alt="${post.track_title}">` :
+                                                    '🎵'
+                                                }
+                                            </div>
+                                            <div class="profile-post-title">${escapeHtml(post.track_title)}</div>
+                                            <div class="profile-post-artist">${escapeHtml(post.track_artist)}</div>
+                                            <div class="profile-post-stats">
+                                                <span>❤️ ${post.like_count || 0}</span>
+                                                <span>💬 ${post.comment_count || 0}</span>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : `
+                                <div class="no-friends">
+                                    <div class="empty-icon">🎵</div>
+                                    <h4>No posts yet</h4>
+                                    <p>Start sharing your favorite music!</p>
+                                    <button class="btn btn-primary" onclick="showCreatePostModal()">Share Music</button>
+                                </div>
+                            `}
+                        </div>
+                        
+                        <div class="profile-sidebar">
+                            <div class="profile-widget">
+                                <h3>Music Preferences</h3>
+                                <p>Customize your music taste and discover new genres.</p>
+                                <button class="btn btn-secondary" onclick="showMusicPreferencesModal()">
+                                    Edit Preferences
+                                </button>
+                            </div>
+                            
+                            <div class="profile-widget">
+                                <h3>Privacy Settings</h3>
+                                <p>Control who can see your posts and profile information.</p>
+                                <button class="btn btn-secondary" onclick="showPrivacySettingsModal()">
+                                    Privacy Settings
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            feedContainer.innerHTML = profileHTML;
+        }
+
+        function showProfileError(message) {
+            const feedContainer = document.querySelector('#socialFeed .container');
+            feedContainer.innerHTML = `
+                <div class="no-friends">
+                    <div class="empty-icon">⚠️</div>
+                    <h4>Error</h4>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function showEditProfileModal() {
+            // TODO: Implement edit profile modal
+            alert('Edit profile feature coming soon!');
+        }
+
+        function showSettingsModal() {
+            // TODO: Implement settings modal
+            alert('Settings feature coming soon!');
+        }
+
+        function showMusicPreferencesModal() {
+            // TODO: Implement music preferences modal
+            alert('Music preferences feature coming soon!');
+        }
+
+        function showPrivacySettingsModal() {
+            // TODO: Implement privacy settings modal
+            alert('Privacy settings feature coming soon!');
         }
 
         // Real-time Update Functions
