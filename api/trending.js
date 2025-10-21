@@ -103,6 +103,8 @@ async function fetchGenreTracks(genre = 'all', limit = 150) {
   const accessToken = await getSpotifyAccessToken();
   const playlistIds = GENRE_PLAYLISTS[genre] || GENRE_PLAYLISTS.all;
   
+  console.log(`Fetching tracks for genre: ${genre}, playlists: ${playlistIds.length}, limit: ${limit}`);
+  
   const allTracks = [];
   
   for (const playlistId of playlistIds) {
@@ -134,6 +136,7 @@ async function fetchGenreTracks(genre = 'all', limit = 150) {
             explicit: item.track.explicit
           }));
         
+        console.log(`Playlist ${playlistId}: fetched ${tracks.length} tracks`);
         allTracks.push(...tracks);
       }
     } catch (error) {
@@ -181,7 +184,7 @@ module.exports = async (req, res) => {
     
     try {
       console.log('Starting trending music cache refresh...');
-      const tracks = await fetchGenreTracks(genre, 20);
+      const tracks = await fetchGenreTracks(genre, 150);
       
       if (tracks.length === 0) {
         console.log('No tracks fetched, skipping cache update');

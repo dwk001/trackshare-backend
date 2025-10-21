@@ -1176,12 +1176,52 @@
             });
         }
 
+        async function resolveUrl(url) {
+            showLoadingIndicator();
+            updateSectionTitle('Resolving URL...');
+            
+            try {
+                const response = await fetch(`/api/resolve?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+                
+                if (data.success && data.track) {
+                    // Create search results from API response
+                    const apiResults = [{
+                        id: data.track.id,
+                        title: data.track.title,
+                        artist: data.track.artist,
+                        artwork: data.track.artwork,
+                        url: data.track.sourceUrl,
+                        platform: data.track.platform || 'unknown'
+                    }];
+                    
+                    displaySearchResults(apiResults, false);
+                    updateSectionTitle(`Resolved: ${data.track.title}`);
+                } else {
+                    displayEmptyState(
+                        'URL Not Found',
+                        'We couldn\'t resolve this music URL.',
+                        'Try a different link or search for the track directly.'
+                    );
+                }
+            } catch (error) {
+                console.error('URL resolve error:', error);
+                displayErrorState(
+                    'Resolve Failed',
+                    'Something went wrong while resolving the URL.',
+                    'Please try again or search for the track directly.'
+                );
+            } finally {
+                hideLoadingIndicator();
+            }
+        }
+
         async function performSearch(query) {
             currentSearchQuery = query;
             searchOffset = 0;
             
-            // Check if it's a URL
-            if (query.startsWith('http://') || query.startsWith('https://')) {
+            // Check if it's a URL (more specific detection)
+            if (query.match(/^https?:\/\/.+\..+/)) {
                 resolveUrl(query);
                 return;
             }
