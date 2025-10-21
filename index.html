@@ -1131,6 +1131,327 @@
             font-size: 1rem;
             margin-bottom: 2rem;
         }
+
+        /* Music Groups & Communities Styles */
+        .groups-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .groups-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .groups-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .groups-header p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .groups-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .group-tab {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .group-tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .group-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
+        .groups-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .group-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .group-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .group-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .group-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .group-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .group-info h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .group-meta {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .group-description {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .group-stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .group-stat {
+            text-align: center;
+        }
+
+        .group-stat-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.25rem;
+        }
+
+        .group-stat-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .group-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .group-action-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .group-action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .group-action-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
+        .group-action-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .group-create-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .group-create-form {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .group-form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .group-form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .group-form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .group-form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .group-form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color 0.3s ease;
+        }
+
+        .group-form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .group-form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .group-members {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .group-member {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .group-member-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        .group-member-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .group-recent-activity {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .activity-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .activity-content {
+            flex: 1;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
         @media (max-width: 768px) {
             .feed-tabs {
                 padding: 0 1rem;
@@ -3298,6 +3619,9 @@
                     <div class="tab" data-feed="friends" onclick="switchFeed('friends')">
                         👥 Friends
                     </div>
+                    <div class="tab" data-feed="groups" onclick="switchFeed('groups')">
+                        🎭 Groups
+                    </div>
                     <div class="tab" data-feed="requests" onclick="switchFeed('requests')">
                         📬 Requests
                     </div>
@@ -3407,6 +3731,46 @@
                 <div id="musicGrid" class="music-grid">
                     <div class="loading">Loading trending music...</div>
                 </div>
+            </div>
+        </section>
+
+        <!-- Music Groups (Hidden by default) -->
+        <section id="musicGroups" class="groups-section" style="display: none;">
+            <div class="groups-container">
+                <div class="groups-header">
+                    <h1>Music Groups & Communities</h1>
+                    <p>Join music communities, discover new artists, and connect with fellow music lovers who share your taste.</p>
+                </div>
+                
+                <div class="groups-tabs">
+                    <div class="group-tab active" data-group-type="all" onclick="filterGroups('all')">
+                        All Groups
+                    </div>
+                    <div class="group-tab" data-group-type="genre" onclick="filterGroups('genre')">
+                        By Genre
+                    </div>
+                    <div class="group-tab" data-group-type="artist" onclick="filterGroups('artist')">
+                        Artist Fan Clubs
+                    </div>
+                    <div class="group-tab" data-group-type="local" onclick="filterGroups('local')">
+                        Local Music
+                    </div>
+                    <div class="group-tab" data-group-type="my-groups" onclick="filterGroups('my-groups')">
+                        My Groups
+                    </div>
+                </div>
+                
+                <div class="groups-grid" id="groupsGrid">
+                    <!-- Groups will be loaded here -->
+                </div>
+                
+                ${isSignedIn ? `
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button class="btn btn-primary" onclick="showCreateGroupModal()">
+                            Create New Group
+                        </button>
+                    </div>
+                ` : ''}
             </div>
         </section>
     </main>
@@ -3599,6 +3963,63 @@
                     <!-- Tracks will be loaded here -->
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Group Create Modal -->
+    <div id="groupCreateModal" class="group-create-modal">
+        <div class="group-create-form">
+            <h2>Create Music Group</h2>
+            <form id="groupCreateForm">
+                <div class="group-form-group">
+                    <label for="groupName">Group Name</label>
+                    <input type="text" id="groupName" class="group-form-input" placeholder="My Music Group" required>
+                </div>
+                
+                <div class="group-form-group">
+                    <label for="groupDescription">Description</label>
+                    <textarea id="groupDescription" class="group-form-textarea" placeholder="Describe your group's music focus..."></textarea>
+                </div>
+                
+                <div class="group-form-group">
+                    <label for="groupType">Group Type</label>
+                    <select id="groupType" class="group-form-input">
+                        <option value="genre">Genre Community</option>
+                        <option value="artist">Artist Fan Club</option>
+                        <option value="local">Local Music Scene</option>
+                        <option value="general">General Music Discussion</option>
+                    </select>
+                </div>
+                
+                <div class="group-form-group">
+                    <label for="groupGenre">Primary Genre (if applicable)</label>
+                    <select id="groupGenre" class="group-form-input">
+                        <option value="">Select Genre</option>
+                        <option value="pop">Pop</option>
+                        <option value="rock">Rock</option>
+                        <option value="hip-hop">Hip-Hop</option>
+                        <option value="electronic">Electronic</option>
+                        <option value="country">Country</option>
+                        <option value="jazz">Jazz</option>
+                        <option value="classical">Classical</option>
+                        <option value="indie">Indie</option>
+                    </select>
+                </div>
+                
+                <div class="group-form-group">
+                    <label for="groupPrivacy">Privacy</label>
+                    <select id="groupPrivacy" class="group-form-input">
+                        <option value="public">Public - Anyone can join</option>
+                        <option value="private">Private - Invite only</option>
+                        <option value="restricted">Restricted - Approval required</option>
+                    </select>
+                </div>
+                
+                <div class="group-form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeGroupCreateModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Group</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -4020,29 +4441,40 @@
             // Show/hide appropriate sections
             const socialFeed = document.getElementById('socialFeed');
             const musicDiscovery = document.getElementById('musicDiscovery');
+            const musicGroups = document.getElementById('musicGroups');
             
             if (feedType === 'discover') {
                 socialFeed.style.display = 'none';
                 musicDiscovery.style.display = 'block';
+                musicGroups.style.display = 'none';
                 // Load music discovery if not already loaded
                 if (!genreCache.all || genreCache.all.length === 0) {
                     await fetchTrendingMusic();
                 }
+            } else if (feedType === 'groups') {
+                socialFeed.style.display = 'none';
+                musicDiscovery.style.display = 'none';
+                musicGroups.style.display = 'block';
+                await loadGroups();
             } else if (feedType === 'friends') {
                 socialFeed.style.display = 'block';
                 musicDiscovery.style.display = 'none';
+                musicGroups.style.display = 'none';
                 await displayFriends();
             } else if (feedType === 'requests') {
                 socialFeed.style.display = 'block';
                 musicDiscovery.style.display = 'none';
+                musicGroups.style.display = 'none';
                 await displayFriendRequests();
             } else if (feedType === 'profile') {
                 socialFeed.style.display = 'block';
                 musicDiscovery.style.display = 'none';
+                musicGroups.style.display = 'none';
                 await loadProfileData();
             } else {
                 socialFeed.style.display = 'block';
                 musicDiscovery.style.display = 'none';
+                musicGroups.style.display = 'none';
                 await loadFeed(feedType);
             }
         }
@@ -6857,6 +7289,353 @@
             `;
         }
 
+        // Music Groups & Communities Functions
+        let currentGroupFilter = 'all';
+        let userGroups = [];
+
+        async function loadGroups() {
+            const groupsGrid = document.getElementById('groupsGrid');
+            groupsGrid.innerHTML = '<div class="loading">Loading groups...</div>';
+            
+            try {
+                const response = await fetch(`/api/friends?groups=true&filter=${currentGroupFilter}`, {
+                    headers: isSignedIn ? { 'Authorization': `Bearer ${userToken}` } : {}
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.groups) {
+                    displayGroups(data.groups);
+                } else {
+                    displayGroupsEmpty();
+                }
+            } catch (error) {
+                console.error('Error loading groups:', error);
+                displayGroupsError();
+            }
+        }
+
+        function displayGroups(groups) {
+            const groupsGrid = document.getElementById('groupsGrid');
+            
+            if (groups.length === 0) {
+                displayGroupsEmpty();
+                return;
+            }
+            
+            groupsGrid.innerHTML = groups.map(group => `
+                <div class="group-card" onclick="viewGroup('${group.id}')">
+                    <div class="group-header">
+                        <div class="group-avatar">
+                            ${group.avatar_url ? 
+                                `<img src="${group.avatar_url}" alt="${escapeHtml(group.name)}">` : 
+                                getGroupIcon(group.type)
+                            }
+                        </div>
+                        <div class="group-info">
+                            <h3>${escapeHtml(group.name)}</h3>
+                            <div class="group-meta">
+                                ${group.type.charAt(0).toUpperCase() + group.type.slice(1)} • ${group.privacy}
+                                ${group.genre ? ` • ${group.genre}` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="group-description">
+                        ${escapeHtml(group.description || 'No description available')}
+                    </div>
+                    
+                    <div class="group-stats">
+                        <div class="group-stat">
+                            <div class="group-stat-number">${group.member_count || 0}</div>
+                            <div class="group-stat-label">Members</div>
+                        </div>
+                        <div class="group-stat">
+                            <div class="group-stat-number">${group.post_count || 0}</div>
+                            <div class="group-stat-label">Posts</div>
+                        </div>
+                        <div class="group-stat">
+                            <div class="group-stat-number">${group.activity_score || 0}</div>
+                            <div class="group-stat-label">Activity</div>
+                        </div>
+                    </div>
+                    
+                    <div class="group-members">
+                        ${generateGroupMembers(group.recent_members || [])}
+                    </div>
+                    
+                    <div class="group-recent-activity">
+                        <h4>Recent Activity</h4>
+                        ${generateGroupActivity(group.recent_activity || [])}
+                    </div>
+                    
+                    <div class="group-actions">
+                        ${generateGroupActions(group)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function generateGroupMembers(members) {
+            if (members.length === 0) {
+                return '<div class="group-member">No members yet</div>';
+            }
+            
+            return members.slice(0, 5).map(member => `
+                <div class="group-member">
+                    <div class="group-member-avatar">
+                        ${member.avatar_url ? 
+                            `<img src="${member.avatar_url}" alt="${escapeHtml(member.display_name)}">` : 
+                            '👤'
+                        }
+                    </div>
+                    <span>${escapeHtml(member.display_name)}</span>
+                </div>
+            `).join('');
+        }
+
+        function generateGroupActivity(activities) {
+            if (activities.length === 0) {
+                return '<div class="activity-item">No recent activity</div>';
+            }
+            
+            return activities.slice(0, 3).map(activity => `
+                <div class="activity-item">
+                    <div class="activity-avatar">
+                        ${activity.user_avatar ? 
+                            `<img src="${activity.user_avatar}" alt="${escapeHtml(activity.user_name)}">` : 
+                            '👤'
+                        }
+                    </div>
+                    <div class="activity-content">
+                        <strong>${escapeHtml(activity.user_name)}</strong> ${activity.action}
+                    </div>
+                    <div class="activity-time">${formatTimeAgo(activity.created_at)}</div>
+                </div>
+            `).join('');
+        }
+
+        function generateGroupActions(group) {
+            const isMember = group.is_member;
+            const isOwner = group.is_owner;
+            
+            if (isOwner) {
+                return `
+                    <button class="group-action-btn primary" onclick="event.stopPropagation(); manageGroup('${group.id}')">
+                        Manage
+                    </button>
+                    <button class="group-action-btn" onclick="event.stopPropagation(); shareGroup('${group.id}')">
+                        Share
+                    </button>
+                `;
+            } else if (isMember) {
+                return `
+                    <button class="group-action-btn primary" onclick="event.stopPropagation(); leaveGroup('${group.id}')">
+                        Leave
+                    </button>
+                    <button class="group-action-btn" onclick="event.stopPropagation(); viewGroup('${group.id}')">
+                        View
+                    </button>
+                `;
+            } else {
+                return `
+                    <button class="group-action-btn primary" onclick="event.stopPropagation(); joinGroup('${group.id}')">
+                        Join
+                    </button>
+                    <button class="group-action-btn" onclick="event.stopPropagation(); viewGroup('${group.id}')">
+                        View
+                    </button>
+                `;
+            }
+        }
+
+        function getGroupIcon(type) {
+            const icons = {
+                'genre': '🎭',
+                'artist': '👤',
+                'local': '📍',
+                'general': '🎵'
+            };
+            return icons[type] || '🎵';
+        }
+
+        function filterGroups(filter) {
+            // Update filter buttons
+            document.querySelectorAll('.group-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-group-type="${filter}"]`).classList.add('active');
+            
+            currentGroupFilter = filter;
+            loadGroups();
+        }
+
+        function showCreateGroupModal() {
+            if (!isSignedIn) {
+                showSignInModal();
+                return;
+            }
+            
+            document.getElementById('groupCreateModal').style.display = 'flex';
+            document.getElementById('groupName').focus();
+        }
+
+        function closeGroupCreateModal() {
+            document.getElementById('groupCreateModal').style.display = 'none';
+            document.getElementById('groupCreateForm').reset();
+        }
+
+        async function createGroup(event) {
+            event.preventDefault();
+            
+            if (!isSignedIn || !userToken) {
+                showSignInModal();
+                return;
+            }
+            
+            const formData = {
+                name: document.getElementById('groupName').value,
+                description: document.getElementById('groupDescription').value,
+                type: document.getElementById('groupType').value,
+                genre: document.getElementById('groupGenre').value,
+                privacy: document.getElementById('groupPrivacy').value
+            };
+            
+            try {
+                const response = await fetch('/api/friends?groups=true', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Group created successfully!', 'success');
+                    closeGroupCreateModal();
+                    await loadGroups();
+                } else {
+                    showNotification(data.error || 'Failed to create group', 'error');
+                }
+            } catch (error) {
+                console.error('Error creating group:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+
+        async function joinGroup(groupId) {
+            if (!isSignedIn || !userToken) return;
+            
+            try {
+                const response = await fetch('/api/friends?groups=true', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        group_id: groupId,
+                        action: 'join'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Joined group successfully!', 'success');
+                    await loadGroups();
+                } else {
+                    showNotification(data.error || 'Failed to join group', 'error');
+                }
+            } catch (error) {
+                console.error('Error joining group:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+
+        async function leaveGroup(groupId) {
+            if (!isSignedIn || !userToken) return;
+            
+            try {
+                const response = await fetch('/api/friends?groups=true', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        group_id: groupId,
+                        action: 'leave'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Left group successfully', 'success');
+                    await loadGroups();
+                } else {
+                    showNotification(data.error || 'Failed to leave group', 'error');
+                }
+            } catch (error) {
+                console.error('Error leaving group:', error);
+                showNotification('Network error', 'error');
+            }
+        }
+
+        function viewGroup(groupId) {
+            // For now, just show a notification
+            // In a full implementation, this would open a detailed group view
+            showNotification('Group view coming soon!', 'info');
+        }
+
+        function manageGroup(groupId) {
+            showNotification('Group management coming soon!', 'info');
+        }
+
+        function shareGroup(groupId) {
+            const shareUrl = `${window.location.origin}/group/${groupId}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Check out this music group!',
+                    text: 'Join this music community on TrackShare',
+                    url: shareUrl
+                });
+            } else {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    showNotification('Group link copied to clipboard!', 'success');
+                });
+            }
+        }
+
+        function displayGroupsEmpty() {
+            const groupsGrid = document.getElementById('groupsGrid');
+            groupsGrid.innerHTML = `
+                <div class="insights-empty">
+                    <div class="insights-empty-icon">🎭</div>
+                    <h3>No Groups Found</h3>
+                    <p>No groups match your current filter. Try a different category or create your own group!</p>
+                    ${isSignedIn ? '<button class="btn btn-primary" onclick="showCreateGroupModal()">Create Group</button>' : ''}
+                </div>
+            `;
+        }
+
+        function displayGroupsError() {
+            const groupsGrid = document.getElementById('groupsGrid');
+            groupsGrid.innerHTML = `
+                <div class="insights-empty">
+                    <div class="insights-empty-icon">⚠️</div>
+                    <h3>Error Loading Groups</h3>
+                    <p>Something went wrong while loading groups.</p>
+                    <button class="btn btn-primary" onclick="loadGroups()">Try Again</button>
+                </div>
+            `;
+        }
+
         // Enhanced switchGenre function
         async function switchGenre(genre) {
             currentGenre = genre;
@@ -8311,6 +9090,9 @@
             
             // Setup playlist form
             document.getElementById('playlistCreateForm').addEventListener('submit', createPlaylist);
+            
+            // Setup group form
+            document.getElementById('groupCreateForm').addEventListener('submit', createGroup);
             
             // Setup modal close handlers
             document.addEventListener('click', function(e) {
