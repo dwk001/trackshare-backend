@@ -1,4 +1,5 @@
 const https = require('https');
+const { kv } = require('@vercel/kv');
 
 // Helper function to make HTTP requests
 function makeRequest(url) {
@@ -154,46 +155,47 @@ module.exports = async (req, res) => {
       `);
     }
     
-    // For demo purposes, we'll generate a random track
-    // In production, you'd look up the track by ID in your database
-    const mockTrack = {
-      title: 'Prelude for Piano No. 11 in F-Sharp Minor',
-      artist: 'Unknown Artist',
-      artwork: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e024f61e186facbb486f79e9fd9',
-      providers: [
-        {
-          name: 'spotify',
-          displayName: 'Spotify',
-          nativeUrl: 'spotify://track/4iV5W9uYEdYUVa79Axb7Rh',
-          webUrl: 'https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh',
-          isAvailable: true
-        },
-        {
-          name: 'apple_music',
-          displayName: 'Apple Music',
-          nativeUrl: 'music://music.apple.com/search?term=Prelude%20for%20Piano%20No.%2011%20in%20F-Sharp%20Minor%20Unknown%20Artist',
-          webUrl: 'https://music.apple.com/search?term=Prelude%20for%20Piano%20No.%2011%20in%20F-Sharp%20Minor%20Unknown%20Artist',
-          isAvailable: true
-        },
-        {
-          name: 'youtube_music',
-          displayName: 'YouTube Music',
-          nativeUrl: 'youtubemusic://watch?v=4iV5W9uYEdYUVa79Axb7Rh',
-          webUrl: 'https://music.youtube.com/search?q=Prelude%20for%20Piano%20No.%2011%20in%20F-Sharp%20Minor%20Unknown%20Artist',
-          isAvailable: true
-        }
-      ]
-    };
+    // Look up track data from KV storage
+    let trackData;
+    try {
+      trackData = await kv.get(`track:${id}`);
+    } catch (kvError) {
+      console.error('KV lookup error:', kvError);
+      trackData = null;
+    }
+    
+    // If no track found in KV, return error
+    if (!trackData) {
+      return res.status(404).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Track Not Found - TrackShare</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+            .error { color: #666; }
+          </style>
+        </head>
+        <body>
+          <h1>Track Not Found</h1>
+          <p class="error">This track link has expired or doesn't exist.</p>
+        </body>
+        </html>
+      `);
+    }
+    
+    const track = trackData;
     
     res.send(`
       <!DOCTYPE html>
       <html>
       <head>
-        <title>${mockTrack.title} - ${mockTrack.artist} | TrackShare</title>
+        <title>${track.title} - ${track.artist} | TrackShare</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta property="og:title" content="${mockTrack.title} - ${mockTrack.artist}">
-        <meta property="og:description" content="Listen to ${mockTrack.title} by ${mockTrack.artist} on your preferred music platform">
-        <meta property="og:image" content="${mockTrack.artwork || ''}">
+        <meta property="og:title" content="${track.title} - ${track.artist}">
+        <meta property="og:description" content="Listen to ${track.title} by ${track.artist} on your preferred music platform">
+        <meta property="og:image" content="${track.artwork || ''}">
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body { 
@@ -273,13 +275,13 @@ module.exports = async (req, res) => {
       <body>
         <div class="container">
           <div class="artwork">
-            ${mockTrack.artwork ? `<img src="${mockTrack.artwork}" alt="Track artwork">` : '🎵'}
+            ${track.artwork ? `<img src="${track.artwork}" alt="Track artwork">` : '🎵'}
           </div>
-          <h1>${mockTrack.title}</h1>
-          <div class="artist">${mockTrack.artist}</div>
+          <h1>${track.title}</h1>
+          <div class="artist">${track.artist}</div>
           
           <div class="providers">
-            ${mockTrack.providers.map(provider => `
+            ${track.providers.map(provider => `
               <a href="${provider.nativeUrl}" class="provider-btn ${provider.name}" onclick="openProvider(event, '${provider.nativeUrl}', '${provider.webUrl}')">
                 Play on ${provider.displayName}
               </a>
@@ -345,3 +347,4 @@ module.exports = async (req, res) => {
     `);
   }
 };
+// Force redeploy: 2025-01-21T14:15:00Z

@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
         code,
         grant_type: 'authorization_code',
-        redirect_uri: `${process.env.TRACKSHARE_BASE_URL}/auth/google/callback`,
+        redirect_uri: `https://www.trackshare.online/auth/google/callback`,
       }),
     });
     
@@ -62,3 +62,5 @@ module.exports = async (req, res) => {
     return res.redirect(`/?error=${encodeURIComponent('Authentication failed')}`);
   }
 };
+
+// Force redeploy: 2025-01-21T13:52:00Z

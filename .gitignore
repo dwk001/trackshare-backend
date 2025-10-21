@@ -10,3 +10,4 @@
 # Ignore backend/ duplicate to avoid confusion - Vercel uses root /api/
 /backend/
 .vercel
+.env*.local

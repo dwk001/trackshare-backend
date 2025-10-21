@@ -17,6 +17,9 @@
     "api/privacy.js": {
       "maxDuration": 30
     },
+    "api/trending.js": {
+      "maxDuration": 60
+    },
     "api/auth/google/callback.js": {
       "maxDuration": 30
     },
@@ -24,7 +27,15 @@
       "maxDuration": 30
     }
   },
+  "crons": [{
+    "path": "/api/trending?refresh=true",
+    "schedule": "0 2 * * *"
+  }],
   "rewrites": [
+    {
+      "source": "/",
+      "destination": "/index.html"
+    },
     {
       "source": "/t/:id",
       "destination": "/api/t?id=:id"

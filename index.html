@@ -50,6 +50,30 @@
             color: #667eea;
             border: 2px solid #667eea;
         }
+        .btn-spotify {
+            background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+            color: white;
+            border: none;
+        }
+        .btn-spotify:hover {
+            background: linear-gradient(135deg, #1ed760 0%, #1DB954 100%);
+        }
+        .btn-apple-music {
+            background: linear-gradient(135deg, #FA243C 0%, #ff6b6b 100%);
+            color: white;
+            border: none;
+        }
+        .btn-apple-music:hover {
+            background: linear-gradient(135deg, #ff6b6b 0%, #FA243C 100%);
+        }
+        .btn-youtube-music {
+            background: linear-gradient(135deg, #FF0000 0%, #ff4444 100%);
+            color: white;
+            border: none;
+        }
+        .btn-youtube-music:hover {
+            background: linear-gradient(135deg, #ff4444 0%, #FF0000 100%);
+        }
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -189,11 +213,23 @@
             text-align: center;
             padding: 2rem;
             color: #666;
+            font-size: 1.1rem;
         }
-        .error {
-            text-align: center;
-            padding: 2rem;
-            color: #e74c3c;
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         .modal {
             display: none;
@@ -276,9 +312,12 @@
             <div class="container">
                 <h2 class="section-title">Trending Now</h2>
                 <div class="platform-tabs">
-                    <div class="tab active" data-platform="spotify" onclick="switchPlatform('spotify')">Spotify</div>
-                    <div class="tab" data-platform="apple" onclick="switchPlatform('apple')">Apple Music</div>
-                    <div class="tab" data-platform="youtube" onclick="switchPlatform('youtube')">YouTube Music</div>
+                    <div class="tab active" data-genre="all" onclick="switchGenre('all')">All Genres</div>
+                    <div class="tab" data-genre="pop" onclick="switchGenre('pop')">Pop</div>
+                    <div class="tab" data-genre="rock" onclick="switchGenre('rock')">Rock</div>
+                    <div class="tab" data-genre="hip-hop" onclick="switchGenre('hip-hop')">Hip-Hop</div>
+                    <div class="tab" data-genre="country" onclick="switchGenre('country')">Country</div>
+                    <div class="tab" data-genre="electronic" onclick="switchGenre('electronic')">Electronic</div>
                 </div>
                 <div id="musicGrid" class="music-grid">
                     <div class="loading">Loading trending music...</div>
@@ -326,15 +365,15 @@
             <div class="share-link" id="shareLink"></div>
             <button class="copy-btn" onclick="copyShareLink()">Copy Link</button>
             <div style="margin-top: 1rem;">
-                <button class="btn btn-primary" onclick="openInSpotify()" style="margin-right: 0.5rem;">Open in Spotify</button>
-                <button class="btn btn-secondary" onclick="openInAppleMusic()" style="margin-right: 0.5rem;">Open in Apple Music</button>
-                <button class="btn btn-secondary" onclick="openInYouTubeMusic()">Open in YouTube Music</button>
+                <button class="btn btn-spotify" onclick="openInSpotify()" style="margin-bottom: 0.5rem;">🎵 Open in Spotify</button>
+                <button class="btn btn-apple-music" onclick="openInAppleMusic()" style="margin-bottom: 0.5rem;">🎵 Open in Apple Music</button>
+                <button class="btn btn-youtube-music" onclick="openInYouTubeMusic()">🎵 Open in YouTube Music</button>
             </div>
         </div>
     </div>
 
     <script>
-        let currentPlatform = 'spotify';
+        let currentGenre = 'all';
         let currentTrack = null;
         
         // OAuth Client IDs
@@ -342,95 +381,130 @@
         const APPLE_CLIENT_ID = 'your.apple.client.id';
 
         // Real trending music data with working artwork URLs
-        const trendingMusic = {
-            spotify: [
-                {
-                    id: '4iV5W9uYEdYUVa79Axb7Rh',
-                    title: 'Prelude for Piano No. 11 in F-Sharp Minor',
-                    artist: 'Unknown Artist',
-                    artwork: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e024f61e186facbb486f79e9fd9',
-                    url: 'https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh'
-                },
-                {
-                    id: '7qiZfU4dY1lWllzX7mPBI3',
-                    title: 'Shape of You',
-                    artist: 'Ed Sheeran',
-                    artwork: 'https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96',
-                    url: 'https://open.spotify.com/track/7qiZfU4dY1lWllzX7mPBI3'
-                },
-                {
-                    id: '3n3Ppam7vgaVa1iaRUpq9E',
-                    title: 'Blinding Lights',
-                    artist: 'The Weeknd',
-                    artwork: 'https://i.scdn.co/image/ab67616d0000b2738863bc11d2aa12b54f5aeb36',
-                    url: 'https://open.spotify.com/track/3n3Ppam7vgaVa1iaRUpq9E'
-                }
-            ],
-            apple: [
-                {
-                    id: '1234567890',
-                    title: 'Anti-Hero',
-                    artist: 'Taylor Swift',
-                    artwork: 'https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/12/34/56/12345678-1234-1234-1234-123456789012/cover.jpg',
-                    url: 'https://music.apple.com/us/album/anti-hero/1234567890'
-                },
-                {
-                    id: '0987654321',
-                    title: 'As It Was',
-                    artist: 'Harry Styles',
-                    artwork: 'https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/98/76/54/98765432-9876-5432-1098-765432109876/cover.jpg',
-                    url: 'https://music.apple.com/us/album/as-it-was/0987654321'
-                }
-            ],
-            youtube: [
-                {
-                    id: 'dQw4w9WgXcQ',
-                    title: 'Never Gonna Give You Up',
-                    artist: 'Rick Astley',
-                    artwork: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
-                    url: 'https://music.youtube.com/watch?v=dQw4w9WgXcQ'
-                },
-                {
-                    id: '9bZkp7q19f0',
-                    title: 'Gangnam Style',
-                    artist: 'PSY',
-                    artwork: 'https://i.ytimg.com/vi/9bZkp7q19f0/maxresdefault.jpg',
-                    url: 'https://music.youtube.com/watch?v=9bZkp7q19f0'
-                }
-            ]
+        // Dynamic trending music - will be loaded from API
+        let trendingMusic = {
+            all: [],
+            pop: [],
+            rock: [],
+            'hip-hop': [],
+            country: [],
+            electronic: []
         };
+        
+        let isLoadingTrending = false;
+        
+        // Fetch trending music from API
+        async function fetchTrendingMusic() {
+            if (isLoadingTrending) return;
+            
+            isLoadingTrending = true;
+            
+            try {
+                const response = await fetch('/api/trending');
+                const data = await response.json();
+                
+                if (data.success && data.tracks) {
+                    // Clear existing data
+                    trendingMusic.all = [];
+                    trendingMusic.pop = [];
+                    trendingMusic.rock = [];
+                    trendingMusic['hip-hop'] = [];
+                    trendingMusic.country = [];
+                    trendingMusic.electronic = [];
+                    
+                    // Add all tracks to 'all' category
+                    trendingMusic.all = data.tracks;
+                    
+                    // For now, we'll categorize based on artist name patterns
+                    // In a real implementation, you'd use Spotify's genre data
+                    data.tracks.forEach(track => {
+                        const artistLower = track.artist.toLowerCase();
+                        
+                        if (artistLower.includes('taylor') || artistLower.includes('swift') || 
+                            artistLower.includes('ed sheeran') || artistLower.includes('weeknd') ||
+                            artistLower.includes('ariana') || artistLower.includes('justin')) {
+                            trendingMusic.pop.push(track);
+                        } else if (artistLower.includes('queen') || artistLower.includes('guns') ||
+                                   artistLower.includes('eagles') || artistLower.includes('led zeppelin')) {
+                            trendingMusic.rock.push(track);
+                        } else if (artistLower.includes('drake') || artistLower.includes('kendrick') ||
+                                   artistLower.includes('travis') || artistLower.includes('kanye')) {
+                            trendingMusic['hip-hop'].push(track);
+                        } else if (artistLower.includes('country') || artistLower.includes('lil nas')) {
+                            trendingMusic.country.push(track);
+                        } else {
+                            trendingMusic.electronic.push(track);
+                        }
+                    });
+                    
+                    // Load the current genre
+                    loadTrendingMusic(currentGenre);
+                } else {
+                    console.error('Failed to fetch trending music:', data.error);
+                    showFallbackMusic();
+                }
+            } catch (error) {
+                console.error('Error fetching trending music:', error);
+                showFallbackMusic();
+            } finally {
+                isLoadingTrending = false;
+            }
+        }
+        
+        // Show fallback music if API fails
+        function showFallbackMusic() {
+            const fallbackTracks = [
+                {
+                    id: 'fallback1',
+                    title: 'Popular Music',
+                    artist: 'Various Artists',
+                    genre: 'trending',
+                    artwork: null,
+                    url: 'https://open.spotify.com'
+                }
+            ];
+            
+            trendingMusic.all = fallbackTracks;
+            trendingMusic.pop = fallbackTracks;
+            trendingMusic.rock = fallbackTracks;
+            trendingMusic['hip-hop'] = fallbackTracks;
+            trendingMusic.country = fallbackTracks;
+            trendingMusic.electronic = fallbackTracks;
+            
+            loadTrendingMusic(currentGenre);
+        }
 
-        function switchPlatform(platform) {
-            currentPlatform = platform;
+        function switchGenre(genre) {
+            currentGenre = genre;
             
             // Update tab styles
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            document.querySelector(`[data-platform="${platform}"]`).classList.add('active');
+            document.querySelector(`[data-genre="${genre}"]`).classList.add('active');
             
-            // Load music for the platform
-            loadTrendingMusic(platform);
+            // Load music for the genre
+            loadTrendingMusic(genre);
         }
 
-        function loadTrendingMusic(platform) {
+        function loadTrendingMusic(genre) {
             const grid = document.getElementById('musicGrid');
-            const music = trendingMusic[platform] || [];
+            const music = trendingMusic[genre] || [];
             
             if (music.length === 0) {
-                grid.innerHTML = '<div class="error">No trending music available for this platform</div>';
+                grid.innerHTML = '<div class="loading">Loading trending music...</div>';
                 return;
             }
             
             grid.innerHTML = music.map(track => `
                 <div class="track-card">
                     <div class="track-artwork">
-                        ${track.artwork ? `<img src="${track.artwork}" alt="${track.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
-                        <div style="display: ${track.artwork ? 'none' : 'flex'}; align-items: center; justify-content: center; font-size: 3rem; color: #999;">🎵</div>
+                        <img src="${track.artwork}" alt="${track.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" onload="this.nextElementSibling.style.display='none';">
+                        <div style="display: none; align-items: center; justify-content: center; font-size: 3rem; color: #999; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">🎵</div>
                     </div>
                     <div class="track-title">${track.title}</div>
                     <div class="track-artist">${track.artist}</div>
-                    <button class="play-btn" onclick="playTrack('${track.url}', '${track.title}', '${track.artist}')">
+                    <button class="play-btn" onclick="playTrack('${track.url.replace(/'/g, "\\'")}', '${track.title.replace(/'/g, "\\'")}', '${track.artist.replace(/'/g, "\\'")}')">
                         Play & Share
                     </button>
                 </div>
@@ -471,8 +545,8 @@
         }
         
         async function searchInMockData(query) {
-            // First try our mock data
-            const allTracks = [...trendingMusic.spotify, ...trendingMusic.apple, ...trendingMusic.youtube];
+            // First try our mock data - search across all genres
+            const allTracks = [...trendingMusic.all, ...trendingMusic.pop, ...trendingMusic.rock, ...trendingMusic['hip-hop'], ...trendingMusic.country, ...trendingMusic.electronic];
             const mockResults = allTracks.filter(track => 
                 track.title.toLowerCase().includes(query.toLowerCase()) ||
                 track.artist.toLowerCase().includes(query.toLowerCase())
@@ -557,12 +631,12 @@
             grid.innerHTML = results.map(track => `
                 <div class="track-card">
                     <div class="track-artwork">
-                        ${track.artwork ? `<img src="${track.artwork}" alt="${track.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" onload="this.nextElementSibling.style.display='none';">` : ''}
-                        <div style="display: ${track.artwork ? 'flex' : 'flex'}; align-items: center; justify-content: center; font-size: 3rem; color: #999;">🎵</div>
+                        <img src="${track.artwork}" alt="${track.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" onload="this.nextElementSibling.style.display='none';">
+                        <div style="display: none; align-items: center; justify-content: center; font-size: 3rem; color: #999; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">🎵</div>
                     </div>
                     <div class="track-title">${track.title}</div>
                     <div class="track-artist">${track.artist}</div>
-                    <button class="play-btn" onclick="playTrack('${track.url}', '${track.title}', '${track.artist}')">
+                    <button class="play-btn" onclick="playTrack('${track.url.replace(/'/g, "\\'")}', '${track.title.replace(/'/g, "\\'")}', '${track.artist.replace(/'/g, "\\'")}')">
                         Play & Share
                     </button>
                 </div>
@@ -589,8 +663,8 @@
         }
 
         function signInWithGoogle() {
-            // Redirect to Google OAuth
-            const googleAuthUrl = `https://accounts.google.com/oauth/authorize?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/auth/google/callback')}&response_type=code&scope=openid%20email%20profile`;
+            // Redirect to Google OAuth (using correct endpoint)
+            const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/auth/google/callback')}&response_type=code&scope=openid%20email%20profile`;
             window.location.href = googleAuthUrl;
         }
 
@@ -691,7 +765,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             checkAuthCallback();
             checkExistingAuth();
-            loadTrendingMusic('spotify');
+            fetchTrendingMusic(); // Load dynamic trending music
         });
 
         // Handle Enter key in search
@@ -701,5 +775,5 @@
             }
         });
     </script>
-</body>
-</html><!-- Force redeploy 10/20/2025 21:10:42 -->
+    </body>
+    </html><!-- Force redeploy 10/21/2025 15:15:00 - Fixed OAuth endpoint + env vars -->

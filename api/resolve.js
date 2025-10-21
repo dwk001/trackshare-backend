@@ -1,4 +1,5 @@
 const https = require('https');
+const { kv } = require('@vercel/kv');
 
 // Helper function to make HTTP requests
 function makeRequest(url) {
@@ -167,6 +168,14 @@ module.exports = async (req, res) => {
     const shortId = Math.random().toString(36).substring(2, 8);
     const shortUrl = `https://trackshare.online/t/${shortId}`;
     
+    // Store track data in KV with expiration (7 days)
+    try {
+      await kv.setex(`track:${shortId}`, 7 * 24 * 60 * 60, JSON.stringify(track));
+    } catch (kvError) {
+      console.error('KV storage error:', kvError);
+      // Continue even if KV storage fails
+    }
+    
     await new Promise(resolve => setTimeout(resolve, 500));
     
     res.json({
@@ -187,3 +196,4 @@ module.exports = async (req, res) => {
     });
   }
 };
+// Force redeploy: 2025-01-21T14:15:00Z

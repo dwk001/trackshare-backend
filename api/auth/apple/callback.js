@@ -54,3 +54,5 @@ module.exports = async (req, res) => {
     return res.redirect(`/?error=${encodeURIComponent('Authentication failed')}`);
   }
 };
+
+// Force redeploy: 2025-01-21T13:52:00Z
