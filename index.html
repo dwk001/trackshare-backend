@@ -395,6 +395,139 @@
                 height: 50px;
             }
         }
+
+        /* Create Post Form Styles */
+        .create-post-form {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 0.25rem;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .post-preview {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .post-preview h4 {
+            margin: 0 0 0.75rem 0;
+            color: #374151;
+        }
+
+        .preview-track {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .preview-artwork {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            margin-right: 0.75rem;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .preview-artwork img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .preview-info h5 {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.95rem;
+            color: #1f2937;
+        }
+
+        .preview-info p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .preview-caption {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #374151;
+            line-height: 1.5;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .form-actions .btn {
+            min-width: 100px;
+        }
+
+        /* Notification Animations */
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
         
         /* Track popularity bars */
         .track-popularity {
@@ -799,6 +932,7 @@
         <div class="auth-buttons">
             <button class="btn btn-secondary" onclick="showSignIn()">Sign In</button>
             <button class="btn btn-primary" onclick="showSignUp()">Sign Up</button>
+            <button class="btn btn-secondary" id="createPostBtn" onclick="showCreatePostModal()" style="display: none;">+ Share Music</button>
         </div>
     </header>
 
@@ -900,6 +1034,55 @@
                 <button class="btn btn-spotify" onclick="openInSpotify()" style="margin-bottom: 0.5rem;">🎵 Open in Spotify</button>
                 <button class="btn btn-apple-music" onclick="openInAppleMusic()" style="margin-bottom: 0.5rem;">🎵 Open in Apple Music</button>
                 <button class="btn btn-youtube-music" onclick="openInYouTubeMusic()">🎵 Open in YouTube Music</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Post Modal -->
+    <div id="createPostModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('createPostModal')">&times;</button>
+            <h2>Share Music</h2>
+            <p>Share a song with your friends</p>
+            
+            <div class="create-post-form">
+                <div class="form-group">
+                    <label for="postTrackUrl">Music Link</label>
+                    <input type="text" id="postTrackUrl" placeholder="Paste Spotify, Apple Music, or YouTube Music link..." class="form-input">
+                    <small>Paste a link to any song from Spotify, Apple Music, or YouTube Music</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="postCaption">Caption (Optional)</label>
+                    <textarea id="postCaption" placeholder="What's on your mind about this song?" class="form-textarea" maxlength="500"></textarea>
+                    <small><span id="captionCount">0</span>/500 characters</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="postPrivacy">Privacy</label>
+                    <select id="postPrivacy" class="form-select">
+                        <option value="friends">Friends Only</option>
+                        <option value="public">Public</option>
+                        <option value="private">Private</option>
+                    </select>
+                </div>
+                
+                <div class="post-preview" id="postPreview" style="display: none;">
+                    <h4>Preview</h4>
+                    <div class="preview-track">
+                        <div class="preview-artwork" id="previewArtwork">🎵</div>
+                        <div class="preview-info">
+                            <h5 id="previewTitle">Track Title</h5>
+                            <p id="previewArtist">Artist Name</p>
+                        </div>
+                    </div>
+                    <p id="previewCaption" class="preview-caption"></p>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-secondary" onclick="closeModal('createPostModal')">Cancel</button>
+                    <button class="btn btn-primary" id="createPostSubmitBtn" onclick="createPost()" disabled>Share Post</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1228,6 +1411,222 @@
             if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
             
             return date.toLocaleDateString();
+        }
+
+        // Create Post Functions
+        function showCreatePostModal() {
+            if (!isSignedIn) {
+                showSignInModal();
+                return;
+            }
+            
+            document.getElementById('createPostModal').style.display = 'flex';
+            
+            // Setup form event listeners
+            setupCreatePostForm();
+        }
+
+        function setupCreatePostForm() {
+            const trackUrlInput = document.getElementById('postTrackUrl');
+            const captionInput = document.getElementById('postCaption');
+            const captionCount = document.getElementById('captionCount');
+            const submitBtn = document.getElementById('createPostSubmitBtn');
+            
+            // Track URL input handler
+            trackUrlInput.addEventListener('input', async (e) => {
+                const url = e.target.value.trim();
+                if (url && (url.includes('spotify.com') || url.includes('music.apple.com') || url.includes('music.youtube.com'))) {
+                    await resolveTrackForPost(url);
+                } else {
+                    hidePostPreview();
+                }
+            });
+            
+            // Caption character count
+            captionInput.addEventListener('input', (e) => {
+                const count = e.target.value.length;
+                captionCount.textContent = count;
+                
+                if (count > 500) {
+                    captionCount.style.color = '#ef4444';
+                } else {
+                    captionCount.style.color = '#6b7280';
+                }
+            });
+            
+            // Update preview caption
+            captionInput.addEventListener('input', (e) => {
+                const previewCaption = document.getElementById('previewCaption');
+                if (e.target.value.trim()) {
+                    previewCaption.textContent = e.target.value;
+                    previewCaption.style.display = 'block';
+                } else {
+                    previewCaption.style.display = 'none';
+                }
+            });
+        }
+
+        async function resolveTrackForPost(url) {
+            try {
+                const response = await fetch(`/api/resolve?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+                
+                if (data.success && data.track) {
+                    showPostPreview(data.track);
+                    document.getElementById('createPostSubmitBtn').disabled = false;
+                } else {
+                    hidePostPreview();
+                    document.getElementById('createPostSubmitBtn').disabled = true;
+                }
+            } catch (error) {
+                console.error('Error resolving track:', error);
+                hidePostPreview();
+                document.getElementById('createPostSubmitBtn').disabled = true;
+            }
+        }
+
+        function showPostPreview(track) {
+            const preview = document.getElementById('postPreview');
+            const artwork = document.getElementById('previewArtwork');
+            const title = document.getElementById('previewTitle');
+            const artist = document.getElementById('previewArtist');
+            
+            if (track.artwork) {
+                artwork.innerHTML = `<img src="${track.artwork}" alt="${escapeHtml(track.title)}">`;
+            } else {
+                artwork.textContent = '🎵';
+            }
+            
+            title.textContent = track.title;
+            artist.textContent = track.artist;
+            
+            preview.style.display = 'block';
+        }
+
+        function hidePostPreview() {
+            document.getElementById('postPreview').style.display = 'none';
+            document.getElementById('createPostSubmitBtn').disabled = true;
+        }
+
+        async function createPost() {
+            if (!isSignedIn || !userToken) {
+                showSignInModal();
+                return;
+            }
+            
+            const trackUrl = document.getElementById('postTrackUrl').value.trim();
+            const caption = document.getElementById('postCaption').value.trim();
+            const privacy = document.getElementById('postPrivacy').value;
+            
+            if (!trackUrl) {
+                alert('Please enter a music link');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('createPostSubmitBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Sharing...';
+            submitBtn.disabled = true;
+            
+            try {
+                // First resolve the track
+                const resolveResponse = await fetch(`/api/resolve?url=${encodeURIComponent(trackUrl)}`);
+                const resolveData = await resolveResponse.json();
+                
+                if (!resolveData.success || !resolveData.track) {
+                    throw new Error('Could not resolve track information');
+                }
+                
+                const track = resolveData.track;
+                
+                // Create the post
+                const postResponse = await fetch('/api/posts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        track_id: track.id,
+                        track_title: track.title,
+                        track_artist: track.artist,
+                        track_album: track.album,
+                        track_artwork_url: track.artwork,
+                        track_spotify_url: track.sourceUrl,
+                        track_duration_ms: track.durationMs,
+                        caption: caption || null,
+                        privacy: privacy
+                    })
+                });
+                
+                const postData = await postResponse.json();
+                
+                if (postData.success) {
+                    // Close modal and refresh feed
+                    closeModal('createPostModal');
+                    clearCreatePostForm();
+                    
+                    // Refresh the current feed
+                    if (currentFeed === 'trending' || currentFeed === 'friends') {
+                        feedCache[currentFeed] = null; // Clear cache
+                        await loadFeed(currentFeed);
+                    }
+                    
+                    // Show success message
+                    showNotification('Post shared successfully!', 'success');
+                } else {
+                    throw new Error(postData.error || 'Failed to create post');
+                }
+                
+            } catch (error) {
+                console.error('Error creating post:', error);
+                showNotification('Failed to share post. Please try again.', 'error');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        function clearCreatePostForm() {
+            document.getElementById('postTrackUrl').value = '';
+            document.getElementById('postCaption').value = '';
+            document.getElementById('captionCount').textContent = '0';
+            document.getElementById('postPrivacy').value = 'friends';
+            hidePostPreview();
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            
+            // Style the notification
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                font-weight: 500;
+                animation: slideInRight 0.3s ease-out;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease-in';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
         }
 
         async function switchGenre(genre) {
@@ -1582,12 +1981,16 @@
         }
         
         function updateAuthUI(userData) {
+            isSignedIn = true;
+            userToken = userData.token; // Assuming token is stored
+            
             const authButtons = document.querySelector('.auth-buttons');
             authButtons.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <img src="${userData.picture || 'https://via.placeholder.com/32'}" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%;">
                     <span style="color: #333; font-weight: 600;">${userData.name}</span>
-                    <button class="btn btn-secondary" onclick="signOut()">Sign Out</button>
+                    <button class="btn btn-secondary" onclick="showCreatePostModal()">+ Share Music</button>
+                    <button class="btn btn-outline" onclick="signOut()">Sign Out</button>
                 </div>
             `;
         }
