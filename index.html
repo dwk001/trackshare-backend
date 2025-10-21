@@ -528,6 +528,122 @@
                 opacity: 0;
             }
         }
+
+        /* Comments Modal Styles */
+        .comments-container {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .comments-list {
+            margin-bottom: 1rem;
+        }
+
+        .comment-item {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .comment-item:last-child {
+            border-bottom: none;
+        }
+
+        .comment-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .comment-content {
+            flex: 1;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 0.9rem;
+        }
+
+        .comment-time {
+            color: #6b7280;
+            font-size: 0.8rem;
+        }
+
+        .comment-text {
+            color: #374151;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        .add-comment {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 1rem;
+        }
+
+        .comment-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .comment-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+        }
+
+        .comment-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .comment-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .comment-actions small {
+            color: #6b7280;
+        }
+
+        .comment-actions .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .no-comments {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+
+        .no-comments .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
         
         /* Track popularity bars */
         .track-popularity {
@@ -1087,6 +1203,33 @@
         </div>
     </div>
 
+    <!-- Comments Modal -->
+    <div id="commentsModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('commentsModal')">&times;</button>
+            <h2>Comments</h2>
+            
+            <div class="comments-container">
+                <div class="comments-list" id="commentsList">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <p>Loading comments...</p>
+                    </div>
+                </div>
+                
+                <div class="add-comment" id="addCommentSection" style="display: none;">
+                    <div class="comment-form">
+                        <textarea id="newCommentText" placeholder="Write a comment..." class="comment-textarea" maxlength="1000"></textarea>
+                        <div class="comment-actions">
+                            <small><span id="commentCharCount">0</span>/1000 characters</small>
+                            <button class="btn btn-primary" id="submitCommentBtn" onclick="submitComment()" disabled>Post Comment</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentGenre = 'all';
         let currentTrack = null;
@@ -1391,8 +1534,190 @@
         }
 
         function showComments(postId) {
-            // TODO: Implement comments modal
-            alert('Comments feature coming soon!');
+            if (!isSignedIn) {
+                showSignInModal();
+                return;
+            }
+            
+            currentPostId = postId;
+            document.getElementById('commentsModal').style.display = 'flex';
+            
+            // Load comments
+            loadComments(postId);
+            
+            // Setup comment form
+            setupCommentForm();
+        }
+
+        let currentPostId = null;
+
+        async function loadComments(postId) {
+            const commentsList = document.getElementById('commentsList');
+            
+            try {
+                const response = await fetch(`/api/engagement?post_id=${postId}&type=comments`);
+                const data = await response.json();
+                
+                if (data.success && data.comments) {
+                    displayComments(data.comments);
+                } else {
+                    showNoComments();
+                }
+            } catch (error) {
+                console.error('Error loading comments:', error);
+                showCommentsError();
+            }
+        }
+
+        function displayComments(comments) {
+            const commentsList = document.getElementById('commentsList');
+            
+            if (comments.length === 0) {
+                showNoComments();
+                return;
+            }
+            
+            const commentsHTML = comments.map(comment => `
+                <div class="comment-item">
+                    <div class="comment-avatar">
+                        ${comment.profiles?.display_name?.charAt(0) || '🎵'}
+                    </div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <span class="comment-author">${escapeHtml(comment.profiles?.display_name || 'Anonymous')}</span>
+                            <span class="comment-time">${formatTimeAgo(comment.created_at)}</span>
+                        </div>
+                        <div class="comment-text">${escapeHtml(comment.content)}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            commentsList.innerHTML = commentsHTML;
+            
+            // Show add comment section
+            document.getElementById('addCommentSection').style.display = 'block';
+        }
+
+        function showNoComments() {
+            const commentsList = document.getElementById('commentsList');
+            commentsList.innerHTML = `
+                <div class="no-comments">
+                    <div class="empty-icon">💬</div>
+                    <h4>No comments yet</h4>
+                    <p>Be the first to comment!</p>
+                </div>
+            `;
+            
+            // Show add comment section
+            document.getElementById('addCommentSection').style.display = 'block';
+        }
+
+        function showCommentsError() {
+            const commentsList = document.getElementById('commentsList');
+            commentsList.innerHTML = `
+                <div class="no-comments">
+                    <div class="empty-icon">⚠️</div>
+                    <h4>Error loading comments</h4>
+                    <p>Please try again later</p>
+                </div>
+            `;
+        }
+
+        function setupCommentForm() {
+            const commentTextarea = document.getElementById('newCommentText');
+            const charCount = document.getElementById('commentCharCount');
+            const submitBtn = document.getElementById('submitCommentBtn');
+            
+            // Character count
+            commentTextarea.addEventListener('input', (e) => {
+                const count = e.target.value.length;
+                charCount.textContent = count;
+                
+                if (count > 1000) {
+                    charCount.style.color = '#ef4444';
+                } else {
+                    charCount.style.color = '#6b7280';
+                }
+                
+                // Enable/disable submit button
+                submitBtn.disabled = count === 0 || count > 1000;
+            });
+            
+            // Handle Enter key (Ctrl+Enter to submit)
+            commentTextarea.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    e.preventDefault();
+                    if (!submitBtn.disabled) {
+                        submitComment();
+                    }
+                }
+            });
+        }
+
+        async function submitComment() {
+            if (!isSignedIn || !userToken || !currentPostId) {
+                return;
+            }
+            
+            const commentText = document.getElementById('newCommentText').value.trim();
+            if (!commentText) {
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitCommentBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Posting...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/engagement', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        post_id: currentPostId,
+                        type: 'comment',
+                        content: commentText
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Clear form
+                    document.getElementById('newCommentText').value = '';
+                    document.getElementById('commentCharCount').textContent = '0';
+                    
+                    // Reload comments
+                    await loadComments(currentPostId);
+                    
+                    // Update comment count in feed
+                    updateCommentCountInFeed(currentPostId);
+                    
+                    showNotification('Comment posted!', 'success');
+                } else {
+                    throw new Error(data.error || 'Failed to post comment');
+                }
+                
+            } catch (error) {
+                console.error('Error posting comment:', error);
+                showNotification('Failed to post comment. Please try again.', 'error');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        function updateCommentCountInFeed(postId) {
+            const postElement = document.querySelector(`[data-post-id="${postId}"]`);
+            if (postElement) {
+                const commentButton = postElement.querySelector('.post-action:nth-child(2)');
+                const commentCount = commentButton.querySelector('span:last-child');
+                const currentCount = parseInt(commentCount.textContent);
+                commentCount.textContent = currentCount + 1;
+            }
         }
 
         function sharePost(postId) {
