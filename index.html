@@ -644,6 +644,195 @@
             font-size: 3rem;
             margin-bottom: 0.5rem;
         }
+
+        /* Friends UI Styles */
+        .friends-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .friends-section {
+            margin-bottom: 2rem;
+        }
+
+        .friends-section h3 {
+            margin-bottom: 1rem;
+            color: #1f2937;
+            font-size: 1.25rem;
+        }
+
+        .friend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .friend-item:hover {
+            transform: translateY(-1px);
+        }
+
+        .friend-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .friend-info {
+            flex: 1;
+        }
+
+        .friend-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .friend-status {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .friend-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .friend-action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-accept {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-accept:hover {
+            background: #059669;
+        }
+
+        .btn-decline {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-decline:hover {
+            background: #dc2626;
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-remove {
+            background: #f3f4f6;
+            color: #6b7280;
+            border: 1px solid #e5e7eb;
+        }
+
+        .btn-remove:hover {
+            background: #e5e7eb;
+        }
+
+        .request-badge {
+            background: #ef4444;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 10px;
+            margin-left: 0.5rem;
+        }
+
+        .no-friends {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6b7280;
+        }
+
+        .no-friends .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .no-friends h4 {
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        .no-friends p {
+            margin-bottom: 1.5rem;
+        }
+
+        .suggestions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .suggestion-item {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .suggestion-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .suggestion-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin: 0 auto 0.75rem auto;
+        }
+
+        .suggestion-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .suggestion-email {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
         
         /* Track popularity bars */
         .track-popularity {
@@ -1075,6 +1264,9 @@
                     <div class="tab" data-feed="friends" onclick="switchFeed('friends')">
                         👥 Friends
                     </div>
+                    <div class="tab" data-feed="requests" onclick="switchFeed('requests')">
+                        📬 Requests
+                    </div>
                 </div>
             </div>
         </section>
@@ -1362,6 +1554,10 @@
                 if (!genreCache.all || genreCache.all.length === 0) {
                     await fetchTrendingMusic();
                 }
+            } else if (feedType === 'friends' || feedType === 'requests') {
+                socialFeed.style.display = 'block';
+                musicDiscovery.style.display = 'none';
+                await loadFriendsData(feedType);
             } else {
                 socialFeed.style.display = 'block';
                 musicDiscovery.style.display = 'none';
@@ -1718,6 +1914,349 @@
                 const currentCount = parseInt(commentCount.textContent);
                 commentCount.textContent = currentCount + 1;
             }
+        }
+
+        // Friends Functions
+        async function loadFriendsData(type) {
+            if (!isSignedIn) {
+                showSignInModal();
+                return;
+            }
+
+            const feedContainer = document.querySelector('#socialFeed .container');
+            const loadingSpinner = document.getElementById('feedLoading');
+            
+            // Show loading
+            loadingSpinner.style.display = 'flex';
+            
+            try {
+                const response = await fetch(`/api/friends?type=${type}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (type === 'friends') {
+                        displayFriends(data.friends);
+                    } else if (type === 'requests') {
+                        displayFriendRequests(data.pendingSent, data.pendingReceived);
+                    }
+                } else {
+                    showFriendsError('Failed to load friends data');
+                }
+            } catch (error) {
+                console.error('Friends load error:', error);
+                showFriendsError('Network error loading friends');
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        function displayFriends(friends) {
+            const feedContainer = document.querySelector('#socialFeed .container');
+            
+            if (!friends || friends.length === 0) {
+                feedContainer.innerHTML = `
+                    <div class="no-friends">
+                        <div class="empty-icon">👥</div>
+                        <h4>No friends yet</h4>
+                        <p>Start connecting with people to see their music posts!</p>
+                        <button class="btn btn-primary" onclick="switchFeed('requests')">Find Friends</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            const friendsHTML = friends.map(friend => `
+                <div class="friend-item">
+                    <div class="friend-avatar">
+                        ${friend.friend?.display_name?.charAt(0) || '🎵'}
+                    </div>
+                    <div class="friend-info">
+                        <div class="friend-name">${escapeHtml(friend.friend?.display_name || 'Unknown')}</div>
+                        <div class="friend-status">Friends since ${formatTimeAgo(friend.created_at)}</div>
+                    </div>
+                    <div class="friend-actions">
+                        <button class="friend-action-btn btn-remove" onclick="removeFriend('${friend.id}')">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            feedContainer.innerHTML = `
+                <div class="friends-container">
+                    <div class="friends-section">
+                        <h3>Your Friends (${friends.length})</h3>
+                        ${friendsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayFriendRequests(sentRequests, receivedRequests) {
+            const feedContainer = document.querySelector('#socialFeed .container');
+            
+            let requestsHTML = '';
+            
+            if (receivedRequests && receivedRequests.length > 0) {
+                requestsHTML += `
+                    <div class="friends-section">
+                        <h3>Friend Requests <span class="request-badge">${receivedRequests.length}</span></h3>
+                        ${receivedRequests.map(request => `
+                            <div class="friend-item">
+                                <div class="friend-avatar">
+                                    ${request.user?.display_name?.charAt(0) || '🎵'}
+                                </div>
+                                <div class="friend-info">
+                                    <div class="friend-name">${escapeHtml(request.user?.display_name || 'Unknown')}</div>
+                                    <div class="friend-status">Wants to be friends</div>
+                                </div>
+                                <div class="friend-actions">
+                                    <button class="friend-action-btn btn-accept" onclick="respondToFriendRequest('${request.id}', 'accept')">
+                                        Accept
+                                    </button>
+                                    <button class="friend-action-btn btn-decline" onclick="respondToFriendRequest('${request.id}', 'decline')">
+                                        Decline
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            if (sentRequests && sentRequests.length > 0) {
+                requestsHTML += `
+                    <div class="friends-section">
+                        <h3>Sent Requests</h3>
+                        ${sentRequests.map(request => `
+                            <div class="friend-item">
+                                <div class="friend-avatar">
+                                    ${request.user?.display_name?.charAt(0) || '🎵'}
+                                </div>
+                                <div class="friend-info">
+                                    <div class="friend-name">${escapeHtml(request.user?.display_name || 'Unknown')}</div>
+                                    <div class="friend-status">Request sent ${formatTimeAgo(request.created_at)}</div>
+                                </div>
+                                <div class="friend-actions">
+                                    <button class="friend-action-btn btn-remove" onclick="cancelFriendRequest('${request.id}')">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            // Add friend suggestions
+            requestsHTML += `
+                <div class="friends-section">
+                    <h3>Suggestions</h3>
+                    <div id="friendSuggestions">
+                        <div class="loading-spinner">
+                            <div class="spinner"></div>
+                            <p>Loading suggestions...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            feedContainer.innerHTML = `
+                <div class="friends-container">
+                    ${requestsHTML}
+                </div>
+            `;
+            
+            // Load friend suggestions
+            loadFriendSuggestions();
+        }
+
+        async function loadFriendSuggestions() {
+            try {
+                const response = await fetch('/api/friends?type=suggestions');
+                const data = await response.json();
+                
+                const suggestionsContainer = document.getElementById('friendSuggestions');
+                
+                if (data.success && data.suggestions && data.suggestions.length > 0) {
+                    const suggestionsHTML = data.suggestions.map(user => `
+                        <div class="suggestion-item">
+                            <div class="suggestion-avatar">
+                                ${user.display_name?.charAt(0) || '🎵'}
+                            </div>
+                            <div class="suggestion-name">${escapeHtml(user.display_name || 'Unknown')}</div>
+                            <div class="suggestion-email">${escapeHtml(user.email || '')}</div>
+                            <button class="friend-action-btn btn-add" onclick="sendFriendRequest('${user.id}')">
+                                Add Friend
+                            </button>
+                        </div>
+                    `).join('');
+                    
+                    suggestionsContainer.innerHTML = `
+                        <div class="suggestions-grid">
+                            ${suggestionsHTML}
+                        </div>
+                    `;
+                } else {
+                    suggestionsContainer.innerHTML = `
+                        <div class="no-friends">
+                            <div class="empty-icon">👥</div>
+                            <h4>No suggestions</h4>
+                            <p>All users are already your friends or have pending requests!</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading suggestions:', error);
+                document.getElementById('friendSuggestions').innerHTML = `
+                    <div class="no-friends">
+                        <div class="empty-icon">⚠️</div>
+                        <h4>Error loading suggestions</h4>
+                        <p>Please try again later</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function sendFriendRequest(userId) {
+            if (!isSignedIn || !userToken) {
+                showSignInModal();
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/friends', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        user_id: userId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Friend request sent!', 'success');
+                    // Reload suggestions
+                    loadFriendSuggestions();
+                } else {
+                    throw new Error(data.error || 'Failed to send friend request');
+                }
+                
+            } catch (error) {
+                console.error('Error sending friend request:', error);
+                showNotification('Failed to send friend request. Please try again.', 'error');
+            }
+        }
+
+        async function respondToFriendRequest(friendshipId, action) {
+            if (!isSignedIn || !userToken) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/friends', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        friendship_id: friendshipId,
+                        action: action
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(`Friend request ${action}ed!`, 'success');
+                    // Reload requests
+                    await loadFriendsData('requests');
+                } else {
+                    throw new Error(data.error || 'Failed to respond to friend request');
+                }
+                
+            } catch (error) {
+                console.error('Error responding to friend request:', error);
+                showNotification('Failed to respond to friend request. Please try again.', 'error');
+            }
+        }
+
+        async function cancelFriendRequest(friendshipId) {
+            if (!isSignedIn || !userToken) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/friends?friendship_id=${friendshipId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Friend request cancelled!', 'success');
+                    // Reload requests
+                    await loadFriendsData('requests');
+                } else {
+                    throw new Error(data.error || 'Failed to cancel friend request');
+                }
+                
+            } catch (error) {
+                console.error('Error cancelling friend request:', error);
+                showNotification('Failed to cancel friend request. Please try again.', 'error');
+            }
+        }
+
+        async function removeFriend(friendshipId) {
+            if (!isSignedIn || !userToken) {
+                return;
+            }
+            
+            if (!confirm('Are you sure you want to remove this friend?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/friends?friendship_id=${friendshipId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Friend removed!', 'success');
+                    // Reload friends
+                    await loadFriendsData('friends');
+                } else {
+                    throw new Error(data.error || 'Failed to remove friend');
+                }
+                
+            } catch (error) {
+                console.error('Error removing friend:', error);
+                showNotification('Failed to remove friend. Please try again.', 'error');
+            }
+        }
+
+        function showFriendsError(message) {
+            const feedContainer = document.querySelector('#socialFeed .container');
+            feedContainer.innerHTML = `
+                <div class="no-friends">
+                    <div class="empty-icon">⚠️</div>
+                    <h4>Error</h4>
+                    <p>${message}</p>
+                </div>
+            `;
         }
 
         function sharePost(postId) {

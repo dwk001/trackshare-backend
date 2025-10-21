@@ -37,6 +37,9 @@
             },
             "api/seed-trending-posts.js": {
               "maxDuration": 60
+            },
+            "api/friends.js": {
+              "maxDuration": 30
             }
   },
   "crons": [{
