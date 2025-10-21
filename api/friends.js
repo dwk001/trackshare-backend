@@ -42,17 +42,33 @@ module.exports = async (req, res) => {
   const userId = getUserId(req);
 
   try {
-    switch (method) {
-      case 'GET':
-        return await handleGetFriends(req, res, userId);
-      case 'POST':
-        return await handleSendFriendRequest(req, res, userId);
-      case 'PUT':
-        return await handleRespondToFriendRequest(req, res, userId);
-      case 'DELETE':
-        return await handleRemoveFriend(req, res, userId);
-      default:
-        return res.status(405).json({ error: 'Method not allowed' });
+    // Check if this is a notifications request (has notifications query param)
+    const { notifications } = req.query;
+    
+    if (notifications) {
+      // Handle notifications endpoints
+      switch (method) {
+        case 'GET':
+          return await handleGetNotifications(req, res, userId);
+        case 'POST':
+          return await handleMarkAsRead(req, res, userId);
+        default:
+          return res.status(405).json({ error: 'Method not allowed' });
+      }
+    } else {
+      // Handle regular friends endpoints
+      switch (method) {
+        case 'GET':
+          return await handleGetFriends(req, res, userId);
+        case 'POST':
+          return await handleSendFriendRequest(req, res, userId);
+        case 'PUT':
+          return await handleRespondToFriendRequest(req, res, userId);
+        case 'DELETE':
+          return await handleRemoveFriend(req, res, userId);
+        default:
+          return res.status(405).json({ error: 'Method not allowed' });
+      }
     }
   } catch (error) {
     console.error('Friends API error:', error);
@@ -417,5 +433,192 @@ async function handleRemoveFriend(req, res, userId) {
   } catch (error) {
     console.error('Error in handleRemoveFriend:', error);
     res.status(500).json({ error: 'Failed to remove friend' });
+  }
+}
+
+// ========================================
+// NOTIFICATIONS HANDLERS (merged from notifications.js)
+// ========================================
+
+// GET /api/friends?notifications=1 - Get user notifications
+async function handleGetNotifications(req, res, userId) {
+  if (!userId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const { limit = 20, offset = 0, unread_only = false } = req.query;
+
+  try {
+    // Get notifications from various sources
+    const notifications = [];
+
+    // 1. Friend requests
+    const { data: friendRequests, error: friendError } = await supabase
+      .from('friendships')
+      .select(`
+        id,
+        created_at,
+        profiles!friendships_requester_id_fkey (
+          id,
+          display_name,
+          avatar_url
+        )
+      `)
+      .eq('addressee_id', userId)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+      .limit(parseInt(limit));
+
+    if (!friendError && friendRequests) {
+      friendRequests.forEach(request => {
+        notifications.push({
+          id: `friend_request_${request.id}`,
+          type: 'friend_request',
+          title: 'New Friend Request',
+          message: `${request.profiles?.display_name || 'Someone'} wants to be your friend`,
+          avatar: request.profiles?.avatar_url,
+          user_id: request.profiles?.id,
+          created_at: request.created_at,
+          read: false // We'll implement read status later
+        });
+      });
+    }
+
+    // 2. Post likes
+    const { data: postLikes, error: likesError } = await supabase
+      .from('post_likes')
+      .select(`
+        id,
+        created_at,
+        post_id,
+        profiles!post_likes_user_id_fkey (
+          id,
+          display_name,
+          avatar_url
+        ),
+        music_posts!post_likes_post_id_fkey (
+          id,
+          track_title,
+          track_artist
+        )
+      `)
+      .eq('music_posts.user_id', userId)
+      .neq('post_likes.user_id', userId) // Don't notify for own likes
+      .order('created_at', { ascending: false })
+      .limit(parseInt(limit));
+
+    if (!likesError && postLikes) {
+      postLikes.forEach(like => {
+        notifications.push({
+          id: `like_${like.id}`,
+          type: 'like',
+          title: 'New Like',
+          message: `${like.profiles?.display_name || 'Someone'} liked your post "${like.music_posts?.track_title}"`,
+          avatar: like.profiles?.avatar_url,
+          user_id: like.profiles?.id,
+          post_id: like.post_id,
+          created_at: like.created_at,
+          read: false
+        });
+      });
+    }
+
+    // 3. Post comments
+    const { data: postComments, error: commentsError } = await supabase
+      .from('post_comments')
+      .select(`
+        id,
+        created_at,
+        post_id,
+        content,
+        profiles!post_comments_user_id_fkey (
+          id,
+          display_name,
+          avatar_url
+        ),
+        music_posts!post_comments_post_id_fkey (
+          id,
+          track_title,
+          track_artist
+        )
+      `)
+      .eq('music_posts.user_id', userId)
+      .neq('post_comments.user_id', userId) // Don't notify for own comments
+      .order('created_at', { ascending: false })
+      .limit(parseInt(limit));
+
+    if (!commentsError && postComments) {
+      postComments.forEach(comment => {
+        notifications.push({
+          id: `comment_${comment.id}`,
+          type: 'comment',
+          title: 'New Comment',
+          message: `${comment.profiles?.display_name || 'Someone'} commented on your post "${comment.music_posts?.track_title}"`,
+          avatar: comment.profiles?.avatar_url,
+          user_id: comment.profiles?.id,
+          post_id: comment.post_id,
+          content: comment.content,
+          created_at: comment.created_at,
+          read: false
+        });
+      });
+    }
+
+    // Sort all notifications by created_at
+    notifications.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    // Apply pagination
+    const startIndex = parseInt(offset);
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedNotifications = notifications.slice(startIndex, endIndex);
+
+    // Count unread notifications
+    const unreadCount = notifications.filter(n => !n.read).length;
+
+    res.json({
+      success: true,
+      notifications: paginatedNotifications,
+      unread_count: unreadCount,
+      total: notifications.length,
+      has_more: endIndex < notifications.length,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error in handleGetNotifications:', error);
+    res.status(500).json({ error: 'Failed to fetch notifications' });
+  }
+}
+
+// POST /api/friends?notifications=1 - Mark notifications as read
+async function handleMarkAsRead(req, res, userId) {
+  if (!userId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const { notification_ids, mark_all = false } = req.body;
+
+  try {
+    if (mark_all) {
+      // Mark all notifications as read (we'll implement this with a notifications table later)
+      res.json({
+        success: true,
+        message: 'All notifications marked as read',
+        timestamp: new Date().toISOString()
+      });
+    } else if (notification_ids && Array.isArray(notification_ids)) {
+      // Mark specific notifications as read
+      res.json({
+        success: true,
+        message: `${notification_ids.length} notifications marked as read`,
+        timestamp: new Date().toISOString()
+      });
+    } else {
+      return res.status(400).json({ error: 'Invalid request parameters' });
+    }
+
+  } catch (error) {
+    console.error('Error in handleMarkAsRead:', error);
+    res.status(500).json({ error: 'Failed to mark notifications as read' });
   }
 }

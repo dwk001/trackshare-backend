@@ -172,7 +172,7 @@ module.exports = async (req, res) => {
     return;
   }
   
-  const { genre = 'all', limit = 20, offset = 0 } = req.query;
+  const { genre = 'all', limit = 20, offset = 0, seed = false } = req.query;
   
   // Handle cron job request to refresh cache
   if (req.query.refresh === 'true') {
@@ -213,6 +213,27 @@ module.exports = async (req, res) => {
         success: false,
         error: error.message 
       });
+    }
+  }
+  
+  // Handle seed request to create trending posts
+  if (seed === 'true') {
+    const authHeader = req.headers['authorization'];
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      console.log('Unauthorized seed request');
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    try {
+      console.log('Starting trending posts seeding...');
+      await seedTrendingPosts();
+      return res.json({ 
+        success: true, 
+        message: 'Trending posts seeded successfully'
+      });
+    } catch (error) {
+      console.error('Seed error:', error);
+      return res.status(500).json({ error: 'Seed failed' });
     }
   }
   
@@ -287,3 +308,97 @@ module.exports = async (req, res) => {
     });
   }
 };
+
+// ========================================
+// SEED TRENDING POSTS FUNCTIONALITY (merged from seed-trending-posts.js)
+// ========================================
+
+const { createClient } = require('@supabase/supabase-js');
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// System user ID for TrackShare Official posts
+const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000';
+
+async function seedTrendingPosts() {
+  try {
+    console.log('Starting trending posts seeding...');
+    
+    // Ensure system user exists
+    await ensureSystemUser();
+    
+    // Fetch trending tracks
+    const tracks = await fetchTrendingTracks();
+    
+    if (tracks.length === 0) {
+      console.log('No tracks to seed');
+      return;
+    }
+    
+    // Create posts for trending tracks
+    let createdCount = 0;
+    for (const track of tracks.slice(0, 10)) { // Limit to 10 posts per run
+      try {
+        const { error } = await supabase
+          .from('music_posts')
+          .insert({
+            user_id: SYSTEM_USER_ID,
+            track_id: track.id,
+            track_title: track.title,
+            track_artist: track.artist,
+            track_album: track.album,
+            track_artwork_url: track.artwork,
+            track_spotify_url: track.spotify_url,
+            track_duration_ms: track.duration_ms,
+            caption: `🔥 Currently trending on TrackShare!`,
+            privacy: 'public'
+          });
+          
+        if (!error) {
+          createdCount++;
+        } else {
+          console.error('Error creating post:', error);
+        }
+      } catch (postError) {
+        console.error('Error creating post for track:', track.title, postError);
+      }
+    }
+    
+    console.log(`Successfully created ${createdCount} trending posts`);
+    
+  } catch (error) {
+    console.error('Error in seedTrendingPosts:', error);
+    throw error;
+  }
+}
+
+async function ensureSystemUser() {
+  try {
+    const { data: existingUser } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', SYSTEM_USER_ID)
+      .single();
+      
+    if (!existingUser) {
+      const { error } = await supabase
+        .from('profiles')
+        .insert({
+          id: SYSTEM_USER_ID,
+          email: 'system@trackshare.online',
+          display_name: 'TrackShare Official',
+          avatar_url: 'https://trackshare.online/logo.png',
+          created_at: new Date().toISOString()
+        });
+        
+      if (error) {
+        console.error('Error creating system user:', error);
+      } else {
+        console.log('Created system user for trending posts');
+      }
+    }
+  } catch (error) {
+    console.error('Error ensuring system user:', error);
+  }
+}

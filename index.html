@@ -1915,7 +1915,7 @@
             try {
                 if (isLiked) {
                     // Unlike
-                    const response = await fetch(`/api/engagement?post_id=${postId}&type=like`, {
+                    const response = await fetch(`/api/posts?engagement_type=1&post_id=${postId}&type=like`, {
                         method: 'DELETE',
                         headers: {
                             'Authorization': `Bearer ${userToken}`
@@ -1929,7 +1929,7 @@
                     }
                 } else {
                     // Like
-                    const response = await fetch('/api/engagement', {
+                    const response = await fetch('/api/posts?engagement_type=1', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1974,7 +1974,7 @@
             const commentsList = document.getElementById('commentsList');
             
             try {
-                const response = await fetch(`/api/engagement?post_id=${postId}&type=comments`);
+                const response = await fetch(`/api/posts?engagement_type=1&post_id=${postId}&type=comments`);
                 const data = await response.json();
                 
                 if (data.success && data.comments) {
@@ -2089,7 +2089,7 @@
             submitBtn.disabled = true;
             
             try {
-                const response = await fetch('/api/engagement', {
+                const response = await fetch('/api/posts?engagement_type=1', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -2516,7 +2516,7 @@
             }
 
             try {
-                const response = await fetch('/api/notifications?limit=10');
+                const response = await fetch('/api/friends?notifications=1&limit=10');
                 const data = await response.json();
                 
                 if (data.success) {
@@ -2587,7 +2587,7 @@
             document.getElementById('notificationsModal').style.display = 'flex';
             
             try {
-                const response = await fetch('/api/notifications?limit=20');
+                const response = await fetch('/api/friends?notifications=1&limit=20');
                 const data = await response.json();
                 
                 if (data.success) {
@@ -2681,7 +2681,7 @@
 
         async function markNotificationAsRead(notificationId) {
             try {
-                await fetch('/api/notifications', {
+                await fetch('/api/friends?notifications=1', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -2698,7 +2698,7 @@
 
         async function markAllNotificationsRead() {
             try {
-                await fetch('/api/notifications', {
+                await fetch('/api/friends?notifications=1', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

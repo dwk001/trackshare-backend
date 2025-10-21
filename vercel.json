@@ -32,16 +32,7 @@
             "api/posts.js": {
               "maxDuration": 30
             },
-            "api/engagement.js": {
-              "maxDuration": 30
-            },
-            "api/seed-trending-posts.js": {
-              "maxDuration": 60
-            },
             "api/friends.js": {
-              "maxDuration": 30
-            },
-            "api/notifications.js": {
               "maxDuration": 30
             }
   },
@@ -49,7 +40,7 @@
     "path": "/api/trending?refresh=true",
     "schedule": "0 2 * * *"
   }, {
-    "path": "/api/seed-trending-posts",
+    "path": "/api/trending?seed=true",
     "schedule": "0 3 * * *"
   }],
   "rewrites": [
