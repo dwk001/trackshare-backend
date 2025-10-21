@@ -411,7 +411,136 @@
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
-        /* Mobile Feed Styles */
+        /* Advanced Music Discovery Styles */
+        .discovery-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .discovery-control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .discovery-control-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .discovery-select {
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .discovery-select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .discovery-select option {
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .mood-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .mood-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .mood-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .mood-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+            color: white;
+        }
+
+        .discovery-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+
+        .recommendation-reason {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        .track-card.recommended {
+            border: 2px solid #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        }
+
+        .track-card.recommended::before {
+            content: '✨';
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            font-size: 1.2rem;
+            z-index: 2;
+        }
         @media (max-width: 768px) {
             .feed-tabs {
                 padding: 0 1rem;
@@ -2602,7 +2731,79 @@
         <!-- Music Discovery (Hidden by default) -->
         <section id="musicDiscovery" class="discovery-section" style="display: none;">
             <div class="container">
-                <h2 class="section-title">Trending Now</h2>
+                <h2 class="section-title">Discover Music</h2>
+                
+                <!-- Discovery Controls -->
+                <div class="discovery-controls">
+                    <div class="discovery-control-group">
+                        <label>Genre</label>
+                        <select class="discovery-select" id="genreFilter" onchange="filterByGenre()">
+                            <option value="all">All Genres</option>
+                            <option value="pop">Pop</option>
+                            <option value="rock">Rock</option>
+                            <option value="hip-hop">Hip-Hop</option>
+                            <option value="electronic">Electronic</option>
+                            <option value="country">Country</option>
+                            <option value="jazz">Jazz</option>
+                            <option value="classical">Classical</option>
+                        </select>
+                    </div>
+                    
+                    <div class="discovery-control-group">
+                        <label>Mood</label>
+                        <div class="mood-buttons">
+                            <button class="mood-btn" data-mood="happy" onclick="filterByMood('happy')">😊 Happy</button>
+                            <button class="mood-btn" data-mood="chill" onclick="filterByMood('chill')">😌 Chill</button>
+                            <button class="mood-btn" data-mood="energetic" onclick="filterByMood('energetic')">⚡ Energetic</button>
+                            <button class="mood-btn" data-mood="melancholic" onclick="filterByMood('melancholic')">😔 Melancholic</button>
+                            <button class="mood-btn" data-mood="romantic" onclick="filterByMood('romantic')">💕 Romantic</button>
+                        </div>
+                    </div>
+                    
+                    <div class="discovery-control-group">
+                        <label>Time Period</label>
+                        <select class="discovery-select" id="timeFilter" onchange="filterByTime()">
+                            <option value="all">All Time</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2020s">2020s</option>
+                            <option value="2010s">2010s</option>
+                            <option value="2000s">2000s</option>
+                            <option value="90s">90s</option>
+                        </select>
+                    </div>
+                    
+                    <div class="discovery-control-group">
+                        <label>Discovery Type</label>
+                        <select class="discovery-select" id="discoveryType" onchange="changeDiscoveryType()">
+                            <option value="trending">Trending</option>
+                            <option value="recommendations">For You</option>
+                            <option value="new-releases">New Releases</option>
+                            <option value="playlists">Playlists</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Discovery Stats -->
+                <div class="discovery-stats" id="discoveryStats" style="display: none;">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalTracks">0</div>
+                        <div class="stat-label">Tracks Found</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="avgPopularity">0</div>
+                        <div class="stat-label">Avg Popularity</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="topGenre">-</div>
+                        <div class="stat-label">Top Genre</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="newReleases">0</div>
+                        <div class="stat-label">New Releases</div>
+                    </div>
+                </div>
+                
                 <div class="genre-tabs">
                     <div class="tab active" data-genre="all" onclick="switchGenre('all')">All Genres</div>
                     <div class="tab" data-genre="pop" onclick="switchGenre('pop')">Pop</div>
@@ -5180,6 +5381,259 @@
                 container.style.display = 'block';
             } else {
                 badge.style.display = 'none';
+            }
+        }
+
+        // Advanced Music Discovery Functions
+        let currentMood = null;
+        let currentTimeFilter = 'all';
+        let currentDiscoveryType = 'trending';
+        let discoveryStats = {};
+
+        async function filterByGenre() {
+            const genre = document.getElementById('genreFilter').value;
+            await switchGenre(genre);
+            updateDiscoveryStats();
+        }
+
+        async function filterByMood(mood) {
+            // Update mood button states
+            document.querySelectorAll('.mood-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-mood="${mood}"]`).classList.add('active');
+            
+            currentMood = mood;
+            await loadMoodBasedRecommendations(mood);
+            updateDiscoveryStats();
+        }
+
+        async function filterByTime() {
+            const timeFilter = document.getElementById('timeFilter').value;
+            currentTimeFilter = timeFilter;
+            await loadTimeFilteredMusic(timeFilter);
+            updateDiscoveryStats();
+        }
+
+        async function changeDiscoveryType() {
+            const discoveryType = document.getElementById('discoveryType').value;
+            currentDiscoveryType = discoveryType;
+            
+            switch(discoveryType) {
+                case 'trending':
+                    await switchGenre(currentGenre);
+                    break;
+                case 'recommendations':
+                    await loadRecommendations();
+                    break;
+                case 'new-releases':
+                    await loadNewReleases();
+                    break;
+                case 'playlists':
+                    await loadPlaylists();
+                    break;
+            }
+            updateDiscoveryStats();
+        }
+
+        async function loadMoodBasedRecommendations(mood) {
+            const grid = document.getElementById('musicGrid');
+            grid.innerHTML = '<div class="loading">Loading mood-based recommendations...</div>';
+            
+            try {
+                const response = await fetch(`/api/profile?recommendations=true&mood=${mood}&limit=20`, {
+                    headers: isSignedIn ? { 'Authorization': `Bearer ${userToken}` } : {}
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.recommendations) {
+                    displayMoodRecommendations(data.recommendations, mood);
+                } else {
+                    // Fallback to trending music
+                    await switchGenre(currentGenre);
+                }
+            } catch (error) {
+                console.error('Error loading mood recommendations:', error);
+                await switchGenre(currentGenre);
+            }
+        }
+
+        function displayMoodRecommendations(recommendations, mood) {
+            const grid = document.getElementById('musicGrid');
+            
+            if (recommendations.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🎵</div>
+                        <h3>No ${mood} music found</h3>
+                        <p>Try a different mood or browse trending music.</p>
+                        <button class="btn btn-primary" onclick="switchGenre('all')">Browse All</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = recommendations.map(track => `
+                <div class="track-card recommended" data-track-id="${track.id}">
+                    <div class="track-artwork">
+                        <img src="${track.artwork || 'https://via.placeholder.com/300x300/667eea/ffffff?text=Music'}" 
+                             alt="${track.title}"
+                             loading="lazy"
+                             onerror="this.src='https://via.placeholder.com/300x300/667eea/ffffff?text=Music'"
+                             onload="this.classList.add('loaded')">
+                        <div class="play-overlay">
+                            <button class="play-button" onclick="playTrack('${escapeJs(track.url)}', '${escapeJs(track.title)}', '${escapeJs(track.artist)}')">
+                                ▶️
+                            </button>
+                        </div>
+                    </div>
+                    <div class="track-info">
+                        <div class="track-title">${escapeHtml(track.title)}</div>
+                        <div class="track-artist">${escapeHtml(track.artist)}</div>
+                        ${track.popularity ? `<div class="track-popularity">${getPopularityBars(track.popularity)}</div>` : ''}
+                        <div class="recommendation-reason">${track.recommendation_reason || `Perfect for ${mood} vibes`}</div>
+                    </div>
+                    <button class="track-action-btn" onclick="playTrack('${escapeJs(track.url)}', '${escapeJs(track.title)}', '${escapeJs(track.artist)}')">
+                        Play & Share
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function loadTimeFilteredMusic(timeFilter) {
+            const grid = document.getElementById('musicGrid');
+            grid.innerHTML = '<div class="loading">Loading music from ' + timeFilter + '...</div>';
+            
+            try {
+                const response = await fetch(`/api/search?q=year:${timeFilter}&limit=20`);
+                const data = await response.json();
+                
+                if (data.success && data.tracks) {
+                    displayTracks(data.tracks);
+                } else {
+                    // Fallback to trending
+                    await switchGenre(currentGenre);
+                }
+            } catch (error) {
+                console.error('Error loading time-filtered music:', error);
+                await switchGenre(currentGenre);
+            }
+        }
+
+        async function loadNewReleases() {
+            const grid = document.getElementById('musicGrid');
+            grid.innerHTML = '<div class="loading">Loading new releases...</div>';
+            
+            try {
+                const response = await fetch('/api/trending?genre=new-releases&limit=20');
+                const data = await response.json();
+                
+                if (data.success && data.tracks) {
+                    displayTracks(data.tracks);
+                } else {
+                    await switchGenre(currentGenre);
+                }
+            } catch (error) {
+                console.error('Error loading new releases:', error);
+                await switchGenre(currentGenre);
+            }
+        }
+
+        function updateDiscoveryStats() {
+            const tracks = document.querySelectorAll('.track-card');
+            if (tracks.length === 0) return;
+            
+            // Calculate stats
+            const totalTracks = tracks.length;
+            const popularities = Array.from(tracks).map(track => {
+                const popularityEl = track.querySelector('.track-popularity');
+                return popularityEl ? parseInt(popularityEl.textContent) || 0 : 0;
+            });
+            
+            const avgPopularity = popularities.length > 0 
+                ? Math.round(popularities.reduce((a, b) => a + b, 0) / popularities.length)
+                : 0;
+            
+            const genres = Array.from(tracks).map(track => {
+                const genreEl = track.querySelector('[data-genre]');
+                return genreEl ? genreEl.dataset.genre : 'unknown';
+            });
+            
+            const genreCounts = genres.reduce((acc, genre) => {
+                acc[genre] = (acc[genre] || 0) + 1;
+                return acc;
+            }, {});
+            
+            const topGenre = Object.keys(genreCounts).reduce((a, b) => 
+                genreCounts[a] > genreCounts[b] ? a : b, 'unknown'
+            );
+            
+            const newReleases = Array.from(tracks).filter(track => 
+                track.classList.contains('recommended')
+            ).length;
+            
+            // Update UI
+            document.getElementById('totalTracks').textContent = totalTracks;
+            document.getElementById('avgPopularity').textContent = avgPopularity;
+            document.getElementById('topGenre').textContent = topGenre.charAt(0).toUpperCase() + topGenre.slice(1);
+            document.getElementById('newReleases').textContent = newReleases;
+            
+            // Show stats
+            document.getElementById('discoveryStats').style.display = 'grid';
+        }
+
+        // Enhanced switchGenre function
+        async function switchGenre(genre) {
+            currentGenre = genre;
+            
+            // Update tab visual state
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-genre="${genre}"]`).classList.add('active');
+            
+            // Show loading state
+            showLoadingIndicator();
+            
+            // Check client-side cache first
+            if (genreCache[genre]) {
+                displayTracks(genreCache[genre]);
+                hideLoadingIndicator();
+                updateDiscoveryStats();
+                return;
+            }
+            
+            // Fetch from API based on discovery type
+            try {
+                let response;
+                if (genre === 'recommendations') {
+                    response = await fetch('/api/profile?recommendations=true&limit=20', {
+                        headers: isSignedIn ? { 'Authorization': `Bearer ${userToken}` } : {}
+                    });
+                } else if (genre === 'playlists') {
+                    response = await fetch('/api/posts?playlists=true&limit=20', {
+                        headers: isSignedIn ? { 'Authorization': `Bearer ${userToken}` } : {}
+                    });
+                } else {
+                    response = await fetch(`/api/trending?genre=${genre}&limit=${calculateTracksPerPage()}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tracks = data.tracks || data.recommendations || data.playlists || [];
+                    genreCache[genre] = tracks;
+                    displayTracks(tracks);
+                    updateDiscoveryStats();
+                } else {
+                    showError('Failed to load music');
+                }
+            } catch (error) {
+                console.error('Genre fetch error:', error);
+                showError('Network error');
+            } finally {
+                hideLoadingIndicator();
             }
         }
 
