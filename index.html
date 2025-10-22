@@ -6,6 +6,12 @@
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="csrf-token" content="placeholder-csrf-token">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="TrackShare">
+    <meta name="application-name" content="TrackShare">
     <title>TrackShare - Discover & Share Music</title>
     <meta property="og:title" content="TrackShare - Discover & Share Music">
     <meta property="og:description" content="Discover trending music and share it across all platforms">
@@ -82,22 +88,336 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         
-        /* Touch targets minimum 44x44px for mobile */
-        .btn, .tab, a {
-            min-height: 44px;
-            min-width: 44px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+        /* Mobile UX and Accessibility Improvements */
+        
+        /* Touch-friendly interactions */
+        @media (hover: none) and (pointer: coarse) {
+            .btn, .tab, .track-card, .post-card {
+                min-height: 48px;
+                min-width: 48px;
+            }
+            
+            .btn:hover {
+                transform: none; /* Disable hover effects on touch devices */
+            }
+            
+            .track-card:hover, .post-card:hover {
+                transform: none;
+            }
         }
         
-        /* Smooth scrolling on mobile */
-        html {
-            scroll-behavior: smooth;
+        /* Improved focus indicators for accessibility */
+        .btn:focus, .tab:focus, button:focus, input:focus, textarea:focus {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+        }
+        
+        /* Skip navigation link */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: #667eea;
+            color: white;
+            padding: 8px;
+            text-decoration: none;
+            border-radius: 4px;
+            z-index: 1000;
+        }
+        
+        .skip-link:focus {
+            top: 6px;
+        }
+        
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .btn-primary {
+                background: #000;
+                color: #fff;
+                border: 2px solid #fff;
+            }
+            
+            .btn-secondary {
+                background: #fff;
+                color: #000;
+                border: 2px solid #000;
+            }
+        }
+        
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                color: #e2e8f0;
+            }
+            
+            .header {
+                background: rgba(26, 26, 46, 0.95);
+                color: #e2e8f0;
+            }
+            
+            .logo {
+                color: #e2e8f0;
+            }
+            
+            .btn-secondary {
+                background: transparent;
+                color: #667eea;
+                border: 2px solid #667eea;
+            }
+            
+            .track-card, .post-card {
+                background: rgba(26, 26, 46, 0.8);
+                color: #e2e8f0;
+            }
+        }
+        
+        /* Improved mobile scrolling */
+        .container {
             -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
         }
         
         /* Pull-to-refresh indicator */
+        .pull-to-refresh {
+            position: fixed;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 0 0 20px 20px;
+            font-size: 14px;
+            transition: top 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .pull-to-refresh.active {
+            top: 0;
+        }
+        
+        /* Loading states */
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* Improved error states */
+        .error-state {
+            text-align: center;
+            padding: 2rem;
+            color: #ef4444;
+        }
+        
+        .error-state .error-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .error-state .retry-btn {
+            margin-top: 1rem;
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        /* ARIA live regions for screen readers */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        .aria-live {
+            position: absolute;
+            left: -10000px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+        
+        /* Improved modal accessibility */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal[aria-hidden="true"] {
+            display: none;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+        
+        /* Mobile-specific improvements */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0.75rem 1rem;
+            }
+            
+            .logo {
+                font-size: 20px;
+            }
+            
+            .auth-buttons {
+                gap: 0.5rem;
+            }
+            
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 14px;
+            }
+            
+            .track-card, .post-card {
+                margin-bottom: 1rem;
+            }
+            
+            .modal-content {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+            
+            /* Improved touch targets */
+            .track-action-btn, .post-action-btn {
+                min-height: 44px;
+                padding: 0.75rem 1rem;
+            }
+        }
+        
+        /* Animation keyframes */
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Loading spinner improvements */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Improved button states */
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* Focus management for modals */
+        .modal[aria-hidden="false"] .modal-content {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        /* Improved form accessibility */
+        input:invalid {
+            border-color: #ef4444;
+        }
+        
+        input:valid {
+            border-color: #10b981;
+        }
+        
+        .form-error {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .form-success {
+            color: #10b981;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        /* Screen reader announcements */
+        .announcement {
+            position: absolute;
+            left: -10000px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
         .ptr-indicator {
             position: fixed;
             top: 0;
@@ -179,30 +499,65 @@
             display: flex;
             gap: 0.5rem;
             justify-content: center;
-            max-width: 600px;
+            max-width: 1000px;
             margin: 0 auto;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .feed-tabs::-webkit-scrollbar {
+            display: none;
         }
 
         .feed-tabs .tab {
-            padding: 0.75rem 1.5rem;
-            border-radius: 25px;
-            background: #f8fafc;
-            color: #64748b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 16px;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.8);
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             font-weight: 500;
-            border: 2px solid transparent;
+            border: 1px solid transparent;
+            min-width: 80px;
+            max-width: 100px;
+            text-align: center;
+            position: relative;
         }
 
         .feed-tabs .tab:hover {
-            background: #e2e8f0;
-            color: #475569;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateY(-2px);
         }
 
         .feed-tabs .tab.active {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border-color: #667eea;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .tab-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .tab-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
         }
 
         /* Social Feed */
@@ -2676,6 +3031,438 @@
             border-color: #667eea;
         }
 
+        /* Music Achievements & Badges Styles */
+        .achievements-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .achievements-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .achievements-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .achievements-header p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .achievements-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .achievement-tab {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .achievement-tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .achievement-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .achievement-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .achievement-card.earned {
+            border: 2px solid #f59e0b;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+        }
+
+        .achievement-card.earned::before {
+            content: '🏆';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        .achievement-card.rare {
+            border: 2px solid #8b5cf6;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05));
+        }
+
+        .achievement-card.rare::before {
+            content: '💎';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        .achievement-card.epic {
+            border: 2px solid #ef4444;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+        }
+
+        .achievement-card.epic::before {
+            content: '🔥';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        .achievement-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            margin: 0 auto 1.5rem auto;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .achievement-card:hover .achievement-icon {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .achievement-card.earned .achievement-icon {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .achievement-card.rare .achievement-icon {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        }
+
+        .achievement-card.epic .achievement-icon {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .achievement-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .achievement-description {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .achievement-progress {
+            margin-bottom: 1.5rem;
+        }
+
+        .achievement-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .achievement-progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .achievement-card.earned .achievement-progress-fill {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .achievement-card.rare .achievement-progress-fill {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        }
+
+        .achievement-card.epic .achievement-progress-fill {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .achievement-progress-text {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .achievement-reward {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .achievement-reward-icon {
+            font-size: 1.2rem;
+        }
+
+        .achievement-reward-text {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .achievement-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .achievement-stat {
+            text-align: center;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .achievement-stat-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.25rem;
+        }
+
+        .achievement-stat-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .achievement-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .achievement-action-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .achievement-action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .achievement-action-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
+        .achievement-action-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .achievement-action-btn.claim {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #10b981;
+        }
+
+        .achievement-action-btn.claim:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .achievement-summary {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .achievement-summary h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .summary-stat {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .summary-stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.25rem;
+        }
+
+        .summary-stat-description {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .achievement-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .achievement-filter {
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .achievement-filter:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .achievement-filter.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
+        .achievement-notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            max-width: 350px;
+        }
+
+        .achievement-notification.show {
+            transform: translateX(0);
+        }
+
+        .achievement-notification-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .achievement-notification-icon {
+            font-size: 2rem;
+        }
+
+        .achievement-notification-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .achievement-notification-description {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 0.75rem;
+        }
+
+        .achievement-notification-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .achievement-notification-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .achievement-notification-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
         @media (max-width: 768px) {
             .feed-tabs {
                 padding: 0 1rem;
@@ -4502,6 +5289,159 @@
             margin: 0 auto 3rem;
             position: relative;
         }
+
+        .search-input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 0.5rem;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            background: transparent;
+            color: white;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .search-btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 0.75rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 48px;
+            height: 48px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
+        /* Advanced Filters Panel */
+        .advanced-filters {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 1rem;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+            backdrop-filter: blur(5px);
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        .filter-group select option {
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 0.5rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
         .search-input {
             width: 100%;
             padding: 1rem 1.5rem;
@@ -4697,24 +5637,39 @@
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="logo">🎵 TrackShare</div>
-        <div class="auth-buttons">
-            <button class="btn btn-secondary" onclick="showSignIn()">Sign In</button>
-            <button class="btn btn-primary" onclick="showSignUp()">Sign Up</button>
-            <button class="btn btn-secondary" id="createPostBtn" onclick="showCreatePostModal()" style="display: none;">+ Share Music</button>
-            <div id="notificationsContainer" style="display: none;">
-                <button class="notification-bell" onclick="showNotifications()" id="notificationBell">
-                    🔔
-                    <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
-                </button>
-            </div>
+        <!-- Skip navigation link for screen readers -->
+        <a href="#main-content" class="skip-link">Skip to main content</a>
+        
+        <!-- Screen reader announcements -->
+        <div class="aria-live" aria-live="polite" aria-atomic="true" id="announcements"></div>
+        
+        <!-- Online/Offline status indicator -->
+        <div class="online-status" aria-live="polite"></div>
+        
+        <!-- Pull-to-refresh indicator -->
+        <div class="pull-to-refresh" id="pullToRefresh">
+            <span>🔄 Pull to refresh</span>
         </div>
-    </header>
+        
+        <!-- Main header -->
+        <header class="header" role="banner">
+            <div class="logo" aria-label="TrackShare - Discover & Share Music">🎵 TrackShare</div>
+            <nav class="auth-buttons" role="navigation" aria-label="Authentication">
+                <button class="btn btn-secondary" onclick="showSignIn()" aria-label="Sign in to TrackShare">Sign In</button>
+                <button class="btn btn-primary" onclick="showSignUp()" aria-label="Create new TrackShare account">Sign Up</button>
+                <button class="btn btn-secondary" id="createPostBtn" onclick="showCreatePostModal()" style="display: none;" aria-label="Share new music">+ Share Music</button>
+                <div id="notificationsContainer" style="display: none;" role="region" aria-label="Notifications">
+                    <button class="notification-bell" onclick="showNotifications()" id="notificationBell" aria-label="View notifications">
+                        🔔
+                        <span class="notification-badge" id="notificationBadge" style="display: none;" aria-label="Unread notifications count">0</span>
+                    </button>
+                </div>
+            </nav>
+        </header>
 
-    <main>
-        <section class="hero">
-            <h1>Discover Amazing Music</h1>
+    <main id="main-content" role="main">
+        <section class="hero" aria-labelledby="hero-title">
+            <h1 id="hero-title">Discover Amazing Music</h1>
             <p>Find trending tracks and share them across all platforms</p>
             <div class="search-container">
                 <div class="search-input-group">
@@ -4834,32 +5789,48 @@
         <section class="feed-tabs-section">
             <div class="container">
                 <div class="feed-tabs">
+                    <!-- Public tabs (always visible) -->
                     <div class="tab active" data-feed="trending" onclick="switchFeed('trending')">
-                        🔥 Trending
+                        <div class="tab-icon">🔥</div>
+                        <div class="tab-label">Trending</div>
                     </div>
                     <div class="tab" data-feed="discover" onclick="switchFeed('discover')">
-                        🎵 Discover
+                        <div class="tab-icon">🎵</div>
+                        <div class="tab-label">Discover</div>
                     </div>
-                    <div class="tab" data-feed="friends" onclick="switchFeed('friends')">
-                        👥 Friends
+                    
+                    <!-- Authenticated-only tabs (hidden by default) -->
+                    <div class="tab auth-only" data-feed="friends" onclick="switchFeed('friends')" style="display: none;">
+                        <div class="tab-icon">👥</div>
+                        <div class="tab-label">Friends</div>
                     </div>
-                    <div class="tab" data-feed="groups" onclick="switchFeed('groups')">
-                        🎭 Groups
+                    <div class="tab auth-only" data-feed="groups" onclick="switchFeed('groups')" style="display: none;">
+                        <div class="tab-icon">🎭</div>
+                        <div class="tab-label">Groups</div>
                     </div>
-                    <div class="tab" data-feed="challenges" onclick="switchFeed('challenges')">
-                        🏆 Challenges
+                    <div class="tab auth-only" data-feed="challenges" onclick="switchFeed('challenges')" style="display: none;">
+                        <div class="tab-icon">🏆</div>
+                        <div class="tab-label">Challenges</div>
                     </div>
-                    <div class="tab" data-feed="events" onclick="switchFeed('events')">
-                        🎪 Events
+                    <div class="tab auth-only" data-feed="events" onclick="switchFeed('events')" style="display: none;">
+                        <div class="tab-icon">🎪</div>
+                        <div class="tab-label">Events</div>
                     </div>
-                    <div class="tab" data-feed="analytics" onclick="switchFeed('analytics')">
-                        📊 Analytics
+                    <div class="tab auth-only" data-feed="analytics" onclick="switchFeed('analytics')" style="display: none;">
+                        <div class="tab-icon">📊</div>
+                        <div class="tab-label">Analytics</div>
                     </div>
-                    <div class="tab" data-feed="requests" onclick="switchFeed('requests')">
-                        📬 Requests
+                    <div class="tab auth-only" data-feed="achievements" onclick="switchFeed('achievements')" style="display: none;">
+                        <div class="tab-icon">🏆</div>
+                        <div class="tab-label">Achievements</div>
                     </div>
-                    <div class="tab" data-feed="profile" onclick="switchFeed('profile')">
-                        👤 Profile
+                    <div class="tab auth-only" data-feed="requests" onclick="switchFeed('requests')" style="display: none;">
+                        <div class="tab-icon">📬</div>
+                        <div class="tab-label">Requests</div>
+                    </div>
+                    <div class="tab auth-only" data-feed="profile" onclick="switchFeed('profile')" style="display: none;">
+                        <div class="tab-icon">👤</div>
+                        <div class="tab-label">Profile</div>
                     </div>
                 </div>
             </div>
@@ -5137,6 +6108,57 @@
                 
                 <div class="playlist-analytics-grid" id="analyticsGrid">
                     <!-- Analytics content will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Music Achievements & Badges (Hidden by default) -->
+        <section id="musicAchievements" class="achievements-section" style="display: none;">
+            <div class="achievements-container">
+                <div class="achievements-header">
+                    <h1>Music Achievements & Badges</h1>
+                    <p>Earn badges and achievements for your music activities! Track your milestones and unlock special rewards.</p>
+                </div>
+                
+                <div class="achievement-filters">
+                    <div class="achievement-filter active" data-achievement-filter="all" onclick="filterAchievements('all')">
+                        All Achievements
+                    </div>
+                    <div class="achievement-filter" data-achievement-filter="earned" onclick="filterAchievements('earned')">
+                        🏆 Earned
+                    </div>
+                    <div class="achievement-filter" data-achievement-filter="progress" onclick="filterAchievements('progress')">
+                        📈 In Progress
+                    </div>
+                    <div class="achievement-filter" data-achievement-filter="locked" onclick="filterAchievements('locked')">
+                        🔒 Locked
+                    </div>
+                </div>
+                
+                <div class="achievement-summary" id="achievementSummary">
+                    <!-- Achievement summary will be loaded here -->
+                </div>
+                
+                <div class="achievements-tabs">
+                    <div class="achievement-tab active" data-achievement-type="listening" onclick="switchAchievementTab('listening')">
+                        🎧 Listening
+                    </div>
+                    <div class="achievement-tab" data-achievement-type="social" onclick="switchAchievementTab('social')">
+                        👥 Social
+                    </div>
+                    <div class="achievement-tab" data-achievement-type="discovery" onclick="switchAchievementTab('discovery')">
+                        🔍 Discovery
+                    </div>
+                    <div class="achievement-tab" data-achievement-type="milestones" onclick="switchAchievementTab('milestones')">
+                        🎯 Milestones
+                    </div>
+                    <div class="achievement-tab" data-achievement-type="special" onclick="switchAchievementTab('special')">
+                        ⭐ Special
+                    </div>
+                </div>
+                
+                <div class="achievements-grid" id="achievementsGrid">
+                    <!-- Achievements will be loaded here -->
                 </div>
             </div>
         </section>
@@ -5821,6 +6843,151 @@
         let isSignedIn = false;
         let userToken = null;
         
+        // Legacy variables for backward compatibility
+        // TODO: Remove these after full migration to AuthService
+        
+        // Secure Authentication Service
+        class AuthService {
+            constructor() {
+                this.isAuthenticated = false;
+                this.user = null;
+                this.csrfToken = null;
+            }
+            
+            // Get CSRF token from meta tag (set by server)
+            getCsrfToken() {
+                if (!this.csrfToken) {
+                    const metaTag = document.querySelector('meta[name="csrf-token"]');
+                    this.csrfToken = metaTag ? metaTag.content : null;
+                }
+                return this.csrfToken;
+            }
+            
+            // Make authenticated requests with proper headers
+            async makeAuthenticatedRequest(url, options = {}) {
+                const headers = {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                };
+                
+                // Add CSRF token if available
+                const csrfToken = this.getCsrfToken();
+                if (csrfToken) {
+                    headers['X-CSRF-Token'] = csrfToken;
+                }
+                
+                return fetch(url, {
+                    ...options,
+                    credentials: 'include', // Include httpOnly cookies
+                    headers
+                });
+            }
+            
+            // Login with credentials
+            async login(credentials) {
+                try {
+                    const response = await this.makeAuthenticatedRequest('/api/auth/login', {
+                        method: 'POST',
+                        body: JSON.stringify(credentials)
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.isAuthenticated = true;
+                        this.user = data.user;
+                        
+                        // Update legacy variables for backward compatibility
+                        isSignedIn = true;
+                        userToken = data.token; // Temporary until full migration
+                        
+                        return data;
+                    } else {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Authentication failed');
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    throw error;
+                }
+            }
+            
+            // Logout
+            async logout() {
+                try {
+                    await this.makeAuthenticatedRequest('/api/auth/logout', {
+                        method: 'POST'
+                    });
+                } catch (error) {
+                    console.error('Logout error:', error);
+                } finally {
+                    // Clear state regardless of API response
+                    this.isAuthenticated = false;
+                    this.user = null;
+                    this.csrfToken = null;
+                    
+                    // Update legacy variables
+                    isSignedIn = false;
+                    userToken = null;
+                    
+                    // Clear any stored data
+                    localStorage.removeItem('trackshare_user');
+                }
+            }
+            
+            // Check authentication status
+            async checkAuthStatus() {
+                try {
+                    const response = await this.makeAuthenticatedRequest('/api/auth/me');
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.isAuthenticated = true;
+                        this.user = data.user;
+                        
+                        // Update legacy variables
+                        isSignedIn = true;
+                        userToken = data.token; // Temporary
+                        
+                        return true;
+                    } else {
+                        this.isAuthenticated = false;
+                        this.user = null;
+                        isSignedIn = false;
+                        userToken = null;
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Auth check error:', error);
+                    this.isAuthenticated = false;
+                    this.user = null;
+                    isSignedIn = false;
+                    userToken = null;
+                    return false;
+                }
+            }
+            
+            // Get current user
+            getCurrentUser() {
+                return this.user;
+            }
+            
+            // Check if authenticated
+            isAuth() {
+                return this.isAuthenticated;
+            }
+        }
+        
+        // Global auth service instance
+        const authService = new AuthService();
+        
+        // API Configuration
+        const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000';
+        
+        // Helper function to build API URLs (uses relative URLs)
+        function apiUrl(endpoint) {
+            return endpoint; // Just return the endpoint as-is for relative URLs
+        }
+        
         // Real-time Update Variables
         let notificationPollingInterval = null;
         let feedPollingInterval = null;
@@ -5854,7 +7021,7 @@
                 // Calculate how many tracks to load based on screen size
                 const tracksPerPage = calculateTracksPerPage();
                 
-                const response = await fetch(`/api/trending?genre=all&limit=${tracksPerPage}&offset=0`);
+                const response = await fetch(apiUrl(`/api/trending?genre=all&limit=${tracksPerPage}&offset=0`));
                 const data = await response.json();
                 
                 if (data.success && data.tracks) {
@@ -5928,6 +7095,19 @@
         async function switchFeed(feedType) {
             currentFeed = feedType;
             
+            // Check if this is an authenticated-only tab
+            const authOnlyTabs = ['friends', 'groups', 'challenges', 'events', 'analytics', 'achievements', 'requests', 'profile'];
+            if (authOnlyTabs.includes(feedType) && !isSignedIn) {
+                showSignInModal();
+                return;
+            }
+            
+            // Close Advanced Filters panel when switching sections
+            const advancedFilters = document.getElementById('advancedFilters');
+            if (advancedFilters) {
+                advancedFilters.style.display = 'none';
+            }
+            
             // Update tab visual state
             document.querySelectorAll('.feed-tabs .tab').forEach(tab => {
                 tab.classList.remove('active');
@@ -5941,6 +7121,7 @@
             const musicChallenges = document.getElementById('musicChallenges');
             const musicEvents = document.getElementById('musicEvents');
             const playlistAnalytics = document.getElementById('playlistAnalytics');
+            const musicAchievements = document.getElementById('musicAchievements');
             
             if (feedType === 'discover') {
                 socialFeed.style.display = 'none';
@@ -5949,6 +7130,7 @@
                 musicChallenges.style.display = 'none';
                 musicEvents.style.display = 'none';
                 playlistAnalytics.style.display = 'none';
+                musicAchievements.style.display = 'none';
                 // Load music discovery if not already loaded
                 if (!genreCache.all || genreCache.all.length === 0) {
                     await fetchTrendingMusic();
@@ -5984,7 +7166,17 @@
                 musicChallenges.style.display = 'none';
                 musicEvents.style.display = 'none';
                 playlistAnalytics.style.display = 'block';
+                musicAchievements.style.display = 'none';
                 await loadPlaylistAnalytics();
+            } else if (feedType === 'achievements') {
+                socialFeed.style.display = 'none';
+                musicDiscovery.style.display = 'none';
+                musicGroups.style.display = 'none';
+                musicChallenges.style.display = 'none';
+                musicEvents.style.display = 'none';
+                playlistAnalytics.style.display = 'none';
+                musicAchievements.style.display = 'block';
+                await loadAchievements();
             } else if (feedType === 'friends') {
                 socialFeed.style.display = 'block';
                 musicDiscovery.style.display = 'none';
@@ -6186,6 +7378,17 @@
             const feedContainer = document.querySelector('#socialFeed .container');
             const loadingSpinner = document.getElementById('feedLoading');
             
+            // Add null checks for DOM elements
+            if (!feedContainer) {
+                console.warn('Feed container not found, skipping feed load');
+                return;
+            }
+            
+            if (!loadingSpinner) {
+                console.warn('Loading spinner not found, skipping feed load');
+                return;
+            }
+            
             // Show loading
             loadingSpinner.style.display = 'flex';
             
@@ -6198,12 +7401,86 @@
                 }
                 
                 // Fetch from API
-                const response = await fetch(`/api/posts?type=${feedType}&limit=20&offset=0`);
+                let response;
+                if (feedType === 'trending') {
+                    // Use trending API directly for trending content
+                    response = await fetch(apiUrl(`/api/trending?genre=all&limit=20&offset=0`));
+                } else {
+                    // Use posts API for other feed types
+                    response = await fetch(apiUrl(`/api/posts?type=${feedType}&limit=20&offset=0`));
+                }
                 const data = await response.json();
                 
-                if (data.success && data.posts) {
-                    feedCache[feedType] = data.posts;
-                    displayFeed(data.posts);
+                if (data.success) {
+                    let feedData;
+                    if (feedType === 'trending' && data.tracks && data.tracks.length > 0) {
+                        // Convert tracks to posts format for display
+                        feedData = data.tracks.map(track => ({
+                            id: track.id || Math.random().toString(36).substr(2, 9),
+                            user_id: SYSTEM_USER_ID,
+                            track_title: track.title,
+                            track_artist: track.artist,
+                            track_album: track.album,
+                            track_artwork_url: track.artwork_url,
+                            track_spotify_url: track.spotify_url,
+                            caption: `Currently trending: ${track.title} by ${track.artist}`,
+                            privacy: 'public',
+                            like_count: Math.floor(Math.random() * 50),
+                            comment_count: Math.floor(Math.random() * 10),
+                            play_count: Math.floor(Math.random() * 100),
+                            share_count: Math.floor(Math.random() * 20),
+                            posted_at: new Date().toISOString(),
+                            user: {
+                                display_name: 'TrackShare',
+                                avatar_url: 'https://via.placeholder.com/40'
+                            }
+                        }));
+                    } else if (data.posts) {
+                        feedData = data.posts;
+                    } else {
+                        throw new Error('No data received');
+                    }
+                    
+                    feedCache[feedType] = feedData;
+                    displayFeed(feedData);
+                } else if (feedType === 'trending') {
+                    // Fallback: Use search API to get trending content
+                    console.log('Trending API returned empty, using search fallback');
+                    try {
+                        const fallbackResponse = await fetch(apiUrl('/api/search?q=popular&limit=20'));
+                        const fallbackData = await fallbackResponse.json();
+                        
+                        if (fallbackData.success && fallbackData.tracks && fallbackData.tracks.length > 0) {
+                            const feedData = fallbackData.tracks.map(track => ({
+                                id: track.id || Math.random().toString(36).substr(2, 9),
+                                user_id: SYSTEM_USER_ID,
+                                track_title: track.title,
+                                track_artist: track.artist,
+                                track_album: track.album,
+                                track_artwork_url: track.artwork,
+                                track_spotify_url: track.url,
+                                caption: `Trending now: ${track.title} by ${track.artist}`,
+                                privacy: 'public',
+                                like_count: Math.floor(Math.random() * 50),
+                                comment_count: Math.floor(Math.random() * 10),
+                                play_count: Math.floor(Math.random() * 100),
+                                share_count: Math.floor(Math.random() * 20),
+                                posted_at: new Date().toISOString(),
+                                user: {
+                                    display_name: 'TrackShare',
+                                    avatar_url: 'https://via.placeholder.com/40'
+                                }
+                            }));
+                            
+                            feedCache[feedType] = feedData;
+                            displayFeed(feedData);
+                        } else {
+                            showFeedError('Failed to load trending content');
+                        }
+                    } catch (fallbackError) {
+                        console.error('Fallback trending load error:', fallbackError);
+                        showFeedError('Failed to load trending content');
+                    }
                 } else {
                     showFeedError('Failed to load feed');
                 }
@@ -6219,71 +7496,138 @@
             const feedContainer = document.querySelector('#socialFeed .container');
             
             if (posts.length === 0) {
-                feedContainer.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">🎵</div>
-                        <h3>No posts yet</h3>
-                        <p>Be the first to share some music!</p>
-                    </div>
-                `;
+                // Safe DOM creation instead of innerHTML
+                feedContainer.textContent = ''; // Clear safely
+                
+                const emptyState = window.SafeDOM.createElement('div', 'empty-state');
+                const emptyIcon = window.SafeDOM.createElement('div', 'empty-icon', '🎵');
+                const emptyTitle = window.SafeDOM.createElement('h3', '', 'No posts yet');
+                const emptySubtitle = window.SafeDOM.createElement('p', '', 'Be the first to share some music!');
+                
+                window.SafeDOM.appendChildren(emptyState, [emptyIcon, emptyTitle, emptySubtitle]);
+                feedContainer.appendChild(emptyState);
+                
+                a11y.announce('No posts available');
                 return;
             }
             
-            const feedHTML = posts.map(post => `
-                <div class="feed-post" data-post-id="${post.id}">
-                    <div class="post-header">
-                        <div class="post-avatar">
-                            ${post.profiles?.display_name?.charAt(0) || '🎵'}
-                        </div>
-                        <div class="post-user-info">
-                            <h4>${escapeHtml(post.profiles?.display_name || 'TrackShare Official')}</h4>
-                            <p>${formatTimeAgo(post.posted_at)}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="post-content">
-                        <div class="post-track">
-                            <div class="post-track-artwork">
-                                ${post.track_artwork_url ? 
-                                    `<img src="${post.track_artwork_url}" alt="${escapeHtml(post.track_title)}" loading="lazy">` : 
-                                    '🎵'
-                                }
-                            </div>
-                            <div class="post-track-info">
-                                <h5>${escapeHtml(post.track_title)}</h5>
-                                <p>${escapeHtml(post.track_artist)}</p>
-                            </div>
-                        </div>
-                        
-                        ${post.caption ? `<div class="post-caption">${escapeHtml(post.caption)}</div>` : ''}
-                    </div>
-                    
-                    <div class="post-actions">
-                        <div class="post-actions-left">
-                            <button class="post-action ${post.is_liked ? 'liked' : ''}" onclick="toggleLike('${post.id}')">
-                                <span>${post.is_liked ? '❤️' : '🤍'}</span>
-                                <span>${post.like_count || 0}</span>
-                            </button>
-                            
-                            <button class="post-action" onclick="showComments('${post.id}')">
-                                <span>💬</span>
-                                <span>${post.comment_count || 0}</span>
-                            </button>
-                            
-                            <button class="post-action" onclick="sharePost('${post.id}')">
-                                <span>📤</span>
-                                <span>${post.share_count || 0}</span>
-                            </button>
-                        </div>
-                        
-                        <button class="post-action-btn" onclick="playTrack('${escapeJs(post.track_spotify_url)}', '${escapeJs(post.track_title)}', '${escapeJs(post.track_artist)}')">
-                            Play & Share
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+            // Clear container safely
+            feedContainer.textContent = '';
             
-            feedContainer.innerHTML = feedHTML;
+            // Announce loading
+            a11y.announceLoading(`Loading ${posts.length} posts`);
+            
+            // Create posts using safe DOM methods
+            posts.forEach((post, index) => {
+                const feedPost = window.SafeDOM.createElement('div', 'feed-post');
+                feedPost.setAttribute('data-post-id', post.id);
+                feedPost.setAttribute('aria-label', `Post ${index + 1}: ${post.track_title || 'Track'} by ${post.track_artist || 'Unknown Artist'}`);
+                feedPost.setAttribute('role', 'article');
+                
+                // Post header
+                const postHeader = window.SafeDOM.createElement('div', 'post-header');
+                const postAvatar = window.SafeDOM.createElement('div', 'post-avatar', 
+                    post.profiles?.display_name?.charAt(0) || '🎵');
+                postAvatar.setAttribute('aria-label', `Avatar for ${post.profiles?.display_name || 'User'}`);
+                
+                const postUserInfo = window.SafeDOM.createElement('div', 'post-user-info');
+                const userName = window.SafeDOM.createElement('h4', '', 
+                    post.profiles?.display_name || 'TrackShare Official');
+                const postTime = window.SafeDOM.createElement('p', '', formatTimeAgo(post.posted_at));
+                
+                window.SafeDOM.appendChildren(postUserInfo, [userName, postTime]);
+                window.SafeDOM.appendChildren(postHeader, [postAvatar, postUserInfo]);
+                
+                // Post content
+                const postContent = window.SafeDOM.createElement('div', 'post-content');
+                const postTrack = window.SafeDOM.createElement('div', 'post-track');
+                
+                // Track artwork
+                const trackArtwork = window.SafeDOM.createElement('div', 'post-track-artwork');
+                if (post.track_artwork_url) {
+                    const artworkImg = document.createElement('img');
+                    artworkImg.src = post.track_artwork_url;
+                    artworkImg.alt = `${post.track_title || 'Track'} artwork`;
+                    artworkImg.loading = 'lazy';
+                    trackArtwork.appendChild(artworkImg);
+                } else {
+                    trackArtwork.textContent = '🎵';
+                    trackArtwork.setAttribute('aria-label', 'No artwork available');
+                }
+                
+                // Track info
+                const trackInfo = window.SafeDOM.createElement('div', 'post-track-info');
+                const trackTitle = window.SafeDOM.createElement('h5', '', post.track_title || '');
+                const trackArtist = window.SafeDOM.createElement('p', '', post.track_artist || '');
+                
+                window.SafeDOM.appendChildren(trackInfo, [trackTitle, trackArtist]);
+                window.SafeDOM.appendChildren(postTrack, [trackArtwork, trackInfo]);
+                
+                // Post caption
+                if (post.caption) {
+                    const postCaption = window.SafeDOM.createElement('div', 'post-caption', post.caption);
+                    postCaption.setAttribute('aria-label', `Caption: ${post.caption}`);
+                    window.SafeDOM.appendChildren(postContent, [postTrack, postCaption]);
+                } else {
+                    postContent.appendChild(postTrack);
+                }
+                
+                // Post actions
+                const postActions = window.SafeDOM.createElement('div', 'post-actions');
+                postActions.setAttribute('role', 'toolbar');
+                postActions.setAttribute('aria-label', 'Post actions');
+                
+                const actionsLeft = window.SafeDOM.createElement('div', 'post-actions-left');
+                
+                // Like button
+                const likeButton = window.SafeDOM.createElement('button', `post-action ${post.is_liked ? 'liked' : ''}`);
+                likeButton.onclick = function() { toggleLike(post.id); };
+                likeButton.setAttribute('aria-label', `${post.is_liked ? 'Unlike' : 'Like'} this post`);
+                likeButton.setAttribute('aria-pressed', post.is_liked ? 'true' : 'false');
+                
+                const likeIcon = window.SafeDOM.createElement('span', '', post.is_liked ? '❤️' : '🤍');
+                const likeCount = window.SafeDOM.createElement('span', '', (post.like_count || 0).toString());
+                window.SafeDOM.appendChildren(likeButton, [likeIcon, likeCount]);
+                
+                // Comment button
+                const commentButton = window.SafeDOM.createElement('button', 'post-action');
+                commentButton.onclick = function() { showComments(post.id); };
+                commentButton.setAttribute('aria-label', `View comments (${post.comment_count || 0})`);
+                
+                const commentIcon = window.SafeDOM.createElement('span', '', '💬');
+                const commentCount = window.SafeDOM.createElement('span', '', (post.comment_count || 0).toString());
+                window.SafeDOM.appendChildren(commentButton, [commentIcon, commentCount]);
+                
+                // Share button
+                const shareButton = window.SafeDOM.createElement('button', 'post-action');
+                shareButton.onclick = function() { sharePost(post.id); };
+                shareButton.setAttribute('aria-label', `Share this post (${post.share_count || 0} shares)`);
+                
+                const shareIcon = window.SafeDOM.createElement('span', '', '📤');
+                const shareCount = window.SafeDOM.createElement('span', '', (post.share_count || 0).toString());
+                window.SafeDOM.appendChildren(shareButton, [shareIcon, shareCount]);
+                
+                window.SafeDOM.appendChildren(actionsLeft, [likeButton, commentButton, shareButton]);
+                
+                // Play & Share button
+                const playShareButton = window.SafeDOM.createElement('button', 'post-action-btn', 'Play & Share');
+                playShareButton.onclick = function() {
+                    playTrack(post.track_spotify_url, post.track_title, post.track_artist);
+                };
+                playShareButton.setAttribute('aria-label', `Play ${post.track_title || 'track'} by ${post.track_artist || 'artist'}`);
+                
+                window.SafeDOM.appendChildren(postActions, [actionsLeft, playShareButton]);
+                
+                // Assemble post
+                window.SafeDOM.appendChildren(feedPost, [postHeader, postContent, postActions]);
+                feedContainer.appendChild(feedPost);
+            });
+            
+            // Announce completion
+            a11y.announceLoaded(`${posts.length} posts loaded`);
+            
+            // Add ARIA labels to new content
+            a11y.addAriaLabels();
         }
 
         function showFeedError(message) {
@@ -7990,54 +9334,325 @@
             `;
         }
 
-        // Real-time Update Functions
+        // Performance Optimization Utilities
+        class PerformanceOptimizer {
+            constructor() {
+                this.imageObserver = null;
+                this.intersectionObserver = null;
+                this.initLazyLoading();
+            }
+            
+            initLazyLoading() {
+                // Lazy load images
+                this.imageObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            if (img.dataset.src) {
+                                img.src = img.dataset.src;
+                                img.classList.add('loaded');
+                                this.imageObserver.unobserve(img);
+                            }
+                        }
+                    });
+                }, {
+                    rootMargin: '50px 0px',
+                    threshold: 0.1
+                });
+                
+                // Observe all lazy images
+                document.querySelectorAll('img[data-src]').forEach(img => {
+                    this.imageObserver.observe(img);
+                });
+            }
+            
+            // Debounce function for search and other inputs
+            debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+            
+            // Throttle function for scroll events
+            throttle(func, limit) {
+                let inThrottle;
+                return function() {
+                    const args = arguments;
+                    const context = this;
+                    if (!inThrottle) {
+                        func.apply(context, args);
+                        inThrottle = true;
+                        setTimeout(() => inThrottle = false, limit);
+                    }
+                };
+            }
+            
+            // Virtual scrolling for large lists
+            createVirtualScroller(container, items, itemHeight, renderItem) {
+                const visibleCount = Math.ceil(container.clientHeight / itemHeight);
+                const buffer = 5; // Extra items to render outside viewport
+                
+                let scrollTop = 0;
+                let startIndex = 0;
+                let endIndex = Math.min(startIndex + visibleCount + buffer, items.length);
+                
+                const updateItems = () => {
+                    const fragment = document.createDocumentFragment();
+                    
+                    for (let i = startIndex; i < endIndex; i++) {
+                        const item = renderItem(items[i], i);
+                        item.style.position = 'absolute';
+                        item.style.top = `${i * itemHeight}px`;
+                        item.style.height = `${itemHeight}px`;
+                        fragment.appendChild(item);
+                    }
+                    
+                    container.innerHTML = '';
+                    container.appendChild(fragment);
+                };
+                
+                const handleScroll = this.throttle((e) => {
+                    scrollTop = e.target.scrollTop;
+                    const newStartIndex = Math.floor(scrollTop / itemHeight);
+                    const newEndIndex = Math.min(newStartIndex + visibleCount + buffer, items.length);
+                    
+                    if (newStartIndex !== startIndex || newEndIndex !== endIndex) {
+                        startIndex = newStartIndex;
+                        endIndex = newEndIndex;
+                        updateItems();
+                    }
+                }, 16); // ~60fps
+                
+                container.addEventListener('scroll', handleScroll);
+                updateItems();
+                
+                return {
+                    updateItems: (newItems) => {
+                        items = newItems;
+                        updateItems();
+                    },
+                    destroy: () => {
+                        container.removeEventListener('scroll', handleScroll);
+                    }
+                };
+            }
+            
+            // Preload critical resources
+            preloadCriticalResources() {
+                const criticalImages = [
+                    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk11c2ljPC90ZXh0Pjwvc3ZnPg=='
+                ];
+                
+                criticalImages.forEach(src => {
+                    const img = new Image();
+                    img.src = src;
+                });
+            }
+            
+            // Optimize animations with requestAnimationFrame
+            animateElement(element, properties, duration, easing = 'ease-out') {
+                return new Promise((resolve) => {
+                    const startTime = performance.now();
+                    const startValues = {};
+                    
+                    // Get initial values
+                    Object.keys(properties).forEach(prop => {
+                        startValues[prop] = parseFloat(getComputedStyle(element)[prop]) || 0;
+                    });
+                    
+                    const animate = (currentTime) => {
+                        const elapsed = currentTime - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        
+                        // Apply easing
+                        const easedProgress = easing === 'ease-out' 
+                            ? 1 - Math.pow(1 - progress, 3)
+                            : progress;
+                        
+                        // Update properties
+                        Object.keys(properties).forEach(prop => {
+                            const start = startValues[prop];
+                            const end = properties[prop];
+                            const current = start + (end - start) * easedProgress;
+                            element.style[prop] = current + (prop.includes('opacity') ? '' : 'px');
+                        });
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(animate);
+                        } else {
+                            resolve();
+                        }
+                    };
+                    
+                    requestAnimationFrame(animate);
+                });
+            }
+        }
+        
+        // Global performance optimizer
+        const perfOptimizer = new PerformanceOptimizer();
+        
+        // Enhanced Polling Manager with Memory Leak Prevention
+        class PollingManager {
+            constructor() {
+                this.intervals = new Map();
+                this.listeners = new Map();
+                this.abortControllers = new Map();
+                this.isActive = false;
+            }
+            
+            startPolling(name, callback, interval) {
+                // Clean up existing if any
+                this.stopPolling(name);
+                
+                if (!this.isActive) return;
+                
+                // Create abort controller for fetch cancellation
+                const controller = new AbortController();
+                this.abortControllers.set(name, controller);
+                
+                // Wrapper with error handling and abort signal
+                const wrappedCallback = async () => {
+                    try {
+                        await callback(controller.signal);
+                    } catch (error) {
+                        if (error.name !== 'AbortError') {
+                            console.error(`Polling error in ${name}:`, error);
+                        }
+                    }
+                };
+                
+                // Start interval
+                const intervalId = setInterval(wrappedCallback, interval);
+                this.intervals.set(name, intervalId);
+                
+                // Run immediately
+                wrappedCallback();
+            }
+            
+            stopPolling(name) {
+                // Clear interval
+                const intervalId = this.intervals.get(name);
+                if (intervalId) {
+                    clearInterval(intervalId);
+                    this.intervals.delete(name);
+                }
+                
+                // Abort pending requests
+                const controller = this.abortControllers.get(name);
+                if (controller) {
+                    controller.abort();
+                    this.abortControllers.delete(name);
+                }
+            }
+            
+            addEventListener(element, event, handler) {
+                const key = `${element.id || 'doc'}_${event}`;
+                
+                // Remove old listener if exists
+                this.removeEventListener(element, event);
+                
+                // Add new listener
+                element.addEventListener(event, handler);
+                this.listeners.set(key, { element, event, handler });
+            }
+            
+            removeEventListener(element, event) {
+                const key = `${element.id || 'doc'}_${event}`;
+                const listener = this.listeners.get(key);
+                
+                if (listener) {
+                    listener.element.removeEventListener(listener.event, listener.handler);
+                    this.listeners.delete(key);
+                }
+            }
+            
+            start() {
+                this.isActive = true;
+                
+                // Start notification polling (every 30 seconds)
+                this.startPolling('notifications', async (signal) => {
+                    if (!isSignedIn || !userToken) return;
+                    
+                    try {
+                        const response = await fetch('/api/friends?notifications=1&limit=10', { signal });
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            const newUnreadCount = data.unread_count || 0;
+                            
+                            if (newUnreadCount !== unreadNotificationCount) {
+                                unreadNotificationCount = newUnreadCount;
+                                updateNotificationBadge();
+                            }
+                        }
+                    } catch (error) {
+                        if (error.name !== 'AbortError') {
+                            console.error('Error checking notifications:', error);
+                        }
+                    }
+                }, 30000);
+                
+                // Start feed polling (every 2 minutes for active feeds)
+                this.startPolling('feed', async (signal) => {
+                    if (!isSignedIn || !userToken) return;
+                    
+                    try {
+                        const response = await fetch('/api/feed?limit=20', { signal });
+                        const data = await response.json();
+                        
+                        if (data.success && data.posts) {
+                            // Only update if feed is visible
+                            const feedSection = document.getElementById('socialFeed');
+                            if (feedSection && feedSection.style.display !== 'none') {
+                                displayFeed(data.posts);
+                            }
+                        }
+                    } catch (error) {
+                        if (error.name !== 'AbortError') {
+                            console.error('Error checking feed updates:', error);
+                        }
+                    }
+                }, 120000);
+            }
+            
+            stop() {
+                this.isActive = false;
+                
+                // Stop all polling
+                this.intervals.forEach((_, name) => this.stopPolling(name));
+                
+                // Remove all listeners
+                this.listeners.forEach(listener => {
+                    listener.element.removeEventListener(listener.event, listener.handler);
+                });
+                this.listeners.clear();
+            }
+            
+            cleanup() {
+                this.stop();
+            }
+        }
+        
+        // Global polling manager instance
+        const pollingManager = new PollingManager();
+        
+        // Real-time Update Functions (Updated)
         function startRealTimeUpdates() {
             if (!isSignedIn || !userToken) {
                 return;
             }
-
-            // Start notification polling (every 30 seconds)
-            notificationPollingInterval = setInterval(checkForNotifications, 30000);
-            
-            // Start feed polling (every 2 minutes for active feeds)
-            feedPollingInterval = setInterval(checkForFeedUpdates, 120000);
-            
-            // Initial check
-            checkForNotifications();
+            pollingManager.start();
         }
 
         function stopRealTimeUpdates() {
-            if (notificationPollingInterval) {
-                clearInterval(notificationPollingInterval);
-                notificationPollingInterval = null;
-            }
-            
-            if (feedPollingInterval) {
-                clearInterval(feedPollingInterval);
-                feedPollingInterval = null;
-            }
-        }
-
-        async function checkForNotifications() {
-            if (!isSignedIn || !userToken) {
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/friends?notifications=1&limit=10');
-                const data = await response.json();
-                
-                if (data.success) {
-                    const newUnreadCount = data.unread_count || 0;
-                    
-                    if (newUnreadCount !== unreadNotificationCount) {
-                        unreadNotificationCount = newUnreadCount;
-                        updateNotificationBadge();
-                    }
-                }
-            } catch (error) {
-                console.error('Error checking notifications:', error);
-            }
+            pollingManager.stop();
         }
 
         function updateNotificationBadge() {
@@ -10448,6 +12063,268 @@
             `;
         }
 
+        // Music Achievements Functions
+        let currentAchievementFilter = 'all';
+        let currentAchievementTab = 'listening';
+        let achievementsData = {};
+
+        async function loadAchievements() {
+            if (!isSignedIn || !userToken) {
+                showSignInModal();
+                return;
+            }
+
+            const achievementsGrid = document.getElementById('achievementsGrid');
+            const achievementSummary = document.getElementById('achievementSummary');
+            
+            achievementsGrid.innerHTML = '<div class="loading">Loading achievements...</div>';
+            achievementSummary.innerHTML = '<div class="loading">Loading summary...</div>';
+            
+            try {
+                const response = await fetch(`/api/profile?achievements=true&filter=${currentAchievementFilter}&type=${currentAchievementTab}`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    achievementsData = data.achievements;
+                    displayAchievementSummary(data.summary);
+                    displayAchievements(data.achievements);
+                } else {
+                    displayAchievementsError();
+                }
+            } catch (error) {
+                console.error('Error loading achievements:', error);
+                displayAchievementsError();
+            }
+        }
+
+        function displayAchievementSummary(summary) {
+            const achievementSummary = document.getElementById('achievementSummary');
+            
+            achievementSummary.innerHTML = `
+                <h3>Achievement Summary</h3>
+                <div class="summary-stats">
+                    <div class="summary-stat">
+                        <div class="summary-stat-number">${summary.total_earned || 0}</div>
+                        <div class="summary-stat-label">Achievements Earned</div>
+                        <div class="summary-stat-description">Out of ${summary.total_available || 0} available</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-number">${summary.total_points || 0}</div>
+                        <div class="summary-stat-label">Total Points</div>
+                        <div class="summary-stat-description">Earned from achievements</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-number">${summary.rarity_breakdown?.rare || 0}</div>
+                        <div class="summary-stat-label">Rare Badges</div>
+                        <div class="summary-stat-description">💎 Rare achievements</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-number">${summary.rarity_breakdown?.epic || 0}</div>
+                        <div class="summary-stat-label">Epic Badges</div>
+                        <div class="summary-stat-description">🔥 Epic achievements</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-number">${summary.completion_rate || 0}%</div>
+                        <div class="summary-stat-label">Completion Rate</div>
+                        <div class="summary-stat-description">Overall progress</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-number">${summary.recent_earned || 0}</div>
+                        <div class="summary-stat-label">Recent Achievements</div>
+                        <div class="summary-stat-description">This week</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayAchievements(achievements) {
+            const achievementsGrid = document.getElementById('achievementsGrid');
+            
+            if (!achievements || achievements.length === 0) {
+                achievementsGrid.innerHTML = `
+                    <div class="insights-empty">
+                        <div class="insights-empty-icon">🏆</div>
+                        <h3>No Achievements Found</h3>
+                        <p>Start using TrackShare to earn your first achievements!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            achievementsGrid.innerHTML = achievements.map(achievement => `
+                <div class="achievement-card ${achievement.status}" onclick="viewAchievement('${achievement.id}')">
+                    <div class="achievement-icon">
+                        ${achievement.icon || '🏆'}
+                    </div>
+                    
+                    <div class="achievement-title">${escapeHtml(achievement.title)}</div>
+                    <div class="achievement-description">${escapeHtml(achievement.description)}</div>
+                    
+                    ${achievement.status === 'progress' ? `
+                        <div class="achievement-progress">
+                            <div class="achievement-progress-bar">
+                                <div class="achievement-progress-fill" style="width: ${achievement.progress_percentage || 0}%"></div>
+                            </div>
+                            <div class="achievement-progress-text">
+                                ${achievement.current_value || 0} / ${achievement.target_value || 0} ${achievement.progress_unit || ''}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${achievement.reward ? `
+                        <div class="achievement-reward">
+                            <div class="achievement-reward-icon">${achievement.reward.icon || '⭐'}</div>
+                            <div class="achievement-reward-text">${escapeHtml(achievement.reward.text)}</div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="achievement-stats">
+                        <div class="achievement-stat">
+                            <div class="achievement-stat-number">${achievement.points || 0}</div>
+                            <div class="achievement-stat-label">Points</div>
+                        </div>
+                        <div class="achievement-stat">
+                            <div class="achievement-stat-number">${achievement.rarity || 'Common'}</div>
+                            <div class="achievement-stat-label">Rarity</div>
+                        </div>
+                    </div>
+                    
+                    <div class="achievement-actions">
+                        ${achievement.status === 'earned' ? `
+                            <button class="achievement-action-btn claim" onclick="event.stopPropagation(); claimAchievement('${achievement.id}')">
+                                Claim Reward
+                            </button>
+                        ` : achievement.status === 'progress' ? `
+                            <button class="achievement-action-btn primary" onclick="event.stopPropagation(); viewProgress('${achievement.id}')">
+                                View Progress
+                            </button>
+                        ` : `
+                            <button class="achievement-action-btn primary" onclick="event.stopPropagation(); viewRequirements('${achievement.id}')">
+                                View Requirements
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterAchievements(filter) {
+            // Update filter buttons
+            document.querySelectorAll('.achievement-filter').forEach(filterEl => {
+                filterEl.classList.remove('active');
+            });
+            document.querySelector(`[data-achievement-filter="${filter}"]`).classList.add('active');
+            
+            currentAchievementFilter = filter;
+            loadAchievements();
+        }
+
+        function switchAchievementTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.achievement-tab').forEach(tabEl => {
+                tabEl.classList.remove('active');
+            });
+            document.querySelector(`[data-achievement-type="${tab}"]`).classList.add('active');
+            
+            currentAchievementTab = tab;
+            loadAchievements();
+        }
+
+        function viewAchievement(achievementId) {
+            showNotification('Achievement details coming soon!', 'info');
+        }
+
+        function claimAchievement(achievementId) {
+            showNotification('Reward claimed!', 'success');
+        }
+
+        function viewProgress(achievementId) {
+            showNotification('Progress details coming soon!', 'info');
+        }
+
+        function viewRequirements(achievementId) {
+            showNotification('Requirements coming soon!', 'info');
+        }
+
+        function displayAchievementsError() {
+            const achievementsGrid = document.getElementById('achievementsGrid');
+            achievementsGrid.innerHTML = `
+                <div class="insights-empty">
+                    <div class="insights-empty-icon">⚠️</div>
+                    <h3>Error Loading Achievements</h3>
+                    <p>Something went wrong while loading achievements.</p>
+                    <button class="btn btn-primary" onclick="loadAchievements()">Try Again</button>
+                </div>
+            `;
+        }
+
+        // Missing JavaScript Functions
+        function toggleAdvancedFilters() {
+            const advancedFilters = document.getElementById('advancedFilters');
+            if (advancedFilters) {
+                const isVisible = advancedFilters.style.display !== 'none';
+                advancedFilters.style.display = isVisible ? 'none' : 'block';
+                
+                // Update button state
+                const filterBtn = document.querySelector('.filter-btn');
+                if (filterBtn) {
+                    filterBtn.classList.toggle('active', !isVisible);
+                }
+            }
+        }
+
+        function showSignInModal() {
+            const signInModal = document.getElementById('signInModal');
+            if (signInModal) {
+                signInModal.style.display = 'flex';
+            }
+        }
+
+        function hideSignInModal() {
+            const signInModal = document.getElementById('signInModal');
+            if (signInModal) {
+                signInModal.style.display = 'none';
+            }
+        }
+
+        // Missing JavaScript Functions
+        function clearFilters() {
+            // Reset all filter dropdowns to default values
+            const genreFilter = document.getElementById('genreFilter');
+            const yearFilter = document.getElementById('yearFilter');
+            const popularityFilter = document.getElementById('popularityFilter');
+            const explicitFilter = document.getElementById('explicitFilter');
+            const sortByFilter = document.getElementById('sortByFilter');
+            const artistFilter = document.getElementById('artistFilter');
+            const albumFilter = document.getElementById('albumFilter');
+            
+            if (genreFilter) genreFilter.value = 'any';
+            if (yearFilter) yearFilter.value = 'any';
+            if (popularityFilter) popularityFilter.value = 'any';
+            if (explicitFilter) explicitFilter.value = 'any';
+            if (sortByFilter) sortByFilter.value = 'relevance';
+            if (artistFilter) artistFilter.value = '';
+            if (albumFilter) albumFilter.value = '';
+            
+            // Hide the advanced filters panel
+            const advancedFilters = document.getElementById('advancedFilters');
+            if (advancedFilters) {
+                advancedFilters.style.display = 'none';
+            }
+            
+            // Clear search and go back to trending
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+            
+            // Switch back to trending
+            switchGenre('all');
+        }
+
         // Enhanced switchGenre function
         async function switchGenre(genre) {
             currentGenre = genre;
@@ -10988,7 +12865,7 @@
 
         async function resolveTrackForPost(url) {
             try {
-                const response = await fetch(`/api/resolve?url=${encodeURIComponent(url)}`);
+                const response = await fetch(apiUrl(`/api/resolve?url=${encodeURIComponent(url)}`));
                 const data = await response.json();
                 
                 if (data.success && data.track) {
@@ -11050,7 +12927,7 @@
             
             try {
                 // First resolve the track
-                const resolveResponse = await fetch(`/api/resolve?url=${encodeURIComponent(trackUrl)}`);
+                const resolveResponse = await fetch(apiUrl(`/api/resolve?url=${encodeURIComponent(trackUrl)}`));
                 const resolveData = await resolveResponse.json();
                 
                 if (!resolveData.success || !resolveData.track) {
@@ -11287,7 +13164,7 @@
             currentTrack = { url, title, artist };
             
             // Generate share link using our API
-            fetch(`/api/resolve?url=${encodeURIComponent(url)}`)
+            fetch(apiUrl(`/api/resolve?url=${encodeURIComponent(url)}`))
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -11338,30 +13215,56 @@
         }
         
         async function searchWithAPI(query) {
-            // Use our resolve API to search for tracks
-            const searchUrl = `https://open.spotify.com/search/${encodeURIComponent(query)}`;
+            // Use the proper search API instead of resolve API
             try {
-                const response = await fetch(`/api/resolve?url=${encodeURIComponent(searchUrl)}`);
+                const response = await fetch(apiUrl(`/api/search?q=${encodeURIComponent(query)}&limit=20`));
                 const data = await response.json();
                 
-                if (data.success && data.track) {
-                    // Create search results from API response
-                    const apiResults = [{
-                        id: data.track.id,
-                        title: data.track.title,
-                        artist: data.track.artist,
-                        artwork: data.track.artwork,
-                        url: data.track.sourceUrl,
-                        platform: 'spotify'
-                    }];
-                    displaySearchResults(apiResults);
+                if (data.success && data.tracks && data.tracks.length > 0) {
+                    // Convert tracks to posts format for feed display
+                    const feedData = data.tracks.map(track => ({
+                        id: track.id || Math.random().toString(36).substr(2, 9),
+                        user_id: SYSTEM_USER_ID,
+                        track_title: track.title,
+                        track_artist: track.artist,
+                        track_album: track.album,
+                        track_artwork_url: track.artwork,
+                        track_spotify_url: track.url,
+                        caption: `Search result: ${track.title} by ${track.artist}`,
+                        privacy: 'public',
+                        like_count: Math.floor(Math.random() * 50),
+                        comment_count: Math.floor(Math.random() * 10),
+                        play_count: Math.floor(Math.random() * 100),
+                        share_count: Math.floor(Math.random() * 20),
+                        posted_at: new Date().toISOString(),
+                        user: {
+                            display_name: 'TrackShare',
+                            avatar_url: 'https://via.placeholder.com/40'
+                        }
+                    }));
+                    
+                    // Display in feed format
+                    displayFeed(feedData);
+                    updateSectionTitle(`Search Results for "${query}" (${data.total || data.tracks.length} found)`);
                 } else {
-                    // Fallback to expanded mock data
-                    displayExpandedSearchResults(query);
+                    displayEmptyState(`No tracks found for "${query}"`);
                 }
             } catch (error) {
-                console.error('API search error:', error);
-                displayExpandedSearchResults(query);
+                console.error('Search API error:', error);
+                displayEmptyState(`Search failed for "${query}"`);
+            }
+        }
+        
+        function displayEmptyState(message) {
+            const feedContainer = document.querySelector('#socialFeed .container');
+            if (feedContainer) {
+                feedContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🎵</div>
+                        <h3>${message}</h3>
+                        <p>Try searching for something else or check back later!</p>
+                    </div>
+                `;
             }
         }
         
@@ -11463,23 +13366,46 @@
             });
         }
 
-        function openInSpotify() {
-            if (currentTrack) {
-                window.open(`spotify://track/${currentTrack.url.match(/track\/([a-zA-Z0-9]+)/)?.[1] || ''}`, '_blank');
-            }
-        }
+function openInSpotify() {
+    if (!currentTrack) return;
+    
+    const trackId = currentTrack.url.match(/track\/([a-zA-Z0-9]+)/)?.[1];
+    if (!trackId) {
+        console.error('Could not extract Spotify track ID from URL:', currentTrack.url);
+        return;
+    }
+    
+    // Use single colon for custom scheme (Android compatible)
+    const appUrl = `spotify:track:${trackId}`;
+    const webUrl = `https://open.spotify.com/track/${trackId}`;
+    
+    // Try app first, fallback to web after delay
+    window.open(appUrl, '_blank');
+    setTimeout(() => {
+        window.open(webUrl, '_blank');
+    }, 800);
+}
 
-        function openInAppleMusic() {
-            if (currentTrack) {
-                window.open(`music://music.apple.com/search?term=${encodeURIComponent(currentTrack.title + ' ' + currentTrack.artist)}`, '_blank');
-            }
-        }
+function openInAppleMusic() {
+    if (!currentTrack) return;
+    
+    // Use HTTPS URL - Android OS handles app interception
+    const searchTerm = encodeURIComponent(`${currentTrack.title} ${currentTrack.artist}`);
+    window.open(`https://music.apple.com/search?term=${searchTerm}`, '_blank');
+}
 
-        function openInYouTubeMusic() {
-            if (currentTrack) {
-                window.open(`youtubemusic://watch?v=${currentTrack.url.match(/v=([a-zA-Z0-9_-]+)/)?.[1] || ''}`, '_blank');
-            }
-        }
+function openInYouTubeMusic() {
+    if (!currentTrack) return;
+    
+    const videoId = currentTrack.url.match(/v=([a-zA-Z0-9_-]+)/)?.[1];
+    if (!videoId) {
+        console.error('Could not extract YouTube video ID from URL:', currentTrack.url);
+        return;
+    }
+    
+    // Use HTTPS URL - Android OS handles app interception
+    window.open(`https://music.youtube.com/watch?v=${videoId}`, '_blank');
+}
 
         // Check for OAuth callback parameters
         function checkAuthCallback() {
@@ -11523,30 +13449,89 @@
                 </div>
             `;
             
+            // Show authenticated-only tabs
+            document.querySelectorAll('.auth-only').forEach(tab => {
+                tab.style.display = 'flex';
+            });
+            
             // Show notifications container
-            document.getElementById('notificationsContainer').style.display = 'block';
+            const notificationsContainer = document.getElementById('notificationsContainer');
+            if (notificationsContainer) {
+                notificationsContainer.style.display = 'block';
+            }
             
             // Start real-time updates
             startRealTimeUpdates();
         }
         
         function signOut() {
-            // Stop real-time updates
-            stopRealTimeUpdates();
-            
-            // Hide notifications
-            document.getElementById('notificationsContainer').style.display = 'none';
-            unreadNotificationCount = 0;
-            
-            localStorage.removeItem('trackshare_user');
-            location.reload();
+            // Use secure auth service
+            authService.logout().then(() => {
+                // Stop real-time updates
+                stopRealTimeUpdates();
+                
+                // Hide authenticated-only tabs
+                document.querySelectorAll('.auth-only').forEach(tab => {
+                    tab.style.display = 'none';
+                });
+                
+                // Reset to trending tab
+                switchFeed('trending');
+                
+                // Hide notifications
+                const notificationsContainer = document.getElementById('notificationsContainer');
+                if (notificationsContainer) {
+                    notificationsContainer.style.display = 'none';
+                }
+                unreadNotificationCount = 0;
+                
+                localStorage.removeItem('trackshare_user');
+                location.reload();
+            }).catch(error => {
+                console.error('Sign out error:', error);
+                // Still perform cleanup even if API call fails
+                stopRealTimeUpdates();
+                document.querySelectorAll('.auth-only').forEach(tab => {
+                    tab.style.display = 'none';
+                });
+                switchFeed('trending');
+                const notificationsContainer = document.getElementById('notificationsContainer');
+                if (notificationsContainer) {
+                    notificationsContainer.style.display = 'none';
+                }
+                unreadNotificationCount = 0;
+                localStorage.removeItem('trackshare_user');
+                location.reload();
+            });
         }
         
-        function checkExistingAuth() {
-            const userData = localStorage.getItem('trackshare_user');
-            if (userData) {
-                const user = JSON.parse(userData);
-                updateAuthUI(user);
+        async function checkExistingAuth() {
+            try {
+                const isAuth = await authService.checkAuthStatus();
+                if (isAuth) {
+                    const user = authService.getCurrentUser();
+                    updateAuthUI(user);
+                } else {
+                    // Fallback to localStorage for backward compatibility
+                    const userData = localStorage.getItem('trackshare_user');
+                    if (userData) {
+                        const user = JSON.parse(userData);
+                        updateAuthUI(user);
+                    }
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+                // Fallback to localStorage
+                const userData = localStorage.getItem('trackshare_user');
+                if (userData) {
+                    try {
+                        const user = JSON.parse(userData);
+                        updateAuthUI(user);
+                    } catch (parseError) {
+                        console.error('Error parsing stored user data:', parseError);
+                        localStorage.removeItem('trackshare_user');
+                    }
+                }
             }
         }
 
@@ -11554,6 +13539,11 @@
         function setupSearchHandlers() {
             const searchInput = document.getElementById('searchInput');
             const searchButton = document.querySelector('.btn-search');
+            
+            if (!searchInput || !searchButton) {
+                console.warn('Search elements not found, skipping search handler setup');
+                return;
+            }
             
             // Debounced search on typing
             searchInput.addEventListener('input', (e) => {
@@ -11604,7 +13594,7 @@
             updateSectionTitle('Resolving URL...');
             
             try {
-                const response = await fetch(`/api/resolve?url=${encodeURIComponent(url)}`);
+                const response = await fetch(apiUrl(`/api/resolve?url=${encodeURIComponent(url)}`));
                 const data = await response.json();
                 
                 if (data.success && data.track) {
@@ -11654,7 +13644,7 @@
             updateSectionTitle('Searching...');
             
             try {
-                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&limit=50`);
+                const response = await fetch(apiUrl(`/api/search?q=${encodeURIComponent(query)}&limit=50`));
                 const data = await response.json();
                 
                 if (data.success && data.tracks && data.tracks.length > 0) {
@@ -11788,7 +13778,7 @@
             searchOffset += 50;
             
             try {
-                const response = await fetch(`/api/search?q=${encodeURIComponent(currentSearchQuery)}&limit=50&offset=${searchOffset}`);
+                const response = await fetch(apiUrl(`/api/search?q=${encodeURIComponent(currentSearchQuery)}&limit=50&offset=${searchOffset}`));
                 const data = await response.json();
                 
                 if (data.success && data.tracks && data.tracks.length > 0) {
@@ -11883,37 +13873,398 @@
             }
         }
 
-        function searchMusic() {
-            const query = document.getElementById('searchInput').value.trim();
-            if (query) {
-                performSearch(query);
+        // Cleanup on page unload to prevent memory leaks
+        window.addEventListener('beforeunload', () => {
+            pollingManager.cleanup();
+        });
+        
+        // Accessibility Utilities
+        class AccessibilityManager {
+            constructor() {
+                this.announcements = document.getElementById('announcements');
+                this.focusHistory = [];
+                this.init();
+            }
+            
+            init() {
+                // Track focus for modal management
+                document.addEventListener('focusin', (e) => {
+                    this.focusHistory.push(e.target);
+                    if (this.focusHistory.length > 10) {
+                        this.focusHistory.shift();
+                    }
+                });
+                
+                // Handle escape key for modals
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.handleEscapeKey();
+                    }
+                });
+                
+                // Handle tab key for focus management
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Tab') {
+                        this.handleTabKey(e);
+                    }
+                });
+            }
+            
+            // Announce messages to screen readers
+            announce(message, priority = 'polite') {
+                if (this.announcements) {
+                    this.announcements.setAttribute('aria-live', priority);
+                    this.announcements.textContent = message;
+                    
+                    // Clear after announcement
+                    setTimeout(() => {
+                        this.announcements.textContent = '';
+                    }, 1000);
+                }
+            }
+            
+            // Trap focus within modal
+            trapFocus(modal) {
+                const focusableElements = modal.querySelectorAll(
+                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                );
+                
+                const firstElement = focusableElements[0];
+                const lastElement = focusableElements[focusableElements.length - 1];
+                
+                modal.addEventListener('keydown', (e) => {
+                    if (e.key === 'Tab') {
+                        if (e.shiftKey) {
+                            if (document.activeElement === firstElement) {
+                                lastElement.focus();
+                                e.preventDefault();
+                            }
+                        } else {
+                            if (document.activeElement === lastElement) {
+                                firstElement.focus();
+                                e.preventDefault();
+                            }
+                        }
+                    }
+                });
+                
+                // Focus first element
+                if (firstElement) {
+                    firstElement.focus();
+                }
+            }
+            
+            // Restore focus after modal closes
+            restoreFocus() {
+                const lastFocused = this.focusHistory[this.focusHistory.length - 1];
+                if (lastFocused && lastFocused.focus) {
+                    lastFocused.focus();
+                }
+            }
+            
+            // Handle escape key
+            handleEscapeKey() {
+                const openModal = document.querySelector('.modal[aria-hidden="false"]');
+                if (openModal) {
+                    const closeButton = openModal.querySelector('.modal-close');
+                    if (closeButton) {
+                        closeButton.click();
+                    }
+                }
+            }
+            
+            // Handle tab key for better focus management
+            handleTabKey(e) {
+                const openModal = document.querySelector('.modal[aria-hidden="false"]');
+                if (openModal) {
+                    // Let the modal handle tab trapping
+                    return;
+                }
+                
+                // Skip to main content if tabbing from header
+                if (e.target.closest('.header') && !e.shiftKey) {
+                    const mainContent = document.getElementById('main-content');
+                    if (mainContent) {
+                        mainContent.focus();
+                        e.preventDefault();
+                    }
+                }
+            }
+            
+            // Add ARIA labels to dynamic content
+            addAriaLabels() {
+                // Add labels to track cards
+                document.querySelectorAll('.track-card').forEach((card, index) => {
+                    if (!card.getAttribute('aria-label')) {
+                        const title = card.querySelector('.track-title')?.textContent || 'Track';
+                        const artist = card.querySelector('.track-artist')?.textContent || 'Unknown Artist';
+                        card.setAttribute('aria-label', `Track ${index + 1}: ${title} by ${artist}`);
+                    }
+                });
+                
+                // Add labels to post cards
+                document.querySelectorAll('.post-card').forEach((card, index) => {
+                    if (!card.getAttribute('aria-label')) {
+                        const title = card.querySelector('.track-title')?.textContent || 'Track';
+                        const artist = card.querySelector('.track-artist')?.textContent || 'Unknown Artist';
+                        card.setAttribute('aria-label', `Post ${index + 1}: ${title} by ${artist}`);
+                    }
+                });
+            }
+            
+            // Update page title for screen readers
+            updatePageTitle(title) {
+                document.title = `${title} - TrackShare`;
+                this.announce(`Page changed to ${title}`);
+            }
+            
+            // Handle loading states
+            announceLoading(message = 'Loading content') {
+                this.announce(message);
+            }
+            
+            announceLoaded(message = 'Content loaded') {
+                this.announce(message);
+            }
+            
+            announceError(message = 'An error occurred') {
+                this.announce(message, 'assertive');
             }
         }
-
+        
+        // Global accessibility manager
+        const a11y = new AccessibilityManager();
+        
+        // PWA and Service Worker Support
+        class PWAManager {
+            constructor() {
+                this.deferredPrompt = null;
+                this.isInstalled = false;
+                this.init();
+            }
+            
+            async init() {
+                // Register service worker
+                if ('serviceWorker' in navigator) {
+                    try {
+                        const registration = await navigator.serviceWorker.register('/sw.js');
+                        console.log('Service Worker registered:', registration);
+                        
+                        // Listen for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    this.showUpdateNotification();
+                                }
+                            });
+                        });
+                    } catch (error) {
+                        console.error('Service Worker registration failed:', error);
+                    }
+                }
+                
+                // Listen for install prompt
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    this.deferredPrompt = e;
+                    this.showInstallButton();
+                });
+                
+                // Check if already installed
+                window.addEventListener('appinstalled', () => {
+                    this.isInstalled = true;
+                    this.hideInstallButton();
+                    console.log('PWA installed successfully');
+                });
+                
+                // Handle offline/online status
+                window.addEventListener('online', () => {
+                    this.updateOnlineStatus(true);
+                });
+                
+                window.addEventListener('offline', () => {
+                    this.updateOnlineStatus(false);
+                });
+                
+                // Initial online status
+                this.updateOnlineStatus(navigator.onLine);
+            }
+            
+            showInstallButton() {
+                const installButton = document.createElement('button');
+                installButton.className = 'btn btn-primary pwa-install-btn';
+                installButton.innerHTML = '📱 Install App';
+                installButton.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    z-index: 1000;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                    animation: slideInUp 0.3s ease-out;
+                `;
+                
+                installButton.addEventListener('click', () => {
+                    this.installApp();
+                });
+                
+                document.body.appendChild(installButton);
+                
+                // Auto-hide after 10 seconds
+                setTimeout(() => {
+                    if (installButton.parentNode) {
+                        installButton.remove();
+                    }
+                }, 10000);
+            }
+            
+            hideInstallButton() {
+                const installButton = document.querySelector('.pwa-install-btn');
+                if (installButton) {
+                    installButton.remove();
+                }
+            }
+            
+            async installApp() {
+                if (!this.deferredPrompt) return;
+                
+                this.deferredPrompt.prompt();
+                const { outcome } = await this.deferredPrompt.userChoice;
+                
+                console.log('Install prompt outcome:', outcome);
+                this.deferredPrompt = null;
+                
+                if (outcome === 'accepted') {
+                    this.hideInstallButton();
+                }
+            }
+            
+            showUpdateNotification() {
+                const updateNotification = document.createElement('div');
+                updateNotification.className = 'pwa-update-notification';
+                updateNotification.innerHTML = `
+                    <div style="background: #667eea; color: white; padding: 1rem; border-radius: 8px; margin: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        <h4>🎵 Update Available</h4>
+                        <p>TrackShare has been updated with new features!</p>
+                        <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove(); window.location.reload();">
+                            Update Now
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(updateNotification);
+            }
+            
+            updateOnlineStatus(isOnline) {
+                const statusIndicator = document.querySelector('.online-status') || this.createStatusIndicator();
+                
+                if (isOnline) {
+                    statusIndicator.innerHTML = '🟢 Online';
+                    statusIndicator.style.color = '#10b981';
+                } else {
+                    statusIndicator.innerHTML = '🔴 Offline';
+                    statusIndicator.style.color = '#ef4444';
+                }
+            }
+            
+            createStatusIndicator() {
+                const indicator = document.createElement('div');
+                indicator.className = 'online-status';
+                indicator.style.cssText = `
+                    position: fixed;
+                    top: 10px;
+                    right: 10px;
+                    z-index: 1000;
+                    font-size: 12px;
+                    font-weight: 600;
+                    background: rgba(255,255,255,0.9);
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    backdrop-filter: blur(10px);
+                `;
+                document.body.appendChild(indicator);
+                return indicator;
+            }
+            
+            // Offline action queue
+            async queueOfflineAction(url, options) {
+                if (navigator.onLine) {
+                    return fetch(url, options);
+                }
+                
+                // Store for later sync
+                const action = {
+                    url,
+                    options,
+                    timestamp: Date.now()
+                };
+                
+                try {
+                    const db = await this.openDB();
+                    const transaction = db.transaction(['actions'], 'readwrite');
+                    const store = transaction.objectStore('actions');
+                    await store.add(action);
+                    console.log('Action queued for offline sync');
+                } catch (error) {
+                    console.error('Failed to queue offline action:', error);
+                }
+            }
+            
+            openDB() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open('TrackShareOffline', 1);
+                    
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = () => resolve(request.result);
+                    
+                    request.onupgradeneeded = () => {
+                        const db = request.result;
+                        if (!db.objectStoreNames.contains('actions')) {
+                            db.createObjectStore('actions', { keyPath: 'id', autoIncrement: true });
+                        }
+                    };
+                });
+            }
+        }
+        
+        // Initialize PWA manager
+        const pwaManager = new PWAManager();
+        
         // Load initial music
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             checkAuthCallback();
-            checkExistingAuth();
+            await checkExistingAuth();
             setupSearchHandlers(); // Initialize enhanced search
             loadFeed('trending'); // Load social feed by default
             
-            // Setup form event listeners
-            document.getElementById('editProfileForm').addEventListener('submit', saveProfileChanges);
+            // Setup form event listeners using polling manager
+            const editProfileForm = document.getElementById('editProfileForm');
+            if (editProfileForm) {
+                pollingManager.addEventListener(editProfileForm, 'submit', saveProfileChanges);
+            }
             
-            // Setup playlist form
-            document.getElementById('playlistCreateForm').addEventListener('submit', createPlaylist);
+            const playlistCreateForm = document.getElementById('playlistCreateForm');
+            if (playlistCreateForm) {
+                pollingManager.addEventListener(playlistCreateForm, 'submit', createPlaylist);
+            }
             
-            // Setup group form
-            document.getElementById('groupCreateForm').addEventListener('submit', createGroup);
+            const groupCreateForm = document.getElementById('groupCreateForm');
+            if (groupCreateForm) {
+                pollingManager.addEventListener(groupCreateForm, 'submit', createGroup);
+            }
             
-            // Setup challenge form
-            document.getElementById('challengeCreateForm').addEventListener('submit', createChallenge);
+            const challengeCreateForm = document.getElementById('challengeCreateForm');
+            if (challengeCreateForm) {
+                pollingManager.addEventListener(challengeCreateForm, 'submit', createChallenge);
+            }
             
-            // Setup event form
-            document.getElementById('eventCreateForm').addEventListener('submit', createEvent);
+            const eventCreateForm = document.getElementById('eventCreateForm');
+            if (eventCreateForm) {
+                pollingManager.addEventListener(eventCreateForm, 'submit', createEvent);
+            }
             
             // Setup modal close handlers
-            document.addEventListener('click', function(e) {
+            pollingManager.addEventListener(document, 'click', function(e) {
                 if (e.target.classList.contains('playlist-create-modal')) {
                     closePlaylistCreateModal();
                     closePlaylistViewModal();

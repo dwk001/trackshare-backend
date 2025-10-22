@@ -1,7 +1,16 @@
 const { kv } = require('@vercel/kv');
+const { createClient } = require('@supabase/supabase-js');
 
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
+
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000';
 
 // Genre-specific Spotify playlists - Expanded for more variety
 const GENRE_PLAYLISTS = {
@@ -312,14 +321,6 @@ module.exports = async (req, res) => {
 // ========================================
 // SEED TRENDING POSTS FUNCTIONALITY (merged from seed-trending-posts.js)
 // ========================================
-
-const { createClient } = require('@supabase/supabase-js');
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-// System user ID for TrackShare Official posts
-const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000';
 
 async function seedTrendingPosts() {
   try {

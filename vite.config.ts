@@ -77,12 +77,12 @@ export default defineConfig({
   
   // CSS configuration
   css: {
-    postcss: './postcss.config.js',
+    postcss: './postcss.config.cjs',
   },
   
   // Environment variables
   define: {
-    __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),
   },
   
   // Optimize dependencies
