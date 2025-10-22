@@ -240,6 +240,193 @@
             cursor: pointer;
         }
         
+        /* Enhanced error handling styles */
+        .error-state.enhanced {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border: 1px solid #fecaca;
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .error-state.enhanced .error-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+        
+        .error-state.enhanced .error-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #dc2626;
+            margin-bottom: 0.5rem;
+        }
+        
+        .error-state.enhanced .error-message {
+            font-size: 1rem;
+            color: #6b7280;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+        
+        .error-state.enhanced .error-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .error-state.enhanced .retry-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .error-state.enhanced .retry-btn:hover {
+            background: #b91c1c;
+            transform: translateY(-1px);
+        }
+        
+        .error-state.enhanced .btn-secondary {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .error-state.enhanced .btn-secondary:hover {
+            background: #4b5563;
+            transform: translateY(-1px);
+        }
+        
+        .error-state.enhanced .btn-outline {
+            background: transparent;
+            color: #6b7280;
+            border: 1px solid #d1d5db;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .error-state.enhanced .btn-outline:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+        
+        .error-details {
+            margin-top: 2rem;
+            text-align: left;
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        
+        .error-details summary {
+            cursor: pointer;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        
+        .error-details pre {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .toast-success {
+            background: #10b981;
+        }
+        
+        .toast-error {
+            background: #ef4444;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Error state active styling */
+        body.error-state-active {
+            background-color: #fef2f2;
+        }
+        
+        body.error-state-active .header {
+            background-color: #fee2e2;
+        }
+        
+        /* Mobile responsive error states */
+        @media (max-width: 768px) {
+            .error-state.enhanced {
+                padding: 2rem 1rem;
+                margin: 1rem 0;
+            }
+            
+            .error-state.enhanced .error-icon {
+                font-size: 3rem;
+            }
+            
+            .error-state.enhanced .error-title {
+                font-size: 1.25rem;
+            }
+            
+            .error-state.enhanced .error-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .error-state.enhanced .retry-btn,
+            .error-state.enhanced .btn-secondary,
+            .error-state.enhanced .btn-outline {
+                width: 100%;
+                max-width: 200px;
+            }
+            
+            .toast {
+                top: 1rem;
+                right: 1rem;
+                left: 1rem;
+                text-align: center;
+            }
+        }
+        
         /* ARIA live regions for screen readers */
         .sr-only {
             position: absolute;
@@ -6828,6 +7015,7 @@
         </div>
     </div>
 
+    <script src="error-handler.js"></script>
     <script>
         let currentGenre = 'all';
         let currentTrack = null;
@@ -7030,11 +7218,20 @@
                     displayTracks(data.tracks, data.hasMore);
                 } else {
                     console.error('Failed to fetch trending music:', data.error);
-                    showError('Failed to load trending music');
+                    showError('Failed to load trending music', { 
+                        page: 'trending', 
+                        genre: genre,
+                        container: 'musicGrid'
+                    });
                 }
             } catch (error) {
                 console.error('Error fetching trending music:', error);
-                showError('Network error loading music');
+                showError('Network error loading music', { 
+                    page: 'trending', 
+                    genre: genre,
+                    container: 'musicGrid',
+                    error: error
+                });
             } finally {
                 isLoadingTrending = false;
             }
@@ -13122,18 +13319,11 @@
             }
         }
 
-        function showError(message) {
-            const grid = document.getElementById('musicGrid');
-            grid.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">⚠️</div>
-                    <h3>Error</h3>
-                    <p>${message}</p>
-                    <button class="btn btn-primary" onclick="switchGenre('${currentGenre}')">
-                        Try Again
-                    </button>
-                </div>
-            `;
+        function showError(message, context = {}) {
+            // Use enhanced error handler
+            const error = new Error(message);
+            error.context = context;
+            window.errorHandler.handleError(error, context);
         }
 
         function loadTrendingMusic(genre) {
@@ -13251,7 +13441,12 @@
                 }
             } catch (error) {
                 console.error('Search API error:', error);
-                displayEmptyState(`Search failed for "${query}"`);
+                showError(`Search failed for "${query}"`, { 
+                    page: 'search', 
+                    query: query,
+                    container: 'socialFeed .container',
+                    error: error
+                });
             }
         }
         
