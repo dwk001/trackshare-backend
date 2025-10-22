@@ -1,5 +1,18 @@
 # TrackShare Holistic Improvement Plan
 
+## ⚠️ **VERCEL FUNCTION LIMIT CONSTRAINT**
+
+**CRITICAL**: TrackShare is deployed on Vercel's free plan with a **12 serverless function limit**. We currently have exactly 12 functions and are at the limit. Any new API endpoints must either:
+
+1. **Consolidate existing functions** (recommended)
+2. **Remove unused functions** 
+3. **Upgrade to Vercel Pro** ($20/month per member)
+
+**Current Functions (12/12):**
+- `api/resolve.js`, `api/t.js`, `api/providers.js`, `api/privacy.js`
+- `api/trending.js`, `api/search.js`, `api/posts.js`, `api/friends.js`
+- `api/profile.js`, `api/auth/google/callback.js`, `api/auth/apple/callback.js`, `api/auth/me.js`
+
 ## Executive Summary
 
 Based on comprehensive analysis of trackshare.online, I've identified critical issues and opportunities for improvement across multiple dimensions. The application shows promise but has several production-blocking issues that need immediate attention.

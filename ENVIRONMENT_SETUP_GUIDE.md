@@ -1,5 +1,27 @@
 # Environment Variables Setup Guide for TrackShare
 
+## ⚠️ **VERCEL FUNCTION LIMIT WARNING**
+
+**IMPORTANT**: TrackShare is deployed on Vercel's free plan which has a **12 serverless function limit**. We currently have exactly 12 functions:
+
+1. `api/resolve.js`
+2. `api/t.js` 
+3. `api/providers.js`
+4. `api/privacy.js`
+5. `api/trending.js`
+6. `api/search.js`
+7. `api/auth/google/callback.js`
+8. `api/auth/apple/callback.js`
+9. `api/auth/me.js`
+10. `api/posts.js`
+11. `api/friends.js`
+12. `api/profile.js`
+
+**To add more functions, you'll need to:**
+- Upgrade to Vercel Pro plan ($20/month per member)
+- Or consolidate existing functions
+- Or remove unused functions
+
 ## Critical Environment Variables Required
 
 The TrackShare application requires several environment variables to function properly. The current 500 errors are likely due to missing Spotify API credentials and Supabase configuration.

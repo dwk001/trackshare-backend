@@ -31,6 +31,9 @@
     "api/auth/apple/callback.js": {
       "maxDuration": 30
     },
+    "api/auth/me.js": {
+      "maxDuration": 30
+    },
     "api/posts.js": {
       "maxDuration": 30
     },
