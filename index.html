@@ -5486,6 +5486,7 @@
             padding: 0.5rem;
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
         }
 
         .search-input {
@@ -5862,7 +5863,7 @@
                 <div class="search-input-group">
                     <input type="text" class="search-input" placeholder="Search for songs, artists, or paste a music link..." id="searchInput">
                     <button class="search-btn" onclick="searchMusic()">Search</button>
-                    <button class="filter-btn" onclick="toggleAdvancedFilters()" title="Advanced Filters">
+                    <button class="filter-btn" id="filterBtn" onclick="toggleAdvancedFilters()" title="Advanced Filters" style="display: none;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"></polygon>
                         </svg>
@@ -13374,6 +13375,12 @@
             const query = document.getElementById('searchInput').value.trim();
             if (!query) return;
             
+            // Show filter button after search
+            const filterBtn = document.getElementById('filterBtn');
+            if (filterBtn) {
+                filterBtn.style.display = 'flex';
+            }
+            
             // Check if it's a URL
             if (query.includes('spotify.com') || query.includes('music.apple.com') || query.includes('music.youtube.com')) {
                 playTrack(query, 'Unknown Track', 'Unknown Artist');
@@ -13399,11 +13406,46 @@
                     await searchWithAPI(query);
                 } catch (error) {
                     console.error('API search failed:', error);
-                    alert('No tracks found. Try pasting a music link instead!');
+                    // Show better error message with suggestions
+                    showSearchError(query);
                 }
             }
         }
         
+        function showSearchError(query) {
+            const feedContainer = document.querySelector('#socialFeed .container');
+            if (feedContainer) {
+                feedContainer.innerHTML = `
+                    <div class="error-state enhanced">
+                        <div class="error-icon">🔍</div>
+                        <h3 class="error-title">No tracks found for "${query}"</h3>
+                        <p class="error-message">We couldn't find any tracks matching your search. This might be because:</p>
+                        <ul style="text-align: left; margin: 1rem 0; color: #6b7280;">
+                            <li>The artist name might be spelled differently</li>
+                            <li>The track might not be available in our database</li>
+                            <li>Our search service is temporarily unavailable</li>
+                        </ul>
+                        <div class="error-actions">
+                            <button class="retry-btn" onclick="searchMusic()">Try Again</button>
+                            <button class="btn-secondary" onclick="loadTrendingMusic('all')">Browse Trending</button>
+                            <button class="btn-outline" onclick="document.getElementById('searchInput').value = ''; document.getElementById('searchInput').focus();">Clear Search</button>
+                        </div>
+                        <div class="error-details">
+                            <details>
+                                <summary>Search Tips</summary>
+                                <ul style="text-align: left; margin: 0.5rem 0;">
+                                    <li>Try searching for just the artist name (e.g., "Drake" instead of "Drake songs")</li>
+                                    <li>Use partial names (e.g., "Taylor" for Taylor Swift)</li>
+                                    <li>Try different spellings or variations</li>
+                                    <li>Paste a Spotify, Apple Music, or YouTube Music link instead</li>
+                                </ul>
+                            </details>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
         async function searchWithAPI(query) {
             // Use the proper search API instead of resolve API
             try {
@@ -13608,19 +13650,30 @@ function openInYouTubeMusic() {
             const userParam = urlParams.get('user');
             const errorParam = urlParams.get('error');
             
+            console.log('Checking auth callback:', { userParam, errorParam, url: window.location.href });
+            
             if (errorParam) {
+                console.error('Auth error:', errorParam);
                 alert('Authentication failed: ' + decodeURIComponent(errorParam));
                 // Clean URL
                 window.history.replaceState({}, document.title, window.location.pathname);
             } else if (userParam) {
-                const userData = JSON.parse(decodeURIComponent(userParam));
-                handleSuccessfulAuth(userData);
-                // Clean URL
-                window.history.replaceState({}, document.title, window.location.pathname);
+                try {
+                    const userData = JSON.parse(decodeURIComponent(userParam));
+                    console.log('Auth success, user data:', userData);
+                    handleSuccessfulAuth(userData);
+                    // Clean URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                } catch (error) {
+                    console.error('Error parsing user data:', error);
+                    alert('Authentication data corrupted. Please try again.');
+                }
             }
         }
         
         function handleSuccessfulAuth(userData) {
+            console.log('Handling successful auth:', userData);
+            
             // Store user data in localStorage
             localStorage.setItem('trackshare_user', JSON.stringify(userData));
             
@@ -13631,18 +13684,27 @@ function openInYouTubeMusic() {
         }
         
         function updateAuthUI(userData) {
+            console.log('Updating auth UI with:', userData);
+            
             isSignedIn = true;
             userToken = userData.token; // Assuming token is stored
             
             const authButtons = document.querySelector('.auth-buttons');
-            authButtons.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <img src="${userData.picture || 'https://via.placeholder.com/32'}" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%;">
-                    <span style="color: #333; font-weight: 600;">${userData.name}</span>
-                    <button class="btn btn-secondary" onclick="showCreatePostModal()">+ Share Music</button>
-                    <button class="btn btn-outline" onclick="signOut()">Sign Out</button>
-                </div>
-            `;
+            console.log('Auth buttons element:', authButtons);
+            
+            if (authButtons) {
+                authButtons.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <img src="${userData.picture || 'https://via.placeholder.com/32'}" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%;">
+                        <span style="color: #333; font-weight: 600;">${userData.name}</span>
+                        <button class="btn btn-secondary" onclick="showCreatePostModal()">+ Share Music</button>
+                        <button class="btn btn-outline" onclick="signOut()">Sign Out</button>
+                    </div>
+                `;
+                console.log('Auth UI updated successfully');
+            } else {
+                console.error('Auth buttons element not found!');
+            }
             
             // Show authenticated-only tabs
             document.querySelectorAll('.auth-only').forEach(tab => {
@@ -14430,7 +14492,18 @@ function openInYouTubeMusic() {
             checkAuthCallback();
             await checkExistingAuth();
             setupSearchHandlers(); // Initialize enhanced search
-            loadFeed('trending'); // Load social feed by default
+            
+            // Load trending music from local data first
+            loadTrendingMusic('all');
+            
+            // Try to load social feed, but don't fail if API is down
+            try {
+                await loadFeed('trending');
+            } catch (error) {
+                console.warn('Failed to load social feed, using local data:', error);
+                // Fallback to local trending music
+                loadTrendingMusic('all');
+            }
             
             // Setup form event listeners using polling manager
             const editProfileForm = document.getElementById('editProfileForm');
