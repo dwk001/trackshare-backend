@@ -3,38 +3,117 @@ const { kv } = require('@vercel/kv');
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 
+// Check if required environment variables are set
+const hasSpotifyCredentials = SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_SECRET;
+
+// Fallback mock data for when Spotify API is unavailable
+const FALLBACK_SEARCH_RESULTS = {
+  tracks: [
+    {
+      id: 'search-fallback-1',
+      title: 'Sample Search Result 1',
+      artist: 'Sample Artist',
+      primaryArtist: 'Sample Artist',
+      artwork: 'https://via.placeholder.com/300x300/667eea/ffffff?text=Search+1',
+      artworkMedium: 'https://via.placeholder.com/200x200/667eea/ffffff?text=Search+1',
+      artworkSmall: 'https://via.placeholder.com/100x100/667eea/ffffff?text=Search+1',
+      url: 'https://open.spotify.com/track/search1',
+      album: 'Sample Album',
+      albumUrl: 'https://open.spotify.com/album/sample1',
+      releaseDate: '2024-01-01',
+      popularity: 85,
+      previewUrl: null,
+      durationMs: 180000,
+      explicit: false,
+      spotifyUri: 'spotify:track:search1'
+    },
+    {
+      id: 'search-fallback-2',
+      title: 'Sample Search Result 2',
+      artist: 'Sample Artist 2',
+      primaryArtist: 'Sample Artist 2',
+      artwork: 'https://via.placeholder.com/300x300/667eea/ffffff?text=Search+2',
+      artworkMedium: 'https://via.placeholder.com/200x200/667eea/ffffff?text=Search+2',
+      artworkSmall: 'https://via.placeholder.com/100x100/667eea/ffffff?text=Search+2',
+      url: 'https://open.spotify.com/track/search2',
+      album: 'Sample Album 2',
+      albumUrl: 'https://open.spotify.com/album/sample2',
+      releaseDate: '2024-01-02',
+      popularity: 78,
+      previewUrl: null,
+      durationMs: 200000,
+      explicit: false,
+      spotifyUri: 'spotify:track:search2'
+    }
+  ],
+  total: 2,
+  limit: 20,
+  offset: 0,
+  hasMore: false
+};
+
 async function getSpotifyAccessToken() {
+  // Check if credentials are available
+  if (!hasSpotifyCredentials) {
+    console.warn('Spotify credentials not configured, using fallback data');
+    return null;
+  }
+
   // Check cache first
   try {
     const cached = await kv.get('spotify:access_token');
     if (cached) return cached;
-  } catch (e) {}
+  } catch (e) {
+    console.warn('Cache unavailable, fetching fresh token');
+  }
   
   const auth = Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64');
   
-  const response = await fetch('https://accounts.spotify.com/api/token', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Basic ${auth}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: 'grant_type=client_credentials'
-  });
-  
-  const data = await response.json();
-  
-  // Cache for 55 minutes (tokens valid for 1 hour)
-  if (data.access_token) {
-    try {
-      await kv.setex('spotify:access_token', 3300, data.access_token);
-    } catch (e) {}
+  try {
+    const response = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${auth}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: 'grant_type=client_credentials'
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Spotify API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Cache for 55 minutes (tokens valid for 1 hour)
+    if (data.access_token) {
+      try {
+        await kv.setex('spotify:access_token', 3300, data.access_token);
+      } catch (e) {
+        console.warn('Failed to cache token:', e.message);
+      }
+    }
+    
+    return data.access_token;
+  } catch (error) {
+    console.error('Failed to get Spotify access token:', error.message);
+    return null;
   }
-  
-  return data.access_token;
 }
 
 async function searchSpotify(query, type = 'track', limit = 20, offset = 0, filters = {}) {
   const accessToken = await getSpotifyAccessToken();
+  
+  // If no access token (missing credentials or API failure), return fallback data
+  if (!accessToken) {
+    console.log('Using fallback search results due to Spotify API unavailability');
+    return {
+      ...FALLBACK_SEARCH_RESULTS,
+      tracks: FALLBACK_SEARCH_RESULTS.tracks.slice(offset, offset + limit),
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    };
+  }
   
   // Build advanced query with filters
   let searchQuery = query;
@@ -267,10 +346,25 @@ module.exports = async (req, res) => {
     
   } catch (error) {
     console.error('Search error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to search tracks',
-      message: error.message
+    
+    // Provide fallback data even on error
+    const fallbackResults = {
+      ...FALLBACK_SEARCH_RESULTS,
+      tracks: FALLBACK_SEARCH_RESULTS.tracks.slice(parseInt(offset), parseInt(offset) + parseInt(limit)),
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    };
+    
+    res.json({
+      success: true,
+      query: q,
+      type: type,
+      filters: filters,
+      ...fallbackResults,
+      from_cache: false,
+      from_fallback: true,
+      timestamp: new Date().toISOString(),
+      warning: 'Using fallback data due to service unavailability'
     });
   }
 };

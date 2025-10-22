@@ -4,13 +4,68 @@ const { createClient } = require('@supabase/supabase-js');
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+// Check if required environment variables are set
+const hasSpotifyCredentials = SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_SECRET;
+const hasSupabaseConfig = process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+// Initialize Supabase client only if credentials are available
+let supabase = null;
+if (hasSupabaseConfig) {
+  supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+}
 
 const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000';
+
+// Fallback mock data for when Spotify API is unavailable
+const FALLBACK_TRACKS = {
+  all: [
+    {
+      id: 'fallback-1',
+      title: 'Sample Track 1',
+      artist: 'Sample Artist',
+      artwork: 'https://via.placeholder.com/300x300/667eea/ffffff?text=Track+1',
+      url: 'https://open.spotify.com/track/sample1',
+      album: 'Sample Album',
+      popularity: 85,
+      previewUrl: null,
+      durationMs: 180000,
+      releaseDate: '2024-01-01',
+      genre: 'all',
+      explicit: false
+    },
+    {
+      id: 'fallback-2',
+      title: 'Sample Track 2',
+      artist: 'Sample Artist 2',
+      artwork: 'https://via.placeholder.com/300x300/667eea/ffffff?text=Track+2',
+      url: 'https://open.spotify.com/track/sample2',
+      album: 'Sample Album 2',
+      popularity: 78,
+      previewUrl: null,
+      durationMs: 200000,
+      releaseDate: '2024-01-02',
+      genre: 'all',
+      explicit: false
+    },
+    {
+      id: 'fallback-3',
+      title: 'Sample Track 3',
+      artist: 'Sample Artist 3',
+      artwork: 'https://via.placeholder.com/300x300/667eea/ffffff?text=Track+3',
+      url: 'https://open.spotify.com/track/sample3',
+      album: 'Sample Album 3',
+      popularity: 92,
+      previewUrl: null,
+      durationMs: 160000,
+      releaseDate: '2024-01-03',
+      genre: 'all',
+      explicit: false
+    }
+  ]
+};
 
 // Genre-specific Spotify playlists - Expanded for more variety
 const GENRE_PLAYLISTS = {
@@ -79,37 +134,64 @@ const GENRE_PLAYLISTS = {
 };
 
 async function getSpotifyAccessToken() {
+  // Check if credentials are available
+  if (!hasSpotifyCredentials) {
+    console.warn('Spotify credentials not configured, using fallback data');
+    return null;
+  }
+
   // Check cache first
   try {
     const cached = await kv.get('spotify:access_token');
     if (cached) return cached;
-  } catch (e) {}
+  } catch (e) {
+    console.warn('Cache unavailable, fetching fresh token');
+  }
   
   const auth = Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64');
   
-  const response = await fetch('https://accounts.spotify.com/api/token', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Basic ${auth}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: 'grant_type=client_credentials'
-  });
-  
-  const data = await response.json();
-  
-  // Cache for 55 minutes (tokens valid for 1 hour)
-  if (data.access_token) {
-    try {
-      await kv.setex('spotify:access_token', 3300, data.access_token);
-    } catch (e) {}
+  try {
+    const response = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${auth}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: 'grant_type=client_credentials'
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Spotify API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Cache for 55 minutes (tokens valid for 1 hour)
+    if (data.access_token) {
+      try {
+        await kv.setex('spotify:access_token', 3300, data.access_token);
+      } catch (e) {
+        console.warn('Failed to cache token:', e.message);
+      }
+    }
+    
+    return data.access_token;
+  } catch (error) {
+    console.error('Failed to get Spotify access token:', error.message);
+    return null;
   }
-  
-  return data.access_token;
 }
 
 async function fetchGenreTracks(genre = 'all', limit = 150) {
   const accessToken = await getSpotifyAccessToken();
+  
+  // If no access token (missing credentials or API failure), return fallback data
+  if (!accessToken) {
+    console.log('Using fallback tracks due to Spotify API unavailability');
+    const fallbackTracks = FALLBACK_TRACKS[genre] || FALLBACK_TRACKS.all;
+    return fallbackTracks.slice(0, limit);
+  }
+  
   const playlistIds = GENRE_PLAYLISTS[genre] || GENRE_PLAYLISTS.all;
   
   console.log(`Fetching tracks for genre: ${genre}, playlists: ${playlistIds.length}, limit: ${limit}`);
@@ -124,6 +206,11 @@ async function fetchGenreTracks(genre = 'all', limit = 150) {
           headers: { 'Authorization': `Bearer ${accessToken}` }
         }
       );
+      
+      if (!response.ok) {
+        console.warn(`Spotify API error for playlist ${playlistId}: ${response.status}`);
+        continue;
+      }
       
       const data = await response.json();
       
@@ -149,10 +236,17 @@ async function fetchGenreTracks(genre = 'all', limit = 150) {
         allTracks.push(...tracks);
       }
     } catch (error) {
-      console.error(`Error fetching playlist ${playlistId}:`, error);
+      console.error(`Error fetching playlist ${playlistId}:`, error.message);
     }
     
     if (allTracks.length >= limit) break;
+  }
+  
+  // If no tracks were fetched, return fallback data
+  if (allTracks.length === 0) {
+    console.log('No tracks fetched from Spotify, using fallback data');
+    const fallbackTracks = FALLBACK_TRACKS[genre] || FALLBACK_TRACKS.all;
+    return fallbackTracks.slice(0, limit);
   }
   
   // Shuffle and return requested number of tracks
@@ -311,9 +405,25 @@ module.exports = async (req, res) => {
     
   } catch (error) {
     console.error('Error in trending endpoint:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch trending tracks'
+    
+    // Provide fallback data even on error
+    const fallbackTracks = FALLBACK_TRACKS[genre] || FALLBACK_TRACKS.all;
+    const startIndex = parseInt(offset);
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedTracks = fallbackTracks.slice(startIndex, endIndex);
+    
+    res.json({
+      success: true,
+      tracks: paginatedTracks,
+      genre: genre,
+      from_cache: false,
+      from_fallback: true,
+      total: fallbackTracks.length,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      hasMore: endIndex < fallbackTracks.length,
+      timestamp: new Date().toISOString(),
+      warning: 'Using fallback data due to service unavailability'
     });
   }
 };
