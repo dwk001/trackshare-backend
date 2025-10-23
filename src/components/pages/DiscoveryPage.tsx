@@ -66,7 +66,9 @@ export default function MusicDiscovery({ className }: MusicDiscoveryProps) {
       setError(null)
       
       try {
-        const results = await searchMusic(searchQuery)
+        const results = await searchMusic(searchQuery, { 
+          genre: selectedGenre !== 'all' ? selectedGenre : undefined 
+        })
         setTracks(results)
         setHasSearched(true)
         setShowFilters(true) // Show filters after first search
@@ -79,7 +81,7 @@ export default function MusicDiscovery({ className }: MusicDiscoveryProps) {
     }, 500) // 500ms debounce
 
     return () => clearTimeout(timeoutId)
-  }, [searchQuery])
+  }, [searchQuery, selectedGenre, selectedProvider]) // Re-run effect when filters change
 
   const handlePlayTrack = (track: Track) => {
     // Open track in music app based on provider

@@ -37,10 +37,11 @@ const GENRE_CHARTS = {
   'classical': 'https://rss.applemarketingtools.com/api/v2/us/songs/classical/25/explicit.json',
 }
 
-// Fetch trending tracks from iTunes RSS
+// Fetch trending tracks from iTunes RSS via server-side proxy
 const fetchTrendingFromRSS = async (endpoint: string, genre: string = 'all'): Promise<TrendingTrack[]> => {
   try {
-    const response = await fetch(endpoint)
+    // Use server-side API to avoid CORS issues
+    const response = await fetch('/api/trending?genre=' + encodeURIComponent(genre) + '&limit=25')
     
     if (!response.ok) {
       throw new Error(`iTunes RSS error: ${response.status}`)
@@ -48,22 +49,22 @@ const fetchTrendingFromRSS = async (endpoint: string, genre: string = 'all'): Pr
     
     const data = await response.json()
     
-    if (!data.results || !Array.isArray(data.results)) {
-      console.warn('Invalid RSS data structure:', data)
+    if (!data.success || !data.tracks || !Array.isArray(data.tracks)) {
+      console.warn('Invalid server response:', data)
       return []
     }
     
-    return data.results.map((track: any, index: number) => ({
+    return data.tracks.map((track: any, index: number) => ({
       id: track.id || `trending-${index}`,
-      title: track.name || track.title || 'Unknown Track',
-      artist: track.artistName || track.artist || 'Unknown Artist',
-      album: track.collectionName || track.album || 'Unknown Album',
-      artwork: track.artworkUrl100?.replace('100x100', '300x300') || '',
-      url: track.url || track.trackViewUrl || '#',
+      title: track.title || 'Unknown Track',
+      artist: track.artist || 'Unknown Artist',
+      album: track.album || 'Unknown Album',
+      artwork: track.artwork || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjNjY3ZWVhIi8+CjxjaXJjbGUgY3g9IjE1MCIgY3k9IjE1MCIgcj0iNTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMjAgMTIwSDIwMFYxODBIMTIwVjEyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMjAgMTIwSDIwMFYxODBIMTIwVjEyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMjAgMTIwSDIwMFYxODBIMTIwVjEyMFoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=',
+      url: track.url || '#',
       previewUrl: track.previewUrl,
-      duration: track.durationInMillis || track.duration,
+      duration: track.durationMs,
       releaseDate: track.releaseDate,
-      position: index + 1,
+      position: track.position || index + 1,
       genre: genre,
       provider: 'itunes' as const
     }))
