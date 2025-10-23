@@ -1,0 +1,12 @@
+name = "trackshare-api"
+main = "functions/api.js"
+compatibility_date = "2024-01-01"
+
+# Cloudflare Workers configuration for TrackShare API
+# This replaces the Vercel serverless functions
+
+[env.production]
+name = "trackshare-api"
+
+[env.staging]
+name = "trackshare-api-staging"
