@@ -204,58 +204,26 @@ module.exports = async (req, res) => {
   }
   
   try {
-    const results = await searchiTunes(
-      q.trim(),
-      type,
-      parseInt(limit),
-      parseInt(offset),
-      filters
-    );
+    // For now, return fallback data immediately to test functionality
+    console.log(`Search request for: "${q}", type: ${type}, limit: ${limit}, offset: ${offset}`);
     
-    // Post-process results for client-side filtering
-    let processedResults = { ...results };
+    const fallbackResults = {
+      ...FALLBACK_SEARCH_RESULTS,
+      tracks: FALLBACK_SEARCH_RESULTS.tracks.slice(parseInt(offset), parseInt(offset) + parseInt(limit)),
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    };
     
-    if (type === 'track' && processedResults.tracks) {
-      // Filter by popularity if specified
-      if (filters.popularity) {
-        const [minPop, maxPop] = filters.popularity.split('-').map(Number);
-        processedResults.tracks = processedResults.tracks.filter(track => {
-          const pop = track.popularity || 0;
-          return pop >= (minPop || 0) && pop <= (maxPop || 100);
-        });
-      }
-      
-      // Filter by explicit content if specified
-      if (filters.explicit !== undefined) {
-        processedResults.tracks = processedResults.tracks.filter(track => 
-          track.explicit === filters.explicit
-        );
-      }
-      
-      // Sort results if specified
-      if (filters.sortBy) {
-        processedResults.tracks = sortTracks(processedResults.tracks, filters.sortBy);
-      }
-    }
-    
-    const response = {
+    res.json({
       success: true,
       query: q,
       type: type,
       filters: filters,
-      ...processedResults,
+      ...fallbackResults,
       from_cache: false,
+      from_fallback: true,
       timestamp: new Date().toISOString()
-    };
-    
-    // Cache for 10 minutes
-    try {
-      await kv.setex(cacheKey, 600, JSON.stringify(response));
-    } catch (e) {
-      console.error('Cache set error:', e);
-    }
-    
-    res.json(response);
+    });
     
   } catch (error) {
     console.error('Search error:', error);
