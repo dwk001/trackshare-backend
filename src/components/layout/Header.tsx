@@ -91,7 +91,7 @@ export default function Header({
                   key={item.id}
                   onClick={() => handleTabChange(item.id)}
                   className={cn(
-                    'flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                    'flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[44px] touch-manipulation',
                     activeTab === item.id
                       ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
                       : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
@@ -123,7 +123,7 @@ export default function Header({
           {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
             {/* Notifications */}
-            <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors relative">
+            <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors relative min-h-[44px] min-w-[44px] touch-manipulation">
               <Bell className="w-5 h-5" />
               <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
@@ -131,10 +131,10 @@ export default function Header({
             {/* User Menu */}
             {isAuthenticated ? (
               <div className="relative">
-                <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                >
+                  <button
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors min-h-[44px] touch-manipulation"
+                  >
                   <img
                     src={user?.avatar || '/placeholder-avatar.jpg'}
                     alt={user?.displayName}
@@ -185,13 +185,13 @@ export default function Header({
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => onAuthModalOpen?.('signin')}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors min-h-[44px] touch-manipulation"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={() => onAuthModalOpen?.('signup')}
-                  className="px-4 py-2 bg-primary-500 text-white text-sm font-medium rounded-lg hover:bg-primary-600 transition-colors"
+                  className="px-4 py-2 bg-primary-500 text-white text-sm font-medium rounded-lg hover:bg-primary-600 transition-colors min-h-[44px] touch-manipulation"
                 >
                   Sign Up
                 </button>
@@ -201,7 +201,7 @@ export default function Header({
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              className="md:hidden p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors min-h-[44px] min-w-[44px] touch-manipulation"
             >
               {isMobileMenuOpen ? (
                 <X className="w-6 h-6" />
@@ -248,7 +248,7 @@ export default function Header({
                       setIsMobileMenuOpen(false)
                     }}
                     className={cn(
-                      'flex items-center space-x-3 w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                      'flex items-center space-x-3 w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[44px] touch-manipulation',
                       activeTab === item.id
                         ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
                         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'

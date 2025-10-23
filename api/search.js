@@ -1,12 +1,14 @@
+// ⚠️ VERCEL FUNCTION LIMIT WARNING ⚠️
+// TrackShare is deployed on Vercel FREE plan with 12-function limit
+// Current count: 12/12 functions (AT LIMIT)
+// To add new functions: upgrade to Pro plan or consolidate existing ones
+
 const { kv } = require('@vercel/kv');
 
-const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
-const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
+// iTunes Search API - no authentication required
+const ITUNES_SEARCH_BASE = 'https://itunes.apple.com/search';
 
-// Check if required environment variables are set
-const hasSpotifyCredentials = SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_SECRET;
-
-// Fallback mock data for when Spotify API is unavailable
+// Fallback mock data for when iTunes API is unavailable
 const FALLBACK_SEARCH_RESULTS = {
   tracks: [
     {
@@ -17,15 +19,15 @@ const FALLBACK_SEARCH_RESULTS = {
       artwork: 'https://via.placeholder.com/300x300/667eea/ffffff?text=Search+1',
       artworkMedium: 'https://via.placeholder.com/200x200/667eea/ffffff?text=Search+1',
       artworkSmall: 'https://via.placeholder.com/100x100/667eea/ffffff?text=Search+1',
-      url: 'https://open.spotify.com/track/search1',
+      url: 'https://music.apple.com/us/album/sample-track/123456789',
       album: 'Sample Album',
-      albumUrl: 'https://open.spotify.com/album/sample1',
+      albumUrl: 'https://music.apple.com/us/album/sample-album/123456789',
       releaseDate: '2024-01-01',
       popularity: 85,
       previewUrl: null,
       durationMs: 180000,
       explicit: false,
-      spotifyUri: 'spotify:track:search1'
+      itunesUri: 'itunes:track:123456789'
     },
     {
       id: 'search-fallback-2',
@@ -52,177 +54,104 @@ const FALLBACK_SEARCH_RESULTS = {
   hasMore: false
 };
 
-async function getSpotifyAccessToken() {
-  // Check if credentials are available
-  if (!hasSpotifyCredentials) {
-    console.warn('Spotify credentials not configured, using fallback data');
-    return null;
-  }
-
-  // Check cache first
-  try {
-    const cached = await kv.get('spotify:access_token');
-    if (cached) return cached;
-  } catch (e) {
-    console.warn('Cache unavailable, fetching fresh token');
-  }
-  
-  const auth = Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64');
+async function searchiTunes(query, type = 'track', limit = 20, offset = 0, filters = {}) {
+  console.log(`Searching iTunes for: "${query}", type: ${type}, limit: ${limit}, offset: ${offset}`);
   
   try {
-    const response = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${auth}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: 'grant_type=client_credentials'
+    // Build iTunes search URL
+    const params = new URLSearchParams({
+      term: query,
+      media: 'music',
+      entity: type === 'track' ? 'musicTrack' : type,
+      limit: Math.min(limit, 200), // iTunes max limit is 200
+      country: 'US'
     });
     
+    const url = `${ITUNES_SEARCH_BASE}?${params}`;
+    console.log('iTunes search URL:', url);
+    
+    const response = await fetch(url);
+    
     if (!response.ok) {
-      throw new Error(`Spotify API error: ${response.status}`);
+      throw new Error(`iTunes API error: ${response.status}`);
     }
     
     const data = await response.json();
     
-    // Cache for 55 minutes (tokens valid for 1 hour)
-    if (data.access_token) {
-      try {
-        await kv.setex('spotify:access_token', 3300, data.access_token);
-      } catch (e) {
-        console.warn('Failed to cache token:', e.message);
-      }
+    if (!data.results || !Array.isArray(data.results)) {
+      console.warn('Invalid iTunes search response:', data);
+      return {
+        tracks: [],
+        total: 0,
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        hasMore: false
+      };
     }
     
-    return data.access_token;
-  } catch (error) {
-    console.error('Failed to get Spotify access token:', error.message);
-    return null;
-  }
-}
-
-async function searchSpotify(query, type = 'track', limit = 20, offset = 0, filters = {}) {
-  const accessToken = await getSpotifyAccessToken();
-  
-  // If no access token (missing credentials or API failure), return fallback data
-  if (!accessToken) {
-    console.log('Using fallback search results due to Spotify API unavailability');
-    return {
-      ...FALLBACK_SEARCH_RESULTS,
-      tracks: FALLBACK_SEARCH_RESULTS.tracks.slice(offset, offset + limit),
-      limit: parseInt(limit),
-      offset: parseInt(offset)
-    };
-  }
-  
-  // Build advanced query with filters
-  let searchQuery = query;
-  
-  if (filters.genre) {
-    searchQuery += ` genre:"${filters.genre}"`;
-  }
-  
-  if (filters.year) {
-    searchQuery += ` year:${filters.year}`;
-  }
-  
-  if (filters.yearRange) {
-    const [startYear, endYear] = filters.yearRange.split('-');
-    searchQuery += ` year:${startYear}-${endYear}`;
-  }
-  
-  if (filters.artist) {
-    searchQuery += ` artist:"${filters.artist}"`;
-  }
-  
-  if (filters.album) {
-    searchQuery += ` album:"${filters.album}"`;
-  }
-  
-  if (filters.tag) {
-    searchQuery += ` tag:${filters.tag}`;
-  }
-  
-  if (filters.isrc) {
-    searchQuery += ` isrc:${filters.isrc}`;
-  }
-  
-  if (filters.upc) {
-    searchQuery += ` upc:${filters.upc}`;
-  }
-  
-  const params = new URLSearchParams({
-    q: searchQuery,
-    type: type,
-    limit: limit.toString(),
-    offset: offset.toString(),
-    market: 'US'
-  });
-  
-  // Add additional parameters for advanced filtering
-  if (filters.includeExternal) {
-    params.append('include_external', 'audio');
-  }
-  
-  const response = await fetch(
-    `https://api.spotify.com/v1/search?${params.toString()}`,
-    {
-      headers: { 'Authorization': `Bearer ${accessToken}` }
+    // Transform iTunes results to our format
+    const tracks = data.results.map((track, index) => ({
+      id: track.trackId || `itunes-${index}`,
+      title: track.trackName || 'Unknown Track',
+      artist: track.artistName || 'Unknown Artist',
+      primaryArtist: track.artistName || 'Unknown Artist',
+      artwork: track.artworkUrl100?.replace('100x100', '300x300') || '',
+      artworkMedium: track.artworkUrl100?.replace('100x100', '200x200') || '',
+      artworkSmall: track.artworkUrl100 || '',
+      url: track.trackViewUrl || '#',
+      album: track.collectionName || 'Unknown Album',
+      albumUrl: track.collectionViewUrl || '#',
+      releaseDate: track.releaseDate,
+      popularity: Math.max(0, 100 - index), // Higher position = higher popularity
+      previewUrl: track.previewUrl,
+      durationMs: track.trackTimeMillis,
+      explicit: track.trackExplicitness === 'explicit',
+      itunesUri: `itunes:track:${track.trackId}`,
+      genre: track.primaryGenreName || 'Unknown'
+    }));
+    
+    // Apply filters
+    let filteredTracks = tracks;
+    
+    if (filters.genre) {
+      filteredTracks = filteredTracks.filter(track => 
+        track.genre.toLowerCase().includes(filters.genre.toLowerCase())
+      );
     }
-  );
-  
-  if (!response.ok) {
-    throw new Error(`Spotify API error: ${response.status}`);
-  }
-  
-  const data = await response.json();
-  
-  if (type === 'track' && data.tracks) {
+    
+    if (filters.year) {
+      filteredTracks = filteredTracks.filter(track => 
+        track.releaseDate && track.releaseDate.startsWith(filters.year)
+      );
+    }
+    
+    if (filters.explicit !== undefined) {
+      filteredTracks = filteredTracks.filter(track => 
+        track.explicit === filters.explicit
+      );
+    }
+    
+    // Apply pagination
+    const startIndex = parseInt(offset);
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedTracks = filteredTracks.slice(startIndex, endIndex);
+    
+    console.log(`iTunes search returned ${paginatedTracks.length} tracks (${filteredTracks.length} total after filtering)`);
+    
     return {
-      tracks: data.tracks.items.map(track => ({
-        id: track.id,
-        title: track.name,
-        artist: track.artists.map(a => a.name).join(', '),
-        primaryArtist: track.artists[0].name,
-        artwork: track.album.images[0]?.url,
-        artworkMedium: track.album.images[1]?.url,
-        artworkSmall: track.album.images[2]?.url,
-        url: track.external_urls.spotify,
-        album: track.album.name,
-        albumUrl: track.album.external_urls.spotify,
-        releaseDate: track.album.release_date,
-        popularity: track.popularity,
-        previewUrl: track.preview_url,
-        durationMs: track.duration_ms,
-        explicit: track.explicit,
-        spotifyUri: track.uri
-      })),
-      total: data.tracks.total,
-      limit: data.tracks.limit,
-      offset: data.tracks.offset,
-      hasMore: data.tracks.next !== null
+      tracks: paginatedTracks,
+      total: filteredTracks.length,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      hasMore: endIndex < filteredTracks.length
     };
+    
+  } catch (error) {
+    console.error('iTunes search error:', error.message);
+    throw error;
   }
-  
-  if (type === 'artist' && data.artists) {
-    return {
-      artists: data.artists.items.map(artist => ({
-        id: artist.id,
-        name: artist.name,
-        image: artist.images[0]?.url,
-        url: artist.external_urls.spotify,
-        followers: artist.followers.total,
-        popularity: artist.popularity,
-        genres: artist.genres
-      })),
-      total: data.artists.total,
-      hasMore: data.artists.next !== null
-    };
-  }
-  
-  return { tracks: [], total: 0 };
 }
-
+  
 module.exports = async (req, res) => {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -240,16 +169,7 @@ module.exports = async (req, res) => {
     offset = 0,
     genre,
     year,
-    yearRange,
-    artist,
-    album,
-    tag,
-    isrc,
-    upc,
-    includeExternal,
-    popularity,
-    explicit,
-    sortBy
+    explicit
   } = req.query;
   
   if (!q || q.trim().length === 0) {
@@ -263,16 +183,7 @@ module.exports = async (req, res) => {
   const filters = {};
   if (genre) filters.genre = genre;
   if (year) filters.year = year;
-  if (yearRange) filters.yearRange = yearRange;
-  if (artist) filters.artist = artist;
-  if (album) filters.album = album;
-  if (tag) filters.tag = tag;
-  if (isrc) filters.isrc = isrc;
-  if (upc) filters.upc = upc;
-  if (includeExternal === 'true') filters.includeExternal = true;
-  if (popularity) filters.popularity = popularity;
   if (explicit !== undefined) filters.explicit = explicit === 'true';
-  if (sortBy) filters.sortBy = sortBy;
   
   // Cache search results for 10 minutes
   const cacheKey = `search:${type}:${q}:${JSON.stringify(filters)}:${limit}:${offset}`;
@@ -291,7 +202,7 @@ module.exports = async (req, res) => {
   }
   
   try {
-    const results = await searchSpotify(
+    const results = await searchiTunes(
       q.trim(),
       type,
       parseInt(limit),

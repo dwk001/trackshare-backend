@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useQuery } from 'react-query'
-import { Play, Heart, Share2, MoreHorizontal, Filter, Music } from 'lucide-react'
+import { Play, Heart, Share2, MoreHorizontal, Filter, Music, Search } from 'lucide-react'
 import { cn } from '@utils'
-import { apiService } from '@services/apiService'
+import { searchMusic, type Track } from '@services/searchService'
 import LoadingSpinner from '@components/ui/LoadingSpinner'
-import type { Track, SearchFilters } from '@types'
 
 interface MusicDiscoveryProps {
   className?: string
@@ -46,50 +44,50 @@ const DISCOVERY_TYPES = [
 ]
 
 export default function MusicDiscovery({ className }: MusicDiscoveryProps) {
-  const [selectedGenre, setSelectedGenre] = useState('all')
-  const [selectedMood, setSelectedMood] = useState<string | null>(null)
-  const [selectedTimeFilter, setSelectedTimeFilter] = useState('all')
-  const [selectedDiscoveryType, setSelectedDiscoveryType] = useState('trending')
   const [searchQuery, setSearchQuery] = useState('')
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+  const [tracks, setTracks] = useState<Track[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [hasSearched, setHasSearched] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
+  const [selectedGenre, setSelectedGenre] = useState('all')
+  const [selectedProvider, setSelectedProvider] = useState<'itunes' | 'deezer' | 'auto'>('auto')
 
-  // Fetch tracks based on current filters
-  const {
-    data: tracksData,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery(
-    ['tracks', selectedGenre, selectedMood, selectedTimeFilter, selectedDiscoveryType, searchQuery],
-    () => {
-      const filters: SearchFilters = {
-        genre: selectedGenre !== 'all' ? selectedGenre : undefined,
-        mood: selectedMood || undefined,
-        timeFilter: selectedTimeFilter !== 'all' ? selectedTimeFilter as any : undefined,
-        type: selectedDiscoveryType as any,
-      }
-
-      if (searchQuery) {
-        return apiService.searchTracks(searchQuery, filters)
-      } else {
-        return apiService.getTracks({
-          genre: selectedGenre !== 'all' ? selectedGenre : undefined,
-          limit: 20,
-        })
-      }
-    },
-    {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
+  // Search function with debouncing
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setTracks([])
+      setHasSearched(false)
+      return
     }
-  )
 
-  const tracks = tracksData?.data || []
-  const hasMore = tracksData?.pagination?.has_more || false
+    const timeoutId = setTimeout(async () => {
+      setIsLoading(true)
+      setError(null)
+      
+      try {
+        const results = await searchMusic(searchQuery)
+        setTracks(results)
+        setHasSearched(true)
+        setShowFilters(true) // Show filters after first search
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Search failed')
+        setTracks([])
+      } finally {
+        setIsLoading(false)
+      }
+    }, 500) // 500ms debounce
+
+    return () => clearTimeout(timeoutId)
+  }, [searchQuery])
 
   const handlePlayTrack = (track: Track) => {
-    // TODO: Implement track playing functionality
-    console.log('Playing track:', track.title)
+    // Open track in music app based on provider
+    if (track.provider === 'itunes') {
+      window.open(track.url, '_blank')
+    } else {
+      window.open(track.url, '_blank')
+    }
   }
 
   const handleLikeTrack = (track: Track) => {
@@ -98,28 +96,32 @@ export default function MusicDiscovery({ className }: MusicDiscoveryProps) {
   }
 
   const handleShareTrack = (track: Track) => {
-    // TODO: Implement track sharing functionality
-    console.log('Sharing track:', track.title)
+    // Create shareable link
+    const shareUrl = `${window.location.origin}/t/${track.id}`
+    if (navigator.share) {
+      navigator.share({
+        title: `${track.title} by ${track.artist}`,
+        text: `Check out this track: ${track.title}`,
+        url: shareUrl
+      })
+    } else {
+      navigator.clipboard.writeText(shareUrl)
+      // TODO: Show toast notification
+    }
   }
 
-  const handleGenreChange = (genre: string) => {
-    setSelectedGenre(genre)
-  }
-
-  const handleMoodChange = (mood: string | null) => {
-    setSelectedMood(mood)
-  }
-
-  const handleTimeFilterChange = (timeFilter: string) => {
-    setSelectedTimeFilter(timeFilter)
-  }
-
-  const handleDiscoveryTypeChange = (type: string) => {
-    setSelectedDiscoveryType(type)
-  }
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query)
+  const handleRetrySearch = () => {
+    if (searchQuery.trim()) {
+      setIsLoading(true)
+      setError(null)
+      searchMusic(searchQuery).then(results => {
+        setTracks(results)
+        setIsLoading(false)
+      }).catch(err => {
+        setError(err instanceof Error ? err.message : 'Search failed')
+        setIsLoading(false)
+      })
+    }
   }
 
   return (
@@ -147,161 +149,81 @@ export default function MusicDiscovery({ className }: MusicDiscoveryProps) {
           className="max-w-2xl mx-auto mb-8"
         >
           <div className="relative">
-            <Music className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Search for songs, artists, or paste a music link..."
               value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-3 text-lg rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
-          </div>
-        </motion.div>
-
-        {/* Discovery Controls */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-8"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Discovery Filters
-            </h3>
-            <button
-              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              className="flex items-center gap-2 text-primary-500 hover:text-primary-600 transition-colors"
-            >
-              <Filter className="w-4 h-4" />
-              Advanced
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Genre Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Genre
-              </label>
-              <select
-                value={selectedGenre}
-                onChange={(e) => handleGenreChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                {GENRES.map((genre) => (
-                  <option key={genre.value} value={genre.value}>
-                    {genre.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Discovery Type */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Type
-              </label>
-              <select
-                value={selectedDiscoveryType}
-                onChange={(e) => handleDiscoveryTypeChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                {DISCOVERY_TYPES.map((type) => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Time Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Time Period
-              </label>
-              <select
-                value={selectedTimeFilter}
-                onChange={(e) => handleTimeFilterChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                {TIME_FILTERS.map((filter) => (
-                  <option key={filter.value} value={filter.value}>
-                    {filter.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Mood Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Mood
-              </label>
-              <select
-                value={selectedMood || ''}
-                onChange={(e) => handleMoodChange(e.target.value || null)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="">Any Mood</option>
-                {MOODS.map((mood) => (
-                  <option key={mood.value} value={mood.value}>
-                    {mood.emoji} {mood.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Advanced Filters */}
-          <AnimatePresence>
-            {showAdvancedFilters && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Popularity
-                    </label>
-                    <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                      <option value="all">All Popularity</option>
-                      <option value="high">High</option>
-                      <option value="medium">Medium</option>
-                      <option value="low">Low</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Duration
-                    </label>
-                    <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                      <option value="all">Any Duration</option>
-                      <option value="short">Short (&lt; 3 min)</option>
-                      <option value="medium">Medium (3-5 min)</option>
-                      <option value="long">Long (&gt; 5 min)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Year
-                    </label>
-                    <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                      <option value="all">Any Year</option>
-                      <option value="2024">2024</option>
-                      <option value="2023">2023</option>
-                      <option value="2022">2022</option>
-                      <option value="older">Older</option>
-                    </select>
-                  </div>
-                </div>
-              </motion.div>
+            {isLoading && (
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                <LoadingSpinner size="sm" />
+              </div>
             )}
-          </AnimatePresence>
+          </div>
         </motion.div>
+
+        {/* Filter Controls - Only show after search */}
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-8"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Search Filters
+                </h3>
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                >
+                  Hide Filters
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Provider Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Search Provider
+                  </label>
+                  <select
+                    value={selectedProvider}
+                    onChange={(e) => setSelectedProvider(e.target.value as 'itunes' | 'deezer' | 'auto')}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  >
+                    <option value="auto">Auto (iTunes + Deezer)</option>
+                    <option value="itunes">iTunes Only</option>
+                    <option value="deezer">Deezer Only</option>
+                  </select>
+                </div>
+
+                {/* Genre Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Genre
+                  </label>
+                  <select
+                    value={selectedGenre}
+                    onChange={(e) => setSelectedGenre(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  >
+                    {GENRES.map((genre) => (
+                      <option key={genre.value} value={genre.value}>
+                        {genre.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Results */}
         <div className="mb-8">
@@ -311,36 +233,59 @@ export default function MusicDiscovery({ className }: MusicDiscoveryProps) {
             </div>
           ) : error ? (
             <div className="text-center py-12">
-              <p className="text-red-500 mb-4">Failed to load tracks</p>
-              <button
-                onClick={() => refetch()}
-                className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
-              >
-                Try Again
-              </button>
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 max-w-md mx-auto">
+                <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+                <button
+                  onClick={handleRetrySearch}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
             </div>
-          ) : tracks.length === 0 ? (
+          ) : hasSearched && tracks.length === 0 ? (
+            <div className="text-center py-12">
+              <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                No tracks found
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-4">
+                Try searching for a different artist or song name
+              </p>
+              <div className="text-sm text-gray-400">
+                <p>Search tips:</p>
+                <ul className="mt-2 space-y-1">
+                  <li>• Try just the artist name (e.g., "Drake")</li>
+                  <li>• Use partial names (e.g., "Taylor" for Taylor Swift)</li>
+                  <li>• Check spelling and try variations</li>
+                </ul>
+              </div>
+            </div>
+          ) : !hasSearched ? (
             <div className="text-center py-12">
               <Music className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Start searching for music
+              </h3>
               <p className="text-gray-500 dark:text-gray-400">
-                No tracks found. Try adjusting your filters.
+                Enter an artist name, song title, or paste a music link to get started
               </p>
             </div>
           ) : (
             <>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  {searchQuery ? `Search Results for "${searchQuery}"` : 'Discover Music'}
+                  Search Results for "{searchQuery}"
                 </h2>
                 <span className="text-sm text-gray-500 dark:text-gray-400">
-                  {tracks.length} tracks
+                  {tracks.length} tracks found
                 </span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {tracks.map((track, index) => (
                   <motion.div
-                    key={track.id}
+                    key={`${track.provider}-${track.id}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
@@ -349,10 +294,13 @@ export default function MusicDiscovery({ className }: MusicDiscoveryProps) {
                     {/* Track Artwork */}
                     <div className="relative aspect-square rounded-t-lg overflow-hidden">
                       <img
-                        src={track.artwork || track.artworkMedium || '/placeholder-music.jpg'}
+                        src={track.artwork || '/placeholder-music.jpg'}
                         alt={track.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.src = '/placeholder-music.jpg'
+                        }}
                       />
                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center">
                         <button
@@ -362,11 +310,9 @@ export default function MusicDiscovery({ className }: MusicDiscoveryProps) {
                           <Play className="w-6 h-6 text-gray-900 ml-1" />
                         </button>
                       </div>
-                      {track.explicit && (
-                        <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded">
-                          E
-                        </div>
-                      )}
+                      <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                        {track.provider}
+                      </div>
                     </div>
 
                     {/* Track Info */}
@@ -412,15 +358,6 @@ export default function MusicDiscovery({ className }: MusicDiscoveryProps) {
                   </motion.div>
                 ))}
               </div>
-
-              {/* Load More Button */}
-              {hasMore && (
-                <div className="text-center mt-8">
-                  <button className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors">
-                    Load More Tracks
-                  </button>
-                </div>
-              )}
             </>
           )}
         </div>

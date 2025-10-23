@@ -32,7 +32,7 @@ export default defineConfig({
     target: 'esnext',
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: true,
+    sourcemap: false, // Disable sourcemaps in production for smaller builds
     minify: 'terser',
     rollupOptions: {
       output: {
@@ -42,7 +42,12 @@ export default defineConfig({
           router: ['react-router-dom'],
           ui: ['framer-motion', 'lucide-react'],
           utils: ['axios', 'dompurify', 'clsx', 'tailwind-merge'],
-        }
+          query: ['react-query', 'zustand'],
+        },
+        // Optimize chunk names for better caching
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
       }
     },
     // Optimize for production
@@ -50,8 +55,14 @@ export default defineConfig({
       compress: {
         drop_console: true,
         drop_debugger: true,
-      }
-    }
+        pure_funcs: ['console.log', 'console.info', 'console.debug'],
+      },
+      mangle: {
+        safari10: true,
+      },
+    },
+    // Increase chunk size warning limit
+    chunkSizeWarningLimit: 1000,
   },
   
   // Development server

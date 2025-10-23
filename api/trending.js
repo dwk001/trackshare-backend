@@ -1,11 +1,30 @@
+// ⚠️ VERCEL FUNCTION LIMIT WARNING ⚠️
+// TrackShare is deployed on Vercel FREE plan with 12-function limit
+// Current count: 12/12 functions (AT LIMIT)
+// To add new functions: upgrade to Pro plan or consolidate existing ones
+
 const { kv } = require('@vercel/kv');
 const { createClient } = require('@supabase/supabase-js');
 
-const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
-const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
+// iTunes RSS Chart endpoints - no authentication required
+const ITUNES_CHARTS = {
+  'most-played': 'https://rss.appleMusicccharts.com/api/v2/us/songs/most-played/25/explicit.json',
+  'hot-tracks': 'https://rss.appleMusicccharts.com/api/v2/us/songs/hot-tracks/25/explicit.json',
+  'new-releases': 'https://rss.appleMusicccharts.com/api/v2/us/songs/new-releases/25/explicit.json',
+};
 
-// Check if required environment variables are set
-const hasSpotifyCredentials = SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_SECRET;
+// Genre-specific charts
+const GENRE_CHARTS = {
+  'pop': 'https://rss.appleMusicccharts.com/api/v2/us/songs/pop/25/explicit.json',
+  'rock': 'https://rss.appleMusicccharts.com/api/v2/us/songs/rock/25/explicit.json',
+  'hip-hop': 'https://rss.appleMusicccharts.com/api/v2/us/songs/hip-hop/25/explicit.json',
+  'electronic': 'https://rss.appleMusicccharts.com/api/v2/us/songs/electronic/25/explicit.json',
+  'country': 'https://rss.appleMusicccharts.com/api/v2/us/songs/country/25/explicit.json',
+  'jazz': 'https://rss.appleMusicccharts.com/api/v2/us/songs/jazz/25/explicit.json',
+  'classical': 'https://rss.appleMusicccharts.com/api/v2/us/songs/classical/25/explicit.json',
+};
+
+// Check if Supabase is configured
 const hasSupabaseConfig = process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 // Initialize Supabase client only if credentials are available
@@ -19,7 +38,7 @@ if (hasSupabaseConfig) {
 
 const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000';
 
-// Fallback mock data for when Spotify API is unavailable
+// Fallback mock data for when iTunes RSS is unavailable
 const FALLBACK_TRACKS = {
   all: [
     {
@@ -27,7 +46,7 @@ const FALLBACK_TRACKS = {
       title: 'Sample Track 1',
       artist: 'Sample Artist',
       artwork: 'https://via.placeholder.com/300x300/667eea/ffffff?text=Track+1',
-      url: 'https://open.spotify.com/track/sample1',
+      url: 'https://music.apple.com/us/album/sample-track/123456789',
       album: 'Sample Album',
       popularity: 85,
       previewUrl: null,
@@ -67,190 +86,59 @@ const FALLBACK_TRACKS = {
   ]
 };
 
-// Genre-specific Spotify playlists - Expanded for more variety
-const GENRE_PLAYLISTS = {
-  all: [
-    '37i9dQZF1DXcBWIGoYBM5M', // Today's Top Hits
-    '37i9dQZF1DX0XUsuxWHRQd', // RapCaviar
-    '37i9dQZF1DWXRqgorJj26U', // Rock Classics
-    '37i9dQZF1DX4JAvHpjipBk', // New Music Friday
-    '37i9dQZF1DX10zKzsJ2jva', // Summer Hits
-    '37i9dQZF1DWY4xHQp97fN6', // Get Turnt
-    '37i9dQZF1DX3oM43CtKnRV', // Rock This
-    '37i9dQZF1DX1lVhptIYRda', // Hot Country
-    '37i9dQZF1DX4dyzvuaRJ0n', // mint
-    '37i9dQZF1DX6J5NfMJS675'  // Dance Rising
-  ],
-  pop: [
-    '37i9dQZF1DXcBWIGoYBM5M', // Today's Top Hits
-    '37i9dQZF1DX4JAvHpjipBk', // New Music Friday
-    '37i9dQZF1DX10zKzsJ2jva', // Summer Hits
-    '37i9dQZF1DX2RxBh64BHjQ', // Feelin' Myself
-    '37i9dQZF1DX7Jl5KP2eZaS', // Pop Rising
-    '37i9dQZF1DX0XUsuxWHRQd', // RapCaviar (crossover)
-    '37i9dQZF1DX1lVhptIYRda', // Hot Country (crossover)
-    '37i9dQZF1DX4dyzvuaRJ0n'  // mint (electronic pop)
-  ],
-  rock: [
-    '37i9dQZF1DWXRqgorJj26U', // Rock Classics
-    '37i9dQZF1DX3oM43CtKnRV', // Rock This
-    '37i9dQZF1DWWwzidNQX6jx', // All Out 2000s
-    '37i9dQZF1DX1stG8W0Vl2U', // Rock Hard
-    '37i9dQZF1DX8f6LXxYF5km', // Rock Hits
-    '37i9dQZF1DX0XUsuxWHRQd', // RapCaviar (rock rap)
-    '37i9dQZF1DX4dyzvuaRJ0n', // mint (electronic rock)
-    '37i9dQZF1DX6J5NfMJS675'  // Dance Rising (rock dance)
-  ],
-  'hip-hop': [
-    '37i9dQZF1DX0XUsuxWHRQd', // RapCaviar
-    '37i9dQZF1DWY4xHQp97fN6', // Get Turnt
-    '37i9dQZF1DX2RxBh64BHjQ', // Feelin' Myself
-    '37i9dQZF1DX4JAvHpjipBk', // New Music Friday
-    '37i9dQZF1DX10zKzsJ2jva', // Summer Hits
-    '37i9dQZF1DX1stG8W0Vl2U', // Rock Hard (rap rock)
-    '37i9dQZF1DX4dyzvuaRJ0n', // mint (electronic rap)
-    '37i9dQZF1DX6J5NfMJS675'  // Dance Rising (rap dance)
-  ],
-  country: [
-    '37i9dQZF1DX1lVhptIYRda', // Hot Country
-    '37i9dQZF1DWZBCPUIUs2iR', // Country Gold
-    '37i9dQZF1DX93D9SC7vVVB', // Wild Country
-    '37i9dQZF1DX4JAvHpjipBk', // New Music Friday
-    '37i9dQZF1DX10zKzsJ2jva', // Summer Hits
-    '37i9dQZF1DXcBWIGoYBM5M', // Today's Top Hits (country crossover)
-    '37i9dQZF1DX0XUsuxWHRQd', // RapCaviar (country rap)
-    '37i9dQZF1DX4dyzvuaRJ0n'  // mint (country electronic)
-  ],
-  electronic: [
-    '37i9dQZF1DX4dyzvuaRJ0n', // mint
-    '37i9dQZF1DX6J5NfMJS675', // Dance Rising
-    '37i9dQZF1DX8tZsk68tuDw', // Electronic Circus
-    '37i9dQZF1DX4JAvHpjipBk', // New Music Friday
-    '37i9dQZF1DX10zKzsJ2jva', // Summer Hits
-    '37i9dQZF1DXcBWIGoYBM5M', // Today's Top Hits (electronic pop)
-    '37i9dQZF1DX0XUsuxWHRQd', // RapCaviar (electronic rap)
-    '37i9dQZF1DX1stG8W0Vl2U'  // Rock Hard (electronic rock)
-  ]
+// iTunes RSS Chart endpoints mapping
+const CHART_ENDPOINTS = {
+  all: ITUNES_CHARTS['most-played'],
+  rock: GENRE_CHARTS['rock'],
+  'hip-hop': GENRE_CHARTS['hip-hop'],
+  country: GENRE_CHARTS['country'],
+  electronic: GENRE_CHARTS['electronic'],
+  pop: GENRE_CHARTS['pop'],
+  jazz: GENRE_CHARTS['jazz'],
+  classical: GENRE_CHARTS['classical']
 };
 
-async function getSpotifyAccessToken() {
-  // Check if credentials are available
-  if (!hasSpotifyCredentials) {
-    console.warn('Spotify credentials not configured, using fallback data');
-    return null;
-  }
-
-  // Check cache first
-  try {
-    const cached = await kv.get('spotify:access_token');
-    if (cached) return cached;
-  } catch (e) {
-    console.warn('Cache unavailable, fetching fresh token');
-  }
+async function fetchTrendingFromiTunes(genre = 'all', limit = 150) {
+  const endpoint = CHART_ENDPOINTS[genre] || CHART_ENDPOINTS.all;
   
-  const auth = Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64');
+  console.log(`Fetching trending tracks for genre: ${genre}, endpoint: ${endpoint}, limit: ${limit}`);
   
   try {
-    const response = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${auth}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: 'grant_type=client_credentials'
-    });
+    const response = await fetch(endpoint);
     
     if (!response.ok) {
-      throw new Error(`Spotify API error: ${response.status}`);
+      throw new Error(`iTunes RSS error: ${response.status}`);
     }
     
     const data = await response.json();
     
-    // Cache for 55 minutes (tokens valid for 1 hour)
-    if (data.access_token) {
-      try {
-        await kv.setex('spotify:access_token', 3300, data.access_token);
-      } catch (e) {
-        console.warn('Failed to cache token:', e.message);
-      }
+    if (!data.results || !Array.isArray(data.results)) {
+      console.warn('Invalid iTunes RSS data structure:', data);
+      return [];
     }
     
-    return data.access_token;
+    const tracks = data.results.map((track, index) => ({
+      id: track.id || `itunes-${index}`,
+      title: track.name || track.title || 'Unknown Track',
+      artist: track.artistName || track.artist || 'Unknown Artist',
+      album: track.collectionName || track.album || 'Unknown Album',
+      artwork: track.artworkUrl100?.replace('100x100', '300x300') || '',
+      url: track.url || track.trackViewUrl || '#',
+      album: track.collectionName || track.album || 'Unknown Album',
+      popularity: 100 - index, // Higher position = higher popularity
+      previewUrl: track.previewUrl,
+      durationMs: track.durationInMillis || track.duration,
+      releaseDate: track.releaseDate,
+      genre: genre,
+      explicit: track.explicit || false
+    }));
+    
+    console.log(`Fetched ${tracks.length} tracks from iTunes RSS`);
+    return tracks.slice(0, limit);
   } catch (error) {
-    console.error('Failed to get Spotify access token:', error.message);
-    return null;
+    console.error('Error fetching iTunes RSS:', error.message);
+    throw error;
   }
-}
-
-async function fetchGenreTracks(genre = 'all', limit = 150) {
-  const accessToken = await getSpotifyAccessToken();
-  
-  // If no access token (missing credentials or API failure), return fallback data
-  if (!accessToken) {
-    console.log('Using fallback tracks due to Spotify API unavailability');
-    const fallbackTracks = FALLBACK_TRACKS[genre] || FALLBACK_TRACKS.all;
-    return fallbackTracks.slice(0, limit);
-  }
-  
-  const playlistIds = GENRE_PLAYLISTS[genre] || GENRE_PLAYLISTS.all;
-  
-  console.log(`Fetching tracks for genre: ${genre}, playlists: ${playlistIds.length}, limit: ${limit}`);
-  
-  const allTracks = [];
-  
-  for (const playlistId of playlistIds) {
-    try {
-      const response = await fetch(
-        `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=50`,
-        {
-          headers: { 'Authorization': `Bearer ${accessToken}` }
-        }
-      );
-      
-      if (!response.ok) {
-        console.warn(`Spotify API error for playlist ${playlistId}: ${response.status}`);
-        continue;
-      }
-      
-      const data = await response.json();
-      
-      if (data && data.items) {
-        const tracks = data.items
-          .filter(item => item.track && !item.track.is_local)
-          .map(item => ({
-            id: item.track.id,
-            title: item.track.name,
-            artist: item.track.artists[0].name,
-            artwork: item.track.album.images[0]?.url,
-            url: item.track.external_urls.spotify,
-            album: item.track.album.name,
-            popularity: item.track.popularity,
-            previewUrl: item.track.preview_url,
-            durationMs: item.track.duration_ms,
-            releaseDate: item.track.album.release_date,
-            genre: genre,
-            explicit: item.track.explicit
-          }));
-        
-        console.log(`Playlist ${playlistId}: fetched ${tracks.length} tracks`);
-        allTracks.push(...tracks);
-      }
-    } catch (error) {
-      console.error(`Error fetching playlist ${playlistId}:`, error.message);
-    }
-    
-    if (allTracks.length >= limit) break;
-  }
-  
-  // If no tracks were fetched, return fallback data
-  if (allTracks.length === 0) {
-    console.log('No tracks fetched from Spotify, using fallback data');
-    const fallbackTracks = FALLBACK_TRACKS[genre] || FALLBACK_TRACKS.all;
-    return fallbackTracks.slice(0, limit);
-  }
-  
-  // Shuffle and return requested number of tracks
-  return shuffleArray(allTracks).slice(0, limit);
 }
 
 function shuffleArray(array) {
@@ -287,13 +175,13 @@ module.exports = async (req, res) => {
     
     try {
       console.log('Starting trending music cache refresh...');
-      const tracks = await fetchGenreTracks(genre, 150);
+      const tracks = await fetchTrendingFromiTunes(genre, 150);
       
       if (tracks.length === 0) {
         console.log('No tracks fetched, skipping cache update');
         return res.status(500).json({ 
           success: false, 
-          error: 'No tracks fetched from Spotify' 
+          error: 'No tracks fetched from iTunes RSS' 
         });
       }
       
@@ -371,7 +259,7 @@ module.exports = async (req, res) => {
   
   // Fetch fresh data
   try {
-    const tracks = await fetchGenreTracks(genre, 150);
+    const tracks = await fetchTrendingFromiTunes(genre, 150);
     
     // Cache for 24 hours
     if (tracks.length > 0) {
