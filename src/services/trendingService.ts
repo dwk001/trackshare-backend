@@ -18,23 +18,23 @@ export interface TrendingTrack {
 
 // iTunes RSS Chart endpoints
 const CHART_ENDPOINTS = {
-  'most-played': 'https://rss.appleMusicccharts.com/api/v2/us/songs/most-played/25/explicit.json',
-  'most-played-clean': 'https://rss.appleMusicccharts.com/api/v2/us/songs/most-played/25/clean.json',
-  'hot-tracks': 'https://rss.appleMusicccharts.com/api/v2/us/songs/hot-tracks/25/explicit.json',
-  'hot-tracks-clean': 'https://rss.appleMusicccharts.com/api/v2/us/songs/hot-tracks/25/clean.json',
-  'new-releases': 'https://rss.appleMusicccharts.com/api/v2/us/songs/new-releases/25/explicit.json',
-  'new-releases-clean': 'https://rss.appleMusicccharts.com/api/v2/us/songs/new-releases/25/clean.json',
+  'most-played': 'https://rss.applemarketingtools.com/api/v2/us/songs/most-played/25/explicit.json',
+  'most-played-clean': 'https://rss.applemarketingtools.com/api/v2/us/songs/most-played/25/clean.json',
+  'hot-tracks': 'https://rss.applemarketingtools.com/api/v2/us/songs/hot-tracks/25/explicit.json',
+  'hot-tracks-clean': 'https://rss.applemarketingtools.com/api/v2/us/songs/hot-tracks/25/clean.json',
+  'new-releases': 'https://rss.applemarketingtools.com/api/v2/us/songs/new-releases/25/explicit.json',
+  'new-releases-clean': 'https://rss.applemarketingtools.com/api/v2/us/songs/new-releases/25/clean.json',
 }
 
 // Genre-specific charts
 const GENRE_CHARTS = {
-  'pop': 'https://rss.appleMusicccharts.com/api/v2/us/songs/pop/25/explicit.json',
-  'rock': 'https://rss.appleMusicccharts.com/api/v2/us/songs/rock/25/explicit.json',
-  'hip-hop': 'https://rss.appleMusicccharts.com/api/v2/us/songs/hip-hop/25/explicit.json',
-  'electronic': 'https://rss.appleMusicccharts.com/api/v2/us/songs/electronic/25/explicit.json',
-  'country': 'https://rss.appleMusicccharts.com/api/v2/us/songs/country/25/explicit.json',
-  'jazz': 'https://rss.appleMusicccharts.com/api/v2/us/songs/jazz/25/explicit.json',
-  'classical': 'https://rss.appleMusicccharts.com/api/v2/us/songs/classical/25/explicit.json',
+  'pop': 'https://rss.applemarketingtools.com/api/v2/us/songs/pop/25/explicit.json',
+  'rock': 'https://rss.applemarketingtools.com/api/v2/us/songs/rock/25/explicit.json',
+  'hip-hop': 'https://rss.applemarketingtools.com/api/v2/us/songs/hip-hop/25/explicit.json',
+  'electronic': 'https://rss.applemarketingtools.com/api/v2/us/songs/electronic/25/explicit.json',
+  'country': 'https://rss.applemarketingtools.com/api/v2/us/songs/country/25/explicit.json',
+  'jazz': 'https://rss.applemarketingtools.com/api/v2/us/songs/jazz/25/explicit.json',
+  'classical': 'https://rss.applemarketingtools.com/api/v2/us/songs/classical/25/explicit.json',
 }
 
 // Fetch trending tracks from iTunes RSS
