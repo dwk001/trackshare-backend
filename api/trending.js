@@ -3,7 +3,7 @@
 // Current count: 12/12 functions (AT LIMIT)
 // To add new functions: upgrade to Pro plan or consolidate existing ones
 
-const { kv } = require('@vercel/kv');
+// Removed @vercel/kv dependency to work on free plan
 const { createClient } = require('@supabase/supabase-js');
 
 // iTunes RSS Chart endpoints - no authentication required
@@ -185,16 +185,12 @@ module.exports = async (req, res) => {
         });
       }
       
-      await kv.setex(`trending:music:${genre}`, 86400, JSON.stringify({
-        tracks,
-        cached_at: new Date().toISOString()
-      }));
-      
-      console.log(`Successfully cached ${tracks.length} tracks for genre ${genre}`);
+      // Cache disabled for free plan compatibility
+      console.log(`Successfully fetched ${tracks.length} tracks for genre ${genre}`);
       
       return res.json({ 
         success: true, 
-        cached: tracks.length, 
+        tracks: tracks,
         genre: genre,
         timestamp: new Date().toISOString()
       });
@@ -228,51 +224,13 @@ module.exports = async (req, res) => {
     }
   }
   
-  // Check cache first
-  try {
-    const cached = await kv.get(`trending:music:${genre}`);
-    if (cached) {
-      const data = typeof cached === 'string' ? JSON.parse(cached) : cached;
-      console.log(`Returning cached ${genre} music from:`, data.cached_at);
-      
-      // Apply pagination to cached data
-      const startIndex = parseInt(offset);
-      const endIndex = startIndex + parseInt(limit);
-      const paginatedTracks = data.tracks.slice(startIndex, endIndex);
-      
-      return res.json({
-        success: true,
-        tracks: paginatedTracks,
-        genre: genre,
-        cached_at: data.cached_at,
-        from_cache: true,
-        total: data.tracks.length,
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-        hasMore: endIndex < data.tracks.length,
-        timestamp: new Date().toISOString()
-      });
-    }
-  } catch (kvError) {
-    console.log('Cache miss, fetching fresh data');
-  }
+  // Cache disabled for free plan compatibility - fetch fresh data directly
   
   // Fetch fresh data
   try {
     const tracks = await fetchTrendingFromiTunes(genre, 150);
     
-    // Cache for 24 hours
-    if (tracks.length > 0) {
-      try {
-        await kv.setex(`trending:music:${genre}`, 86400, JSON.stringify({
-          tracks,
-          cached_at: new Date().toISOString()
-        }));
-        console.log(`Cached fresh ${genre} music`);
-      } catch (kvError) {
-        console.error('Error caching data:', kvError);
-      }
-    }
+    // Cache disabled for free plan compatibility
     
     // Apply pagination to fresh data
     const startIndex = parseInt(offset);

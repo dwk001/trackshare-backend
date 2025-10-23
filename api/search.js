@@ -3,7 +3,7 @@
 // Current count: 12/12 functions (AT LIMIT)
 // To add new functions: upgrade to Pro plan or consolidate existing ones
 
-const { kv } = require('@vercel/kv');
+// Removed @vercel/kv dependency to work on free plan
 
 // iTunes Search API - no authentication required
 const ITUNES_SEARCH_BASE = 'https://itunes.apple.com/search';
