@@ -83,9 +83,20 @@ This will:
 
 ## Current Status
 
-✅ **Production (trackshare.online)**: Coming soon page
-✅ **QA (trackshare-egq.pages.dev)**: Latest main branch deployment
-✅ **Preview URLs**: Available for each deployment
+✅ **Production (trackshare.online)**: Coming soon page deployed
+✅ **QA (trackshare-egq.pages.dev)**: Latest main branch deployment with full app
+✅ **Preview URLs**: Unique URL for each deployment (latest: `https://756e9931.trackshare-egq.pages.dev`)
+
+## Your Current URLs
+
+### For Testing/QA (Full Application)
+- **Main QA URL**: https://trackshare-egq.pages.dev
+- **Latest Deployment**: https://756e9931.trackshare-egq.pages.dev
+- Use these URLs to test the complete application with all features
+
+### For Public (Coming Soon Page)
+- **Production**: https://trackshare.online
+- Shows beautiful "Coming Soon" page with floating music notes
 
 ## Commands Reference
 
