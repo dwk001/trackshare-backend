@@ -192,7 +192,7 @@ export default function Header({
 
             {/* User Menu */}
             {isAuthenticated ? (
-              <div className="relative">
+              <div className="relative inline-block">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   onMouseEnter={() => setIsHoveringProfile(true)}
