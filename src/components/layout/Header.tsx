@@ -112,13 +112,14 @@ export default function Header({
 
   return (
     <header className={cn('bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700', className)}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <div className="flex items-center flex-shrink-0">
+          {/* Left Side: Logo + Search */}
+          <div className="flex items-center space-x-4 flex-shrink-0">
+            {/* Logo */}
             <button
               onClick={() => navigate('/')}
-              className="flex items-center hover:opacity-80 transition-opacity cursor-pointer focus:outline-none"
+              className="flex items-center hover:opacity-80 transition-opacity cursor-pointer focus:outline-none flex-shrink-0"
               aria-label="Go to home page"
             >
               <div className="w-8 h-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
@@ -128,10 +129,26 @@ export default function Header({
                 TrackShare
               </span>
             </button>
+
+            {/* Search Bar - Larger */}
+            <div className="hidden lg:block">
+              <form onSubmit={handleSearch} className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search tracks, artists, events, or location (city, state, zip)..."
+                  className="block w-[400px] pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </form>
+            </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6 ml-8">
+          {/* Center: Desktop Navigation - Icon only when inactive, Icon + Text when active */}
+          <nav className="hidden md:flex items-center justify-center flex-1 space-x-2 px-8">
             {NAVIGATION_ITEMS.filter(item => !item.requiresAuth || isAuthenticated).map((item) => {
               const Icon = item.icon
               const isActive = getActiveTab() === item.id
@@ -140,37 +157,31 @@ export default function Header({
                   key={item.id}
                   onClick={() => handleTabChange(item)}
                   className={cn(
-                    'flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[44px] touch-manipulation',
+                    'flex items-center rounded-lg text-sm font-medium transition-all min-h-[44px] touch-manipulation overflow-hidden',
                     isActive
-                      ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
+                      ? 'px-4 space-x-2 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
+                      : 'px-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
                   )}
+                  title={item.label}
                 >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
+                  <Icon className={cn("flex-shrink-0", isActive ? "w-5 h-5" : "w-6 h-6")} />
+                  {isActive && (
+                    <motion.span
+                      initial={{ width: 0, opacity: 0 }}
+                      animate={{ width: 'auto', opacity: 1 }}
+                      exit={{ width: 0, opacity: 0 }}
+                      className="whitespace-nowrap"
+                    >
+                      {item.label}
+                    </motion.span>
+                  )}
                 </button>
               )
             })}
           </nav>
 
-          {/* Search Bar */}
-          <div className="hidden md:block flex-1 max-w-lg mx-6">
-            <form onSubmit={handleSearch} className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search tracks, artists, events, or location (city, state, zip)..."
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              />
-            </form>
-          </div>
-
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 flex-shrink-0">
             {/* Dark Mode Toggle */}
             <button
               onClick={toggleDarkMode}
