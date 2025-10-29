@@ -192,7 +192,7 @@ export default function Header({
 
             {/* User Menu */}
             {isAuthenticated ? (
-              <div className="relative inline-block">
+              <div className="relative" style={{ display: 'inline-block' }}>
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   onMouseEnter={() => setIsHoveringProfile(true)}
