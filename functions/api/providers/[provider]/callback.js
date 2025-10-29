@@ -151,8 +151,8 @@ async function exchangeSoundCloudToken(code, redirectUri, env) {
 
 // Exchange YouTube Music (Google OAuth) code for tokens
 async function exchangeYouTubeMusicToken(code, redirectUri, env) {
-  const clientId = env.YOUTUBE_MUSIC_CLIENT_ID || env.YOUTUBE_CLIENT_ID
-  const clientSecret = env.YOUTUBE_MUSIC_CLIENT_SECRET || env.YOUTUBE_CLIENT_SECRET
+  const clientId = env.GOOGLE_CLIENT_ID || env.YOUTUBE_MUSIC_CLIENT_ID || env.YOUTUBE_CLIENT_ID
+  const clientSecret = env.GOOGLE_CLIENT_SECRET || env.YOUTUBE_MUSIC_CLIENT_SECRET || env.YOUTUBE_CLIENT_SECRET
   
   if (!clientId || !clientSecret) {
     throw new Error('YouTube Music credentials not configured')
