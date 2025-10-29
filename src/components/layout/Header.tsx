@@ -230,7 +230,7 @@ export default function Header({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute right-0 top-full mt-0.5 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50"
+                    className="absolute right-0 top-full w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50"
                     onMouseEnter={() => setIsHoveringProfile(true)}
                     onMouseLeave={() => setIsHoveringProfile(false)}
                   >
