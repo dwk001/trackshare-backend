@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@hooks/useAuth'
+import { useProfile } from '@hooks/useProfile'
 import { 
   User, 
   Edit3, 
@@ -13,13 +15,18 @@ import {
   Globe,
   Camera,
   Mail,
-  Phone
+  Phone,
+  Link,
+  CheckCircle
 } from 'lucide-react'
 import { cn } from '@utils'
 import AuthModal from '@components/auth/AuthModal'
+import LoadingSpinner from '@components/ui/LoadingSpinner'
 
 export default function ProfilePage() {
+  const navigate = useNavigate()
   const { user, isAuthenticated } = useAuth()
+  const { profile, isLoading: isProfileLoading, error: profileError } = useProfile()
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
   if (!isAuthenticated) {
@@ -50,6 +57,43 @@ export default function ProfilePage() {
     )
   }
 
+  // Show loading state while fetching profile
+  if (isProfileLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
+  }
+
+  // Show error state
+  if (profileError && !profile) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <User className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Error loading profile
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            {profileError instanceof Error ? profileError.message : 'Failed to load profile data'}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Use profile data or fallback to auth user data
+  const displayName = profile?.display_name || user?.displayName || user?.name || 'Anonymous User'
+  const avatar = profile?.avatar_url || user?.avatar
+  const username = profile?.username || user?.email?.split('@')[0] || 'user'
+  const email = profile?.email || user?.email
+  const bio = profile?.bio
+  const location = profile?.location
+  const website = profile?.website
+  const birthDate = profile?.birth_date
+  const stats = profile?.stats || { tracksShared: 0, followers: 0, following: 0 }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -63,8 +107,8 @@ export default function ProfilePage() {
             {/* Avatar */}
             <div className="relative">
               <img
-                src={user?.avatar || '/placeholder-avatar.jpg'}
-                alt={user?.displayName}
+                src={avatar || '/placeholder-avatar.jpg'}
+                alt={displayName}
                 className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-lg"
               />
               <button className="absolute bottom-0 right-0 w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white hover:bg-primary-600 transition-colors">
@@ -77,14 +121,14 @@ export default function ProfilePage() {
               <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {user?.displayName || 'Anonymous User'}
+                    {displayName}
                   </h1>
                   <p className="text-gray-600 dark:text-gray-400">
-                    @{user?.username || 'user'}
+                    @{username}
                   </p>
-                  {user?.bio && (
+                  {bio && (
                     <p className="text-gray-700 dark:text-gray-300 mt-2">
-                      {user.bio}
+                      {bio}
                     </p>
                   )}
                 </div>
@@ -101,7 +145,7 @@ export default function ProfilePage() {
               <div className="flex space-x-6 mt-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {user?.stats?.tracksShared || 0}
+                    {stats.tracksShared}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">
                     Tracks Shared
@@ -109,7 +153,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {user?.stats?.followers || 0}
+                    {stats.followers}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">
                     Followers
@@ -117,7 +161,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {user?.stats?.following || 0}
+                    {stats.following}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">
                     Following
@@ -143,49 +187,13 @@ export default function ProfilePage() {
                 Recent Activity
               </h2>
               <div className="space-y-4">
-                {[
-                  {
-                    icon: Music,
-                    action: 'Shared a track',
-                    details: 'Blinding Lights by The Weeknd',
-                    time: '2 hours ago',
-                    color: 'text-blue-500'
-                  },
-                  {
-                    icon: Heart,
-                    action: 'Liked a track',
-                    details: 'Levitating by Dua Lipa',
-                    time: '5 hours ago',
-                    color: 'text-red-500'
-                  },
-                  {
-                    icon: Users,
-                    action: 'Followed',
-                    details: 'musiclover123',
-                    time: '1 day ago',
-                    color: 'text-green-500'
-                  }
-                ].map((activity, index) => {
-                  const Icon = activity.icon
-                  return (
-                    <div key={index} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                      <div className={cn('w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center', activity.color)}>
-                        <Icon className="w-4 h-4" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {activity.action}
-                        </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {activity.details}
-                        </p>
-                      </div>
-                      <span className="text-xs text-gray-500 dark:text-gray-500">
-                        {activity.time}
-                      </span>
-                    </div>
-                  )
-                })}
+                {/* TODO: Fetch real activity from Supabase posts/activity table */}
+                <div className="text-center py-8">
+                  <Music className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    No activity yet. Start sharing tracks to see your activity here!
+                  </p>
+                </div>
               </div>
             </motion.div>
 
@@ -200,32 +208,13 @@ export default function ProfilePage() {
                 Top Tracks This Month
               </h2>
               <div className="space-y-3">
-                {[
-                  { title: 'Blinding Lights', artist: 'The Weeknd', plays: 45 },
-                  { title: 'Levitating', artist: 'Dua Lipa', plays: 32 },
-                  { title: 'Watermelon Sugar', artist: 'Harry Styles', plays: 28 },
-                  { title: 'Good 4 U', artist: 'Olivia Rodrigo', plays: 24 },
-                  { title: 'Industry Baby', artist: 'Lil Nas X', plays: 21 }
-                ].map((track, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center text-sm font-bold text-gray-600 dark:text-gray-400">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">
-                          {track.title}
-                        </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {track.artist}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-sm text-gray-500 dark:text-gray-500">
-                      {track.plays} plays
-                    </span>
-                  </div>
-                ))}
+                {/* TODO: Fetch real top tracks from user listening history */}
+                <div className="text-center py-8">
+                  <Music className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    No tracks yet. Connect a music provider and start listening to see your top tracks here!
+                  </p>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -243,40 +232,40 @@ export default function ProfilePage() {
                 Contact Information
               </h3>
               <div className="space-y-3">
-                {user?.email && (
+                {email && (
                   <div className="flex items-center space-x-3">
                     <Mail className="w-4 h-4 text-gray-400" />
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {user.email}
+                      {email}
                     </span>
                   </div>
                 )}
-                {user?.location && (
+                {location && (
                   <div className="flex items-center space-x-3">
                     <MapPin className="w-4 h-4 text-gray-400" />
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {user.location}
+                      {location}
                     </span>
                   </div>
                 )}
-                {user?.website && (
+                {website && (
                   <div className="flex items-center space-x-3">
                     <Globe className="w-4 h-4 text-gray-400" />
                     <a
-                      href={user.website}
+                      href={website}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
                     >
-                      {user.website}
+                      {website}
                     </a>
                   </div>
                 )}
-                {user?.birthDate && (
+                {birthDate && (
                   <div className="flex items-center space-x-3">
                     <Calendar className="w-4 h-4 text-gray-400" />
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      Born {new Date(user.birthDate).toLocaleDateString()}
+                      Born {new Date(birthDate).toLocaleDateString()}
                     </span>
                   </div>
                 )}
@@ -313,6 +302,63 @@ export default function ProfilePage() {
                   </span>
                 </button>
               </div>
+            </motion.div>
+
+            {/* Connected Providers */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6"
+            >
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Connected Music Services
+              </h3>
+              {profile?.connected_providers && Object.keys(profile.connected_providers).length > 0 ? (
+                <div className="flex flex-wrap gap-3">
+                  {Object.keys(profile.connected_providers).map((providerId) => {
+                    const providerNames: Record<string, string> = {
+                      spotify: 'Spotify',
+                      soundcloud: 'SoundCloud',
+                      youtube_music: 'YouTube Music',
+                      tidal: 'Tidal',
+                      apple_music: 'Apple Music'
+                    }
+                    const providerIcons: Record<string, string> = {
+                      spotify: '🎵',
+                      soundcloud: '☁️',
+                      youtube_music: '📺',
+                      tidal: '🌊',
+                      apple_music: '🍎'
+                    }
+                    return (
+                      <div
+                        key={providerId}
+                        className="flex items-center space-x-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg"
+                      >
+                        <span>{providerIcons[providerId] || '🎵'}</span>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                          {providerNames[providerId] || providerId}
+                        </span>
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <Link className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                    No music services connected
+                  </p>
+                  <button
+                    onClick={() => navigate('/settings')}
+                    className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
+                  >
+                    Connect Services →
+                  </button>
+                </div>
+              )}
             </motion.div>
           </div>
         </div>

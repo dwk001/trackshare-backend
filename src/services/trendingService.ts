@@ -37,39 +37,60 @@ const GENRE_CHARTS = {
   'classical': 'https://rss.applemarketingtools.com/api/v2/us/songs/classical/25/explicit.json',
 }
 
-// Fetch trending tracks from iTunes RSS via server-side proxy
-const fetchTrendingFromRSS = async (endpoint: string, genre: string = 'all'): Promise<TrendingTrack[]> => {
+// Fetch trending tracks directly from iTunes Search API
+const fetchTrendingFromiTunes = async (genre: string = 'all'): Promise<TrendingTrack[]> => {
   try {
-    // Use server-side API to avoid CORS issues
-    const response = await fetch('/api/trending?genre=' + encodeURIComponent(genre) + '&limit=25')
+    // Use iTunes Search API directly with popular search terms
+    const searchTerms = genre === 'all' 
+      ? ['pop', 'hip hop', 'rock', 'electronic', 'country']
+      : [genre]
     
-    if (!response.ok) {
-      throw new Error(`iTunes RSS error: ${response.status}`)
+    const allTracks: TrendingTrack[] = []
+    
+    for (const term of searchTerms) {
+      try {
+        const response = await fetch(
+          `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&entity=song&limit=5&sort=popularity`
+        )
+        
+        if (!response.ok) {
+          console.warn(`iTunes API error for ${term}:`, response.status)
+          continue
+        }
+        
+        const data = await response.json()
+        
+        if (data.results && Array.isArray(data.results)) {
+          const tracks = data.results.map((track: any, index: number) => ({
+            id: track.trackId?.toString() || `itunes-${term}-${index}`,
+            title: track.trackName || 'Unknown Track',
+            artist: track.artistName || 'Unknown Artist',
+            album: track.collectionName || 'Unknown Album',
+            artwork: track.artworkUrl100?.replace('100x100', '300x300') || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjNjY3ZWVhIi8+CjxjaXJjbGUgY3g9IjE1MCIgY3k9IjE1MCIgcj0iNTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMjAgMTIwSDIwMFYxODBIMTIwVjEyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMjAgMTIwSDIwMFYxODBIMTIwVjEyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMjAgMTIwSDIwMFYxODBIMTIwVjEyMFoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=',
+            url: track.trackViewUrl || '#',
+            previewUrl: track.previewUrl,
+            duration: track.trackTimeMillis,
+            releaseDate: track.releaseDate,
+            position: allTracks.length + index + 1,
+            genre: genre,
+            provider: 'itunes' as const
+          }))
+          
+          allTracks.push(...tracks)
+        }
+      } catch (error) {
+        console.warn(`Error fetching ${term} tracks:`, error)
+      }
     }
     
-    const data = await response.json()
+    // Remove duplicates and limit results
+    const uniqueTracks = allTracks.filter((track, index, self) => 
+      index === self.findIndex(t => t.id === track.id)
+    )
     
-    if (!data.success || !data.tracks || !Array.isArray(data.tracks)) {
-      console.warn('Invalid server response:', data)
-      return []
-    }
-    
-    return data.tracks.map((track: any, index: number) => ({
-      id: track.id || `trending-${index}`,
-      title: track.title || 'Unknown Track',
-      artist: track.artist || 'Unknown Artist',
-      album: track.album || 'Unknown Album',
-      artwork: track.artwork || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjNjY3ZWVhIi8+CjxjaXJjbGUgY3g9IjE1MCIgY3k9IjE1MCIgcj0iNTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMjAgMTIwSDIwMFYxODBIMTIwVjEyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMjAgMTIwSDIwMFYxODBIMTIwVjEyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMjAgMTIwSDIwMFYxODBIMTIwVjEyMFoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=',
-      url: track.url || '#',
-      previewUrl: track.previewUrl,
-      duration: track.durationMs,
-      releaseDate: track.releaseDate,
-      position: track.position || index + 1,
-      genre: genre,
-      provider: 'itunes' as const
-    }))
+    return uniqueTracks.slice(0, 25)
   } catch (error) {
-    console.error('Error fetching iTunes RSS:', error)
+    console.error('Error fetching iTunes trending:', error)
     throw error
   }
 }
@@ -77,28 +98,15 @@ const fetchTrendingFromRSS = async (endpoint: string, genre: string = 'all'): Pr
 // Get trending tracks by genre
 export const getTrendingTracks = async (genre: string = 'all', limit: number = 25): Promise<TrendingTrack[]> => {
   try {
-    let endpoint: string
-    
-    if (genre === 'all') {
-      // Use most-played chart for general trending
-      endpoint = CHART_ENDPOINTS['most-played']
-    } else if (genre in GENRE_CHARTS) {
-      // Use genre-specific chart
-      endpoint = GENRE_CHARTS[genre as keyof typeof GENRE_CHARTS]
-    } else {
-      // Fallback to most-played
-      endpoint = CHART_ENDPOINTS['most-played']
-    }
-    
     console.log(`Fetching trending tracks for genre: ${genre}`)
-    const tracks = await fetchTrendingFromRSS(endpoint, genre)
+    const tracks = await fetchTrendingFromiTunes(genre)
     
     // Limit results
     return tracks.slice(0, limit)
   } catch (error) {
     console.error('Error getting trending tracks:', error)
     
-    // Return fallback data if RSS fails
+    // Return fallback data if iTunes API fails
     return getFallbackTrendingTracks(genre, limit)
   }
 }
@@ -106,7 +114,7 @@ export const getTrendingTracks = async (genre: string = 'all', limit: number = 2
 // Get hot tracks (alternative to most-played)
 export const getHotTracks = async (limit: number = 25): Promise<TrendingTrack[]> => {
   try {
-    const tracks = await fetchTrendingFromRSS(CHART_ENDPOINTS['hot-tracks'], 'hot')
+    const tracks = await fetchTrendingFromiTunes('hot')
     return tracks.slice(0, limit)
   } catch (error) {
     console.error('Error getting hot tracks:', error)
@@ -117,7 +125,7 @@ export const getHotTracks = async (limit: number = 25): Promise<TrendingTrack[]>
 // Get new releases
 export const getNewReleases = async (limit: number = 25): Promise<TrendingTrack[]> => {
   try {
-    const tracks = await fetchTrendingFromRSS(CHART_ENDPOINTS['new-releases'], 'new')
+    const tracks = await fetchTrendingFromiTunes('new')
     return tracks.slice(0, limit)
   } catch (error) {
     console.error('Error getting new releases:', error)
@@ -133,7 +141,7 @@ const getFallbackTrendingTracks = (genre: string, limit: number): TrendingTrack[
       title: 'Sample Trending Track 1',
       artist: 'Popular Artist',
       album: 'Hit Album',
-      artwork: 'https://via.placeholder.com/300x300/667eea/ffffff?text=Trending+1',
+      artwork: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjNjY3ZWVhIi8+CjxjaXJjbGUgY3g9IjE1MCIgY3k9IjE1MCIgcj0iNTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMjAgMTIwSDIwMFYxODBIMTIwVjEyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMjAgMTIwSDIwMFYxODBIMTIwVjEyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMjAgMTIwSDIwMFYxODBIMTIwVjEyMFoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=',
       url: 'https://music.apple.com/us/album/sample-track/123456789',
       position: 1,
       genre: genre,
@@ -144,7 +152,7 @@ const getFallbackTrendingTracks = (genre: string, limit: number): TrendingTrack[
       title: 'Sample Trending Track 2',
       artist: 'Chart Topper',
       album: 'Top Hits',
-      artwork: 'https://via.placeholder.com/300x300/667eea/ffffff?text=Trending+2',
+      artwork: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjNjY3ZWVhIi8+CjxjaXJjbGUgY3g9IjE1MCIgY3k9IjE1MCIgcj0iNTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMjAgMTIwSDIwMFYxODBIMTIwVjEyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMjAgMTIwSDIwMFYxODBIMTIwVjEyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMjAgMTIwSDIwMFYxODBIMTIwVjEyMFoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=',
       url: 'https://music.apple.com/us/album/sample-track/123456790',
       position: 2,
       genre: genre,
@@ -155,7 +163,7 @@ const getFallbackTrendingTracks = (genre: string, limit: number): TrendingTrack[
       title: 'Sample Trending Track 3',
       artist: 'Rising Star',
       album: 'New Wave',
-      artwork: 'https://via.placeholder.com/300x300/667eea/ffffff?text=Trending+3',
+      artwork: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjNjY3ZWVhIi8+CjxjaXJjbGUgY3g9IjE1MCIgY3k9IjE1MCIgcj0iNTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMjAgMTIwSDIwMFYxODBIMTIwVjEyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMjAgMTIwSDIwMFYxODBIMTIwVjEyMFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMjAgMTIwSDIwMFYxODBIMTIwVjEyMFoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=',
       url: 'https://music.apple.com/us/album/sample-track/123456791',
       position: 3,
       genre: genre,

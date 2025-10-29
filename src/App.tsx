@@ -12,18 +12,23 @@ import ErrorFallback from '@components/ui/ErrorFallback'
 // Pages (lazy loaded for better performance)
 const HomePage = React.lazy(() => import('@components/pages/HomePage'))
 const DiscoveryPage = React.lazy(() => import('@components/pages/DiscoveryPage'))
+const TrendingPage = React.lazy(() => import('@components/pages/TrendingPage'))
 const SocialPage = React.lazy(() => import('@components/pages/SocialPage'))
 const ProfilePage = React.lazy(() => import('@components/pages/ProfilePage'))
+const EventsPage = React.lazy(() => import('@components/pages/EventsPage'))
+const SettingsPage = React.lazy(() => import('@components/pages/SettingsPage'))
+const AchievementsPage = React.lazy(() => import('@components/pages/AchievementsPage'))
+const SignInPage = React.lazy(() => import('@components/pages/SignInPage'))
+import SignUpPage from '@components/pages/SignUpPage'
+import AuthPage from '@components/pages/AuthPage'
+import AuthCallbackPage from '@components/pages/AuthCallbackPage'
 const NotFoundPage = React.lazy(() => import('@components/pages/NotFoundPage'))
 
 // Hooks
-import { useAuth } from '@hooks/useAuth'
 import { usePWA } from '@hooks/usePWA'
 
-function App() {
-  const { isAuthenticated, user } = useAuth()
-  const { isOnline } = usePWA()
 
+function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-500 to-secondary-500">
       {/* Skip link for accessibility */}
@@ -31,19 +36,6 @@ function App() {
         Skip to main content
       </a>
 
-      {/* Online/Offline status indicator */}
-      <div className="fixed top-4 right-4 z-50">
-        <div
-          className={`px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm ${
-            isOnline
-              ? 'bg-green-100 text-green-800'
-              : 'bg-red-100 text-red-800'
-          }`}
-          aria-live="polite"
-        >
-          {isOnline ? '🟢 Online' : '🔴 Offline'}
-        </div>
-      </div>
 
       {/* Screen reader announcements */}
       <div
@@ -73,9 +65,17 @@ function App() {
             >
               <Routes>
                 <Route path="/" element={<HomePage />} />
-                <Route path="/discovery" element={<DiscoveryPage />} />
-                <Route path="/social" element={<SocialPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/discovery" element={<DiscoveryPage />} />
+                    <Route path="/trending" element={<TrendingPage />} />
+                    <Route path="/social" element={<SocialPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/events" element={<EventsPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/achievements" element={<AchievementsPage />} />
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/signin" element={<SignInPage />} />
+                <Route path="/signup" element={<SignUpPage />} />
+                <Route path="/auth/callback" element={<AuthCallbackPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>

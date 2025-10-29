@@ -196,9 +196,9 @@ export default function Header({
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className={cn(
                     "flex items-center space-x-2 px-2 py-1 rounded-lg transition-all min-h-[44px] touch-manipulation cursor-pointer select-none",
-                    "ring-1 ring-transparent hover:ring-2 hover:ring-primary-500 dark:hover:ring-primary-400",
+                    "ring-1 ring-transparent ring-offset-0 hover:ring-2 hover:ring-primary-500 dark:hover:ring-primary-400",
                     isUserMenuOpen
-                      ? "bg-gray-50 dark:bg-gray-800 ring-2 ring-primary-500 dark:ring-primary-400"
+                      ? "bg-gray-50 dark:bg-gray-800 ring-2 ring-primary-500 dark:ring-primary-400 ring-offset-0"
                       : "hover:bg-gray-50 dark:hover:bg-gray-800"
                   )}
                   style={{ 

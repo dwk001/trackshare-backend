@@ -1,73 +1,45 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-
-type Theme = 'light' | 'dark' | 'system'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 
 interface ThemeContextType {
-  theme: Theme
-  setTheme: (theme: Theme) => void
-  actualTheme: 'light' | 'dark'
+  isDarkMode: boolean
+  toggleDarkMode: () => void
+  setDarkMode: (isDark: boolean) => void
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
-interface ThemeProviderProps {
-  children: ReactNode
-}
-
-export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>('system')
-  const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light')
-
-  useEffect(() => {
-    // Load theme from localStorage
-    const savedTheme = localStorage.getItem('theme') as Theme
-    if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
-      setTheme(savedTheme)
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Check localStorage first, then system preference
+    const saved = localStorage.getItem('darkMode')
+    if (saved !== null) {
+      return JSON.parse(saved)
     }
-  }, [])
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+  })
 
   useEffect(() => {
-    // Apply theme to document
-    const root = document.documentElement
+    // Update localStorage when theme changes
+    localStorage.setItem('darkMode', JSON.stringify(isDarkMode))
     
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-      setActualTheme(systemTheme)
-      root.classList.toggle('dark', systemTheme === 'dark')
+    // Update document class for Tailwind dark mode
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark')
     } else {
-      setActualTheme(theme)
-      root.classList.toggle('dark', theme === 'dark')
+      document.documentElement.classList.remove('dark')
     }
-  }, [theme])
+  }, [isDarkMode])
 
-  useEffect(() => {
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    const handleChange = () => {
-      if (theme === 'system') {
-        const systemTheme = mediaQuery.matches ? 'dark' : 'light'
-        setActualTheme(systemTheme)
-        document.documentElement.classList.toggle('dark', systemTheme === 'dark')
-      }
-    }
-
-    mediaQuery.addEventListener('change', handleChange)
-    return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [theme])
-
-  const handleSetTheme = (newTheme: Theme) => {
-    setTheme(newTheme)
-    localStorage.setItem('theme', newTheme)
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode)
   }
 
-  const value: ThemeContextType = {
-    theme,
-    setTheme: handleSetTheme,
-    actualTheme,
+  const setDarkMode = (isDark: boolean) => {
+    setIsDarkMode(isDark)
   }
 
   return (
-    <ThemeContext.Provider value={value}>
+    <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode, setDarkMode }}>
       {children}
     </ThemeContext.Provider>
   )

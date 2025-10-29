@@ -61,6 +61,7 @@ export async function onRequest(context) {
     const stored = await storeProviderTokens(userId, provider, tokens, env)
     
     if (!stored) {
+      console.error(`Failed to store tokens for ${provider} for user ${userId}`)
       return Response.redirect(`${url.origin}/settings?error=storage_failed&provider=${provider}`)
     }
     
@@ -68,7 +69,17 @@ export async function onRequest(context) {
     
   } catch (error) {
     console.error(`OAuth callback error for ${provider}:`, error)
-    return Response.redirect(`${url.origin}/settings?error=callback_failed&provider=${provider}&message=${encodeURIComponent(error.message)}`)
+    console.error(`Error details:`, {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      userId,
+      provider
+    })
+    
+    // Return more specific error message
+    const errorMessage = error.message || 'Unknown error occurred during OAuth callback'
+    return Response.redirect(`${url.origin}/settings?error=callback_failed&provider=${provider}&message=${encodeURIComponent(errorMessage)}`)
   }
 }
 
@@ -95,8 +106,13 @@ async function exchangeSpotifyToken(code, redirectUri, env) {
   })
   
   if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Spotify token exchange failed: ${error}`)
+    const errorText = await response.text()
+    console.error(`Spotify token exchange failed:`, {
+      status: response.status,
+      statusText: response.statusText,
+      error: errorText
+    })
+    throw new Error(`Spotify token exchange failed (${response.status}): ${errorText}`)
   }
   
   const data = await response.json()
@@ -134,8 +150,13 @@ async function exchangeSoundCloudToken(code, redirectUri, env) {
   })
   
   if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`SoundCloud token exchange failed: ${error}`)
+    const errorText = await response.text()
+    console.error(`SoundCloud token exchange failed:`, {
+      status: response.status,
+      statusText: response.statusText,
+      error: errorText
+    })
+    throw new Error(`SoundCloud token exchange failed (${response.status}): ${errorText}`)
   }
   
   const data = await response.json()
@@ -173,8 +194,14 @@ async function exchangeYouTubeMusicToken(code, redirectUri, env) {
   })
   
   if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`YouTube Music token exchange failed: ${error}`)
+    const errorText = await response.text()
+    console.error(`YouTube Music token exchange failed:`, {
+      status: response.status,
+      statusText: response.statusText,
+      error: errorText,
+      redirectUri
+    })
+    throw new Error(`YouTube Music token exchange failed (${response.status}): ${errorText}`)
   }
   
   const data = await response.json()
@@ -211,8 +238,13 @@ async function exchangeTidalToken(code, redirectUri, env) {
   })
   
   if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Tidal token exchange failed: ${error}`)
+    const errorText = await response.text()
+    console.error(`Tidal token exchange failed:`, {
+      status: response.status,
+      statusText: response.statusText,
+      error: errorText
+    })
+    throw new Error(`Tidal token exchange failed (${response.status}): ${errorText}`)
   }
   
   const data = await response.json()

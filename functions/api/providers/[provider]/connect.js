@@ -80,20 +80,49 @@ export async function onRequest(context) {
   
   const redirectUri = `${new URL(request.url).origin}/api/providers/${provider}/callback`
   
+  // Validate redirect URI format
+  if (!redirectUri.startsWith('http://') && !redirectUri.startsWith('https://')) {
+    console.error(`Invalid redirect URI format: ${redirectUri}`)
+    return new Response(JSON.stringify({ 
+      error: 'Invalid redirect URI',
+      message: 'Redirect URI must be a valid HTTP/HTTPS URL'
+    }), { 
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
+  
   // Include user ID in state for callback to use
   // Format: {userId}_{randomUUID}
   const state = userId ? `${userId}_${crypto.randomUUID()}` : crypto.randomUUID()
   
-  const authUrl = new URL(config.authUrl)
-  authUrl.searchParams.set('client_id', config.clientId)
-  authUrl.searchParams.set('redirect_uri', redirectUri)
-  authUrl.searchParams.set('response_type', 'code')
-  authUrl.searchParams.set('scope', config.scopes)
-  authUrl.searchParams.set('state', state)
-  
-  return new Response(JSON.stringify({ authUrl: authUrl.toString() }), {
-    headers: { 'Content-Type': 'application/json' }
-  })
+  try {
+    const authUrl = new URL(config.authUrl)
+    authUrl.searchParams.set('client_id', config.clientId)
+    authUrl.searchParams.set('redirect_uri', redirectUri)
+    authUrl.searchParams.set('response_type', 'code')
+    authUrl.searchParams.set('scope', config.scopes)
+    authUrl.searchParams.set('state', state)
+    
+    console.log(`Generating OAuth URL for ${provider}:`, {
+      authUrl: authUrl.toString(),
+      redirectUri,
+      hasUserId: !!userId
+    })
+    
+    return new Response(JSON.stringify({ authUrl: authUrl.toString() }), {
+      headers: { 'Content-Type': 'application/json' }
+    })
+  } catch (error) {
+    console.error(`Error generating OAuth URL for ${provider}:`, error)
+    return new Response(JSON.stringify({ 
+      error: 'OAuth URL generation failed',
+      message: error.message || 'Failed to generate OAuth authorization URL'
+    }), { 
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
 }
 
 

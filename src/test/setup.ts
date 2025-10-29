@@ -48,3 +48,4 @@ const sessionStorageMock = {
   clear: jest.fn(),
 }
 global.sessionStorage = sessionStorageMock
+

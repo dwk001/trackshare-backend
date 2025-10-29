@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from 'react-query'
 import { ReactQueryDevtools } from 'react-query/devtools'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from '@contexts/AuthContext'
+import { ThemeProvider } from '@contexts/ThemeContext'
 import App from './App'
 import './index.css'
 
@@ -41,9 +42,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AuthProvider>
-          <App />
-          <Toaster
+        <ThemeProvider>
+          <AuthProvider>
+            <App />
+            <Toaster
             position="top-right"
             toastOptions={{
               duration: 4000,
@@ -67,7 +69,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               },
             }}
           />
-        </AuthProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </BrowserRouter>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

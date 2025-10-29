@@ -1,5 +1,32 @@
 // Core types for TrackShare application
 
+export interface AuthUser {
+  id: string
+  email: string
+  name: string
+  avatar?: string
+  displayName?: string
+  provider?: string
+}
+
+export interface SignInData {
+  email: string
+  password: string
+}
+
+export interface SignUpData {
+  name: string
+  email: string
+  password: string
+  confirmPassword: string
+}
+
+export interface ProfileData {
+  name: string
+  email: string
+  avatar?: string
+}
+
 export interface User {
   id: string
   name: string
@@ -220,4 +247,140 @@ export interface TrackShareEvent {
   data: any
   timestamp: string
   user_id?: string
+}
+
+// Music Provider Integration Types
+export interface MusicProvider {
+  id: string
+  name: 'spotify' | 'apple_music' | 'youtube_music' | 'deezer' | 'tidal' | 'soundcloud'
+  displayName: string
+  accessToken: string
+  refreshToken?: string
+  expiresAt: string
+  scopes: string[]
+  isConnected: boolean
+  lastSynced?: string
+  userId?: string
+}
+
+export interface ConnectedProvider {
+  provider: MusicProvider['name']
+  isConnected: boolean
+  lastSynced?: string
+  displayName: string
+  icon: string
+  color: string
+}
+
+export interface Collection {
+  id: string
+  name: string
+  description?: string
+  userId: string
+  tracks: Track[]
+  trackCount: number
+  privacyLevel: 'private' | 'friends' | 'public'
+  isFavorites: boolean
+  createdAt: string
+  updatedAt: string
+  artwork?: string
+}
+
+export interface ActivityPost {
+  id: string
+  userId: string
+  trackId: string
+  trackTitle: string
+  trackArtist: string
+  trackArtwork?: string
+  provider: MusicProvider['name']
+  privacyLevel: 'private' | 'friends' | 'public'
+  playedAt: string
+  duration?: number
+  caption?: string
+  createdAt: string
+  updatedAt: string
+  profiles?: {
+    displayName: string
+    avatar?: string
+  }
+  isLiked?: boolean
+  likeCount?: number
+  commentCount?: number
+  shareCount?: number
+}
+
+export interface PrivacySettings {
+  userId: string
+  autoPosting: 'off' | 'private' | 'friends' | 'public'
+  postingFrequency: 'realtime' | 'batched' | 'daily'
+  perProviderSettings: Record<MusicProvider['name'], {
+    enabled: boolean
+    privacyLevel: 'private' | 'friends' | 'public'
+  }>
+  excludedArtists: string[]
+  excludedTracks: string[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ShareableLink {
+  id: string
+  shortId: string
+  trackId: string
+  trackTitle: string
+  trackArtist: string
+  trackArtwork?: string
+  providerLinks: Record<MusicProvider['name'], {
+    url: string
+    deepLink?: string
+    searchUrl?: string
+  }>
+  createdAt: string
+  expiresAt?: string
+  clickCount: number
+}
+
+export interface DeepLink {
+  provider: MusicProvider['name']
+  nativeUrl: string
+  webUrl: string
+  searchUrl: string
+  fallbackUrl: string
+}
+
+// Provider-specific track data
+export interface ProviderTrackData {
+  spotify?: {
+    id: string
+    uri: string
+    external_urls: { spotify: string }
+  }
+  apple_music?: {
+    id: string
+    url: string
+    preview_url?: string
+  }
+  youtube_music?: {
+    videoId: string
+    url: string
+  }
+  deezer?: {
+    id: string
+    link: string
+  }
+  tidal?: {
+    id: string
+    url: string
+  }
+  soundcloud?: {
+    id: string
+    permalink_url: string
+  }
+}
+
+// Enhanced Track interface with provider data
+export interface EnhancedTrack extends Track {
+  providerData?: ProviderTrackData
+  shareableLink?: ShareableLink
 }

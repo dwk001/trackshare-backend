@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Firefox Mobile Touch Fixes */
+@supports (-moz-appearance: none) {
+  button, [role="button"] {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  
+  /* Ensure buttons are clickable on Firefox mobile */
+  button:not(:disabled) {
+    pointer-events: auto;
+    cursor: pointer;
+  }
+}
+
 /* Custom CSS Variables */
 :root {
   --color-primary: #667eea;
