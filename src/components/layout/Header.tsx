@@ -113,9 +113,9 @@ export default function Header({
   return (
     <header className={cn('bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700', className)}>
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Left Side: Logo + Search */}
-          <div className="flex items-center space-x-4 flex-shrink-0">
+        <div className="flex items-center h-16 relative">
+          {/* Left Side: Logo + Search - Pushed far left */}
+          <div className="flex items-center space-x-4 flex-shrink-0 -ml-2 lg:-ml-4">
             {/* Logo */}
             <button
               onClick={() => navigate('/')}
@@ -147,8 +147,8 @@ export default function Header({
             </div>
           </div>
 
-          {/* Center: Desktop Navigation - Icon only when inactive, Icon + Text when active */}
-          <nav className="hidden md:flex items-center justify-center flex-1 space-x-2 px-8">
+          {/* Center: Desktop Navigation - Absolutely centered */}
+          <nav className="hidden md:flex items-center justify-center absolute left-1/2 -translate-x-1/2 space-x-2">
             {NAVIGATION_ITEMS.filter(item => !item.requiresAuth || isAuthenticated).map((item) => {
               const Icon = item.icon
               const isActive = getActiveTab() === item.id
@@ -180,8 +180,8 @@ export default function Header({
             })}
           </nav>
 
-          {/* Right Side Actions */}
-          <div className="flex items-center space-x-2 flex-shrink-0">
+          {/* Right Side Actions - Pushed far right */}
+          <div className="flex items-center space-x-2 flex-shrink-0 ml-auto -mr-2 lg:-mr-4">
             {/* Dark Mode Toggle */}
             <button
               onClick={toggleDarkMode}
