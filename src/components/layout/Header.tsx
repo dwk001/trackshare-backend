@@ -192,7 +192,7 @@ export default function Header({
 
             {/* User Menu */}
             {isAuthenticated ? (
-              <div className="relative flex-shrink-0">
+              <div className="relative flex-shrink-0 flex items-center">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   onMouseEnter={() => setIsHoveringProfile(true)}
