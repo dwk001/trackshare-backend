@@ -131,8 +131,8 @@ export default function Header({
   return (
     <header className={cn('bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 w-full', className)}>
       <div className="w-full">
-        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-16 relative">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center h-16 relative max-w-[1920px] mx-auto">
           {/* Left Side: Logo + Search - Pushed far left */}
           <div className="flex items-center space-x-4 flex-shrink-0 -ml-2 lg:-ml-4">
             {/* Logo */}
