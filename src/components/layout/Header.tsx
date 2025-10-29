@@ -202,6 +202,7 @@ export default function Header({
                     "focus:outline-none",
                     "border-2",
                     "whitespace-nowrap",
+                    "min-h-[44px]",
                     isUserMenuOpen || isHoveringProfile
                       ? "bg-gray-50 dark:bg-gray-800 border-primary-500 dark:border-primary-400"
                       : "border-transparent hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-primary-500 dark:hover:border-primary-400"
