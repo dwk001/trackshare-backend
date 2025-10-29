@@ -170,7 +170,7 @@ export default function Header({
           </div>
 
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 flex-wrap">
             {/* Dark Mode Toggle */}
             <button
               onClick={toggleDarkMode}
