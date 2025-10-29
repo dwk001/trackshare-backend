@@ -121,6 +121,42 @@ class ApiService {
   async sharePost(postId: string) {
     return this.request(`/posts/${postId}/share`, { method: 'POST' })
   }
+
+  // Friends methods
+  async getFriends(type: 'all' | 'pending' | 'suggestions' = 'all') {
+    return this.request(`/friends?type=${type}`)
+  }
+
+  async searchUsers(query: string) {
+    return this.request(`/friends?type=suggestions&q=${encodeURIComponent(query)}`)
+  }
+
+  async sendFriendRequest(userId: string) {
+    return this.request('/friends', {
+      method: 'POST',
+      body: JSON.stringify({ user_id: userId })
+    })
+  }
+
+  async acceptFriendRequest(friendshipId: string) {
+    return this.request('/friends', {
+      method: 'PUT',
+      body: JSON.stringify({ friendship_id: friendshipId, action: 'accept' })
+    })
+  }
+
+  async declineFriendRequest(friendshipId: string) {
+    return this.request('/friends', {
+      method: 'PUT',
+      body: JSON.stringify({ friendship_id: friendshipId, action: 'decline' })
+    })
+  }
+
+  async removeFriend(friendshipId: string) {
+    return this.request(`/friends?friendship_id=${friendshipId}`, {
+      method: 'DELETE'
+    })
+  }
 }
 
 export const apiService = new ApiService()

@@ -36,7 +36,7 @@ const NAVIGATION_ITEMS = [
   { id: 'friends', label: 'Friends', icon: Users, path: '/social', requiresAuth: true },
   { id: 'achievements', label: 'Achievements', icon: Trophy, path: '/achievements', requiresAuth: true },
   { id: 'events', label: 'Events', icon: Calendar, path: '/events', requiresAuth: false },
-  { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/analytics', requiresAuth: true },
+  // Analytics moved to profile page - removed from navigation
 ]
 
 export default function Header({ 
@@ -78,22 +78,40 @@ export default function Header({
     onSearch?.(searchQuery)
   }
 
-  // Helper function to detect location-based queries
+  // Helper function to detect location-based queries - more inclusive
   const detectLocationQuery = (query: string): boolean => {
-    const locationPatterns = [
-      // ZIP codes (5 digits or 5+4 format)
-      /^\d{5}(-\d{4})?$/,
-      // City, State patterns
-      /^[a-zA-Z\s]+,\s*[a-zA-Z\s]+$/,
-      // State abbreviations
-      /\b(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY)\b/i,
-      // Common location keywords
-      /\b(city|town|county|state|area|region|district|neighborhood|zip|postal)\b/i,
-      // Specific city names (common ones)
-      /\b(new york|los angeles|chicago|houston|phoenix|philadelphia|san antonio|san diego|dallas|san jose|austin|jacksonville|fort worth|columbus|charlotte|san francisco|indianapolis|seattle|denver|washington|boston|el paso|nashville|detroit|oklahoma city|portland|las vegas|memphis|louisville|baltimore|milwaukee|albuquerque|tucson|fresno|mesa|sacramento|kansas city|atlanta|long beach|colorado springs|raleigh|miami|virginia beach|omaha|oakland|minneapolis|tulsa|arlington|tampa|new orleans|wichita|cleveland|bakersfield|aurora|anaheim|honolulu|santa ana|corpus christi|riverside|lexington|stockton|toledo|st paul|newark|greensboro|plano|henderson|lincoln|buffalo|jersey city|chula vista|fort wayne|orlando|st petersburg|chandler|laredo|norfolk|durham|madison|lubbock|irvine|winston salem|glendale|garland|hialeah|reno|chesapeake|gilbert|baton rouge|irving|scottsdale|north las vegas|fremont|boise|richmond|san bernardino|birmingham|spokane|rochester|des moines|modesto|fayetteville|tacoma|oxnard|fontana|columbus|montgomery|moreno valley|shreveport|aurora|yonkers|akron|huntington beach|little rock|augusta|amarillo|mobile|columbus|grand rapids|salt lake city|tallahassee|huntsville|grand prairie|knoxville|worcester|newport news|brownsville|overland park|santa clarita|providence|garden grove|chattanooga|oceanside|jackson|fort lauderdale|santa rosa|rancho cucamonga|port st lucie|tempe|ontario|vancouver|sioux falls|springfield|peoria|pembroke pines|elk grove|salinas|palmdale|hollywood|lakewood|torrance|escondido|naperville|dayton|cary|west palm beach|midland|frisco|clearwater|pearland|richardson|pueblo|college station|palm bay|elgin|carrollton|west valley city|round rock|abilene|stamford|simi valley|concord|corona|lansing|thousand oaks|vallejo|palmdale|columbia|el cajon|antioch|provo|peoria|norman|berkeley|downey|costa mesa|inglewood|ventura|westminster|richmond|pompano beach|north charleston|everett|waterbury|west covina|billings|lowell|san mateo|daly city|citrus heights|santa monica|davie|boulder|compton|carson|salem|westminster|santa barbara|hawthorne|citrus heights|alhambra|livermore|new bedford|concord|south gate|green bay|san leandro|waukegan|fall river|chico|sparks|evansville|allen|miami gardens|olathe|norman|berkeley|downey|costa mesa|inglewood|ventura|westminster|richmond|pompano beach|north charleston|everett|waterbury|west covina|billings|lowell|san mateo|daly city|citrus heights|santa monica|davie|boulder|compton|carson|salem|westminster|santa barbara|hawthorne|citrus heights|alhambra|livermore|new bedford|concord|south gate|green bay|san leandro|waukegan|fall river|chico|sparks|evansville|allen|miami gardens|olathe)\b/i
-    ]
+    const trimmedQuery = query.trim()
     
-    return locationPatterns.some(pattern => pattern.test(query))
+    // ZIP codes (5 digits or 5+4 format)
+    if (/^\d{5}(-\d{4})?$/.test(trimmedQuery)) {
+      return true
+    }
+    
+    // City, State patterns (with or without comma)
+    // Matches: "Louisville, KY", "Louisville KY", "Louisville Kentucky"
+    if (/^[a-zA-Z\s]+([,\s]+[a-zA-Z\s]+)*$/.test(trimmedQuery)) {
+      // Check if it contains state abbreviations or state names
+      const stateAbbrevs = /(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY)/i
+      const stateNames = /(alabama|alaska|arizona|arkansas|california|colorado|connecticut|delaware|florida|georgia|hawaii|idaho|illinois|indiana|iowa|kansas|kentucky|louisiana|maine|maryland|massachusetts|michigan|minnesota|mississippi|missouri|montana|nebraska|nevada|new hampshire|new jersey|new mexico|new york|north carolina|north dakota|ohio|oklahoma|oregon|pennsylvania|rhode island|south carolina|south dakota|tennessee|texas|utah|vermont|virginia|washington|west virginia|wisconsin|wyoming)/i
+      
+      // Check if contains known city names or location keywords
+      const locationKeywords = /\b(city|town|county|state|area|region|district|neighborhood|zip|postal)\b/i
+      const cityNames = ['louisville', 'new york', 'los angeles', 'chicago', 'houston', 'phoenix', 'philadelphia', 'san antonio', 'san diego', 'dallas', 'san jose', 'austin', 'jacksonville', 'fort worth', 'columbus', 'charlotte', 'san francisco', 'indianapolis', 'seattle', 'denver', 'washington', 'boston', 'nashville', 'detroit', 'portland', 'las vegas', 'memphis', 'baltimore', 'milwaukee', 'albuquerque', 'tucson', 'fresno', 'mesa', 'sacramento', 'kansas city', 'atlanta', 'miami', 'omaha', 'oakland', 'minneapolis', 'tulsa', 'arlington', 'tampa', 'new orleans', 'wichita', 'cleveland', 'bakersfield', 'aurora', 'anaheim', 'honolulu', 'santa ana', 'corpus christi', 'riverside', 'lexington', 'stockton', 'toledo', 'st paul', 'newark', 'greensboro', 'plano', 'henderson', 'lincoln', 'buffalo', 'jersey city', 'chula vista', 'fort wayne', 'orlando', 'st petersburg', 'chandler', 'laredo', 'norfolk', 'durham', 'madison', 'lubbock', 'irvine', 'glendale', 'garland', 'hialeah', 'reno', 'chesapeake', 'gilbert', 'baton rouge', 'irving', 'scottsdale', 'north las vegas', 'fremont', 'boise', 'richmond', 'san bernardino', 'birmingham', 'spokane', 'rochester', 'des moines', 'modesto', 'fayetteville', 'tacoma', 'oxnard', 'fontana', 'montgomery', 'moreno valley', 'shreveport', 'yonkers', 'akron', 'huntington beach', 'little rock', 'augusta', 'amarillo', 'mobile', 'grand rapids', 'salt lake city', 'tallahassee', 'huntsville', 'grand prairie', 'knoxville', 'worcester', 'newport news', 'brownsville', 'overland park', 'santa clarita', 'providence', 'garden grove', 'chattanooga', 'oceanside', 'jackson', 'fort lauderdale', 'santa rosa', 'rancho cucamonga', 'port st lucie', 'tempe', 'ontario', 'vancouver', 'sioux falls', 'springfield', 'peoria', 'pembroke pines', 'elk grove', 'salinas', 'palmdale', 'hollywood', 'lakewood', 'torrance', 'escondido', 'naperville', 'dayton', 'cary', 'west palm beach', 'midland', 'frisco', 'clearwater', 'pearland', 'richardson', 'pueblo', 'college station', 'palm bay', 'elgin', 'carrollton', 'west valley city', 'round rock', 'abilene', 'stamford', 'simi valley', 'concord', 'corona', 'lansing', 'thousand oaks', 'vallejo', 'columbia', 'el cajon', 'antioch', 'provo', 'norman', 'berkeley', 'downey', 'costa mesa', 'inglewood', 'ventura', 'westminster', 'pompano beach', 'north charleston', 'everett', 'waterbury', 'west covina', 'billings', 'lowell', 'san mateo', 'daly city', 'citrus heights', 'santa monica', 'davie', 'boulder', 'compton', 'carson', 'salem', 'santa barbara', 'hawthorne', 'alhambra', 'livermore', 'new bedford', 'south gate', 'green bay', 'san leandro', 'waukegan', 'fall river', 'chico', 'sparks', 'evansville', 'allen', 'miami gardens', 'olathe']
+      const hasCity = cityNames.some(city => trimmedQuery.toLowerCase().includes(city))
+      
+      // If it has 2+ words and contains state/city indicators, treat as location
+      const words = trimmedQuery.split(/\s+/)
+      if (words.length >= 2 && (stateAbbrevs.test(trimmedQuery) || stateNames.test(trimmedQuery) || locationKeywords.test(trimmedQuery) || hasCity)) {
+        return true
+      }
+    }
+    
+    // Common location keywords
+    if (/\b(city|town|county|state|area|region|district|neighborhood|zip|postal)\b/i.test(trimmedQuery)) {
+      return true
+    }
+    
+    return false
   }
 
   const handleTabChange = (item: typeof NAVIGATION_ITEMS[0]) => {
@@ -111,9 +129,10 @@ export default function Header({
   }
 
   return (
-    <header className={cn('bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700', className)}>
-      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center h-16 relative">
+    <header className={cn('bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 w-full', className)}>
+      <div className="w-full">
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center h-16 relative">
           {/* Left Side: Logo + Search - Pushed far left */}
           <div className="flex items-center space-x-4 flex-shrink-0 -ml-2 lg:-ml-4">
             {/* Logo */}
@@ -331,6 +350,7 @@ export default function Header({
             </button>
           </div>
         </div>
+      </div>
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
