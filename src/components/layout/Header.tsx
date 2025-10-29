@@ -198,7 +198,7 @@ export default function Header({
                   onMouseEnter={() => setIsHoveringProfile(true)}
                   onMouseLeave={() => setIsHoveringProfile(false)}
                   className={cn(
-                    "flex items-center space-x-2 px-4 py-2 rounded-lg transition-all touch-manipulation cursor-pointer select-none relative flex-shrink-0 w-fit min-w-fit",
+                    "inline-flex items-center space-x-2 px-4 py-2 rounded-lg transition-all touch-manipulation cursor-pointer select-none relative",
                     "focus:outline-none",
                     "border-2",
                     "whitespace-nowrap",
