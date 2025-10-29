@@ -1,12 +1,9 @@
 # Cloudflare Pages Configuration
 name = "trackshare"
 pages_build_output_dir = "dist"
-
-# Redirect all routes to index.html for SPA routing
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+functions_directory = "functions"
+compatibility_date = "2023-10-12"
+compatibility_flags = ["nodejs_compat"]
 
 # Cache static assets
 [[headers]]
