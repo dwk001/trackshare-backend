@@ -48,6 +48,7 @@ export default function Header({
   const { user, isAuthenticated, signOut } = useAuth()
   const { isDarkMode, toggleDarkMode } = useTheme()
   const navigate = useNavigate()
+  const [isHoveringProfile, setIsHoveringProfile] = useState(false)
   const location = useLocation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
@@ -194,12 +195,15 @@ export default function Header({
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  onMouseEnter={() => setIsHoveringProfile(true)}
+                  onMouseLeave={() => setIsHoveringProfile(false)}
                   className={cn(
-                    "flex items-center space-x-2 px-2 py-1 rounded-lg transition-all min-h-[44px] touch-manipulation cursor-pointer select-none",
-                    "ring-1 ring-transparent ring-offset-0 hover:ring-2 hover:ring-primary-500 dark:hover:ring-primary-400",
-                    isUserMenuOpen
-                      ? "bg-gray-50 dark:bg-gray-800 ring-2 ring-primary-500 dark:ring-primary-400 ring-offset-0"
-                      : "hover:bg-gray-50 dark:hover:bg-gray-800"
+                    "flex items-center space-x-2 px-1 py-0.5 rounded-lg transition-all touch-manipulation cursor-pointer select-none relative",
+                    "focus:outline-none",
+                    "border-2",
+                    isUserMenuOpen || isHoveringProfile
+                      ? "bg-gray-50 dark:bg-gray-800 border-primary-500 dark:border-primary-400"
+                      : "border-transparent hover:bg-gray-50 dark:hover:bg-gray-800"
                   )}
                   style={{ 
                     WebkitTouchCallout: 'none', 
@@ -218,44 +222,72 @@ export default function Header({
                 </button>
 
                 {/* User Dropdown */}
-                {isUserMenuOpen && (
+                {(isUserMenuOpen || isHoveringProfile) && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
+                    className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50"
+                    onMouseEnter={() => setIsHoveringProfile(true)}
+                    onMouseLeave={() => setIsHoveringProfile(false)}
                   >
-                    <button
-                      onClick={() => {
-                        navigate('/profile')
-                        setIsUserMenuOpen(false)
-                      }}
-                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-h-[44px] touch-manipulation cursor-pointer select-none"
-                      style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
-                    >
-                      <User className="w-4 h-4 mr-3" />
-                      Profile
-                    </button>
-                    <button
-                      onClick={() => {
-                        navigate('/settings')
-                        setIsUserMenuOpen(false)
-                      }}
-                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-h-[44px] touch-manipulation cursor-pointer select-none"
-                      style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
-                    >
-                      <Settings className="w-4 h-4 mr-3" />
-                      Settings
-                    </button>
-                    <hr className="my-1 border-gray-200 dark:border-gray-700" />
-                    <button
-                      onClick={handleSignOut}
-                      className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-h-[44px] touch-manipulation cursor-pointer select-none"
-                      style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
-                    >
-                      <LogOut className="w-4 h-4 mr-3" />
-                      Sign Out
-                    </button>
+                    {/* Profile Preview Section */}
+                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center space-x-3">
+                        <img
+                          src={user?.avatar || '/placeholder-avatar.jpg'}
+                          alt={user?.displayName}
+                          className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {user?.displayName}
+                          </p>
+                          {user?.email && (
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                              {user.email}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Menu Items */}
+                    <div className="py-1">
+                      <button
+                        onClick={() => {
+                          navigate('/profile')
+                          setIsUserMenuOpen(false)
+                          setIsHoveringProfile(false)
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-h-[44px] touch-manipulation cursor-pointer select-none"
+                        style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
+                      >
+                        <User className="w-4 h-4 mr-3" />
+                        Profile
+                      </button>
+                      <button
+                        onClick={() => {
+                          navigate('/settings')
+                          setIsUserMenuOpen(false)
+                          setIsHoveringProfile(false)
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-h-[44px] touch-manipulation cursor-pointer select-none"
+                        style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
+                      >
+                        <Settings className="w-4 h-4 mr-3" />
+                        Settings
+                      </button>
+                      <hr className="my-1 border-gray-200 dark:border-gray-700" />
+                      <button
+                        onClick={handleSignOut}
+                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-h-[44px] touch-manipulation cursor-pointer select-none"
+                        style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
+                      >
+                        <LogOut className="w-4 h-4 mr-3" />
+                        Sign Out
+                      </button>
+                    </div>
                   </motion.div>
                 )}
               </div>
@@ -354,11 +386,14 @@ export default function Header({
         )}
       </div>
 
-      {/* Click outside to close user menu */}
+      {/* Click outside to close user menu (only when opened via click) */}
       {isUserMenuOpen && (
         <div
           className="fixed inset-0 z-40"
-          onClick={() => setIsUserMenuOpen(false)}
+          onClick={() => {
+            setIsUserMenuOpen(false)
+            setIsHoveringProfile(false)
+          }}
         />
       )}
     </header>

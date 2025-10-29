@@ -1,0 +1,1 @@
+import{r as e}from"./vendor-KIEtaiwe.js";import{u as r,b as t}from"./router-mjhA_Ms8.js";function o(){const o=r(),[n]=t();return e.useEffect(()=>{const e=n.get("redirect")||"/";o("/auth"+("/"!==e?`?redirect=${encodeURIComponent(e)}`:""),{replace:!0})},[o,n]),null}export{o as default};
