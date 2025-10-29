@@ -170,7 +170,7 @@ export default function Header({
           </div>
 
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-4 flex-wrap">
+          <div className="flex items-center space-x-4">
             {/* Dark Mode Toggle */}
             <button
               onClick={toggleDarkMode}
@@ -192,13 +192,13 @@ export default function Header({
 
             {/* User Menu */}
             {isAuthenticated ? (
-              <div className="relative" style={{ display: 'inline-block' }}>
+              <div className="relative flex-shrink-0">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   onMouseEnter={() => setIsHoveringProfile(true)}
                   onMouseLeave={() => setIsHoveringProfile(false)}
                   className={cn(
-                    "inline-flex items-center space-x-2 px-4 py-2 rounded-lg transition-all touch-manipulation cursor-pointer select-none relative",
+                    "flex items-center space-x-2 px-4 py-2 rounded-lg transition-all touch-manipulation cursor-pointer select-none relative",
                     "focus:outline-none",
                     "border-2",
                     "whitespace-nowrap",
