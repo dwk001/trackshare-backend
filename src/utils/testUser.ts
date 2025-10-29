@@ -2,7 +2,7 @@
 // This file provides a way to simulate authenticated users for testing purposes
 // Only available in development mode
 
-import { supabase } from '@lib/supabase'
+import { supabase } from '@/lib/supabase'
 
 export interface TestUser {
   id: string

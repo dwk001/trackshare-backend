@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from 'react-query'
-import { supabase } from '@lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { useAuth } from '@hooks/useAuth'
 
 export interface UserProfile {
